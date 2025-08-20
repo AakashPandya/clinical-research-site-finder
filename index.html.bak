@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Clinical Trial Scenario Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React Libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel to transpile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Export libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Define CommonJS globals for libraries that expect them -->
+    <script>
+      window.exports = window.exports || {};
+      window.module = window.module || { exports: window.exports };
+      // Redirect any deep link like /login to root so SPA works and URL shows domain only
+      if (location.pathname !== '/' && !location.pathname.endsWith('.html')) {
+        history.replaceState(null, '', '/');
+      }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <!-- Your React App (cache-busted) -->
+    <script>
+        (function() {
+            var s = document.createElement('script');
+            s.type = 'text/babel';
+            s.setAttribute('data-presets', 'react');
+            s.src = 'app.js?v=' + Date.now();
+            document.body.appendChild(s);
+        })();
+    </script>
+</body>
+</html>

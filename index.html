@@ -31,15 +31,1779 @@
 <body class="bg-gray-50">
     <div id="root"></div>
 
-    <!-- Your React App (cache-busted) -->
-    <script>
-        (function() {
-            var s = document.createElement('script');
-            s.type = 'text/babel';
-            s.setAttribute('data-presets', 'react');
-            s.src = 'app.js?v=' + Date.now();
-            document.body.appendChild(s);
-        })();
+    <script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+
+// --- SVG Icon Components ---
+const PinIcon = ({ className, isPinned }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    stroke="currentColor"
+    fill={isPinned ? 'currentColor' : 'none'}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.5 3.75V16.5L12 21l-4.5-4.5V3.75m9 0H7.5"
+    />
+  </svg>
+);
+const ArchiveIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h18v4H3V3zm1 5h16v13H4V8zm5 2.5a.5.5 0 00-1 0v4a.5.5 0 001 0v-4z"/></svg>
+);
+const CalendarIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"/></svg>
+);
+const UploadIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
+);
+const ChevronDownIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
+);
+const ArrowDownIcon = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+);
+const LoadingSpinner = ({ className }) => (
+    <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+);
+const CheckIcon = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+);
+const SparklesIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.455-2.456L12.5 18l1.178-.398a3.375 3.375 0 002.455-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456L20.25 18l-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
+    </svg>
+);
+const ChevronUpIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+    </svg>
+);
+const ChevronLeftIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+);
+const ChevronRightIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+);
+
+
+// --- Main App Component ---
+function App() {
+    // --- State Management ---
+    const [currentPage, setCurrentPage] = useState('scenarios'); // default to scenarios to avoid /login routes
+    const [scenarios, setScenarios] = useState([]);
+    const [currentScenario, setCurrentScenario] = useState(null);
+    const [comparisonScenarios, setComparisonScenarios] = useState([]);
+    const [currentSite, setCurrentSite] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // --- Data ---
+    function generateSites(count, seedBase) {
+        const rand = (seed) => () => (seed = (seed * 48271) % 2147483647) / 2147483647;
+        const states = ['CA','TX','NY','MA','FL','IL','WA','NC','AZ','PA','OH','MI','GA','CO','MN'];
+        const pis = ['Laura Bennett, MD, PhD','Samuel Ortiz, DO','Naomi Park, MD','Hannah Wright, MD','Marco Rivera, MD','Ayesha Khan, MD','Ellen Moore, MD','Grace Lin, MD','Omar Haddad, MD','Robert King, MD'];
+        const hospitals = ['Medical Center','Research Hospital','Clinical Institute','Academic Health','Research Group','Trials Center','Health Research','Trials Unit','Research','Medical'];
+        const out = [];
+        let r = rand(seedBase);
+        for (let i=1;i<=count;i++) {
+            const st = states[Math.floor(r()*states.length)];
+            const pi = pis[Math.floor(r()*pis.length)];
+            const match = Math.floor(65 + r()*35);
+            const comp = Math.floor(match - 4 - r()*6);
+            const pastTrials = Math.floor(5 + r()*30);
+            const enr = `${Math.floor(4 + r()*12)} pts/mo`;
+            const ret = `${Math.floor(80 + r()*15)}%`;
+            const tta = `${Math.floor(45 + r()*50)} days`;
+            const siteName = `Site ${i} ${hospitals[Math.floor(r()*hospitals.length)]}`;
+            out.push({
+                rank: i,
+                site: siteName,
+                siteCode: `SITE-${i.toString().padStart(3,'0')}`,
+                state: st,
+                matchScore: match,
+                compositeScore: comp,
+                details: {
+                    siteInfo: { pi: `Dr. ${pi}`, address: `${100+i} Main St, ${st}`, contact: `pi${i}@example.org`, website: `site${i}.example.org`, subInvestigators: ['Dr. A','Dr. B'], regulatoryApprovals: 'FDA' },
+                    infrastructure: { onSiteLab: i%3? 'Yes':'Partial', labCertifications: 'CAP/CLIA', sampleStorage: ['-20°C','-80°C'], pharmacy: 'Yes', imaging: ['CT','ECG'], emergencyCare: 'Yes', hospitalBeds: 200+Math.floor(r()*800), dedicatedTrialUnit: i%4? 'Yes':'No', itInfrastructure: 'EMR, eSource' },
+                    clinicalCapabilities: { therapeuticAreas: ['Oncology','Cardiology','Immunology'].slice(0,1+Math.floor(r()*3)), testingFacilities: ['Biochemistry','Hematology'], patientAccess: 'Regional/Urban', crcCount: 5+Math.floor(r()*20), gcpTrained: 'Yes', languageSupport: 'English' },
+                    operationalPerformance: { pastTrials, enrollmentRate: enr, retentionRate: ret, queryTurnaround: `${24*(1+Math.floor(r()*3))} hrs`, deviationHistory: 'Low', auditHistory: 'Sponsor - Clean', aeReporting: 'Compliant', timeToActivate: tta },
+                    qualityCompliance: { sops: 'Yes', irb: i%2? 'On-site IRB':'Central IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+                    additionalNotes: { affiliations: 'University Network', accreditations: 'AAHRPP/JCI', publications: `${20+Math.floor(r()*150)} publications`, recruitmentStrategies: 'EMR flags, referrals' }
+                }
+            })
+        }
+        return out;
+    }
+
+    const siteRankingData = useRef([
+        {
+            rank: 1,
+            site: 'Cedar Valley Medical Center', siteCode: 'CVM-01', state: 'CA', matchScore: 96, compositeScore: 92,
+            details: {
+                siteInfo: { pi: 'Dr. Laura Bennett, MD, PhD', address: '1200 Maple Ave, San Jose, CA', contact: 'laura.bennett@cedarvalley.org', website: 'cedarvalley.org', subInvestigators: ['Dr. A. Kim', 'Dr. R. Shah'], regulatoryApprovals: 'FDA, WIRB' },
+                infrastructure: { onSiteLab: 'Yes', labCertifications: 'CAP, CLIA', sampleStorage: ['-20°C', '-80°C', 'LN2'], pharmacy: 'Yes', imaging: ['MRI 3T', 'CT'], emergencyCare: 'Yes', hospitalBeds: 850, dedicatedTrialUnit: 'Yes', itInfrastructure: 'EPIC EMR, eSource, eConsent' },
+                clinicalCapabilities: { therapeuticAreas: ['Oncology', 'Cardiology'], testingFacilities: ['Hematology', 'Biochemistry'], patientAccess: 'Large urban population', crcCount: 18, gcpTrained: 'Yes', languageSupport: 'English, Spanish' },
+                operationalPerformance: { pastTrials: 28, enrollmentRate: '14 pts/mo', retentionRate: '93%', queryTurnaround: '24 hrs', deviationHistory: 'Low', auditHistory: 'FDA (2023) - No findings', aeReporting: 'Compliant', timeToActivate: '47 days' },
+                qualityCompliance: { sops: 'Yes', irb: 'On-site IRB', regulatorySubmissions: 'FDA, EMA', dataProtection: 'HIPAA Compliant' },
+                additionalNotes: { affiliations: 'Stanford Network', accreditations: 'JCI', publications: '120+ publications', recruitmentStrategies: 'Community outreach, patient registry' }
+            }
+        },
+        { rank: 2, site: 'Riverview Research Hospital', siteCode: 'RRH-02', state: 'TX', matchScore: 91, compositeScore: 88, details: {
+            siteInfo: { pi: 'Dr. Samuel Ortiz, DO', address: '455 River Rd, Austin, TX', contact: 'sortiz@rrh.org', website: 'rrh.org', subInvestigators: ['Dr. V. Patel'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Yes', labCertifications: 'CAP', sampleStorage: ['-80°C'], pharmacy: 'Yes', imaging: ['CT'], emergencyCare: 'Yes', hospitalBeds: 620, dedicatedTrialUnit: 'Yes', itInfrastructure: 'Cerner EMR, eSource' },
+            clinicalCapabilities: { therapeuticAreas: ['Oncology', 'Endocrinology'], testingFacilities: ['Genomic Sequencing'], patientAccess: 'Regional population', crcCount: 14, gcpTrained: 'Yes', languageSupport: 'English, Spanish' },
+            operationalPerformance: { pastTrials: 21, enrollmentRate: '11 pts/mo', retentionRate: '90%', queryTurnaround: '36 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2023) - Minor', aeReporting: 'Compliant', timeToActivate: '53 days' },
+                qualityCompliance: { sops: 'Yes', irb: 'Central IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'UT Austin', accreditations: 'JCI', publications: 'Extensive portfolio', recruitmentStrategies: 'Physician referrals' }
+        }},
+        { rank: 3, site: 'Evergreen Clinical Institute', siteCode: 'ECI-03', state: 'WA', matchScore: 87, compositeScore: 84, details: {
+            siteInfo: { pi: 'Dr. Naomi Park, MD', address: '88 Pine St, Seattle, WA', contact: 'npark@eci.org', website: 'eci.org', subInvestigators: ['Dr. L. Wong'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Yes', labCertifications: 'CLIA', sampleStorage: ['-20°C'], pharmacy: 'Yes', imaging: ['MRI 1.5T', 'CT'], emergencyCare: 'Yes', hospitalBeds: 520, dedicatedTrialUnit: 'Yes', itInfrastructure: 'Epic, eConsent' },
+            clinicalCapabilities: { therapeuticAreas: ['Neurology', 'Oncology'], testingFacilities: ['Biomarkers'], patientAccess: 'Urban & suburban', crcCount: 11, gcpTrained: 'Yes', languageSupport: 'English, Korean' },
+            operationalPerformance: { pastTrials: 17, enrollmentRate: '9 pts/mo', retentionRate: '92%', queryTurnaround: '48 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2022) - Clean', aeReporting: 'Compliant', timeToActivate: '60 days' },
+            qualityCompliance: { sops: 'Yes', irb: 'WIRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'UW Medicine', accreditations: 'AAHRPP', publications: '80+ publications', recruitmentStrategies: 'Patient portal, social' }
+        }},
+        { rank: 4, site: 'Lakeside Academic Health', siteCode: 'LAH-04', state: 'IL', matchScore: 82, compositeScore: 80, details: {
+            siteInfo: { pi: 'Dr. Hannah Wright, MD', address: '700 Lake Dr, Chicago, IL', contact: 'hwright@lah.edu', website: 'lah.edu', subInvestigators: ['Dr. J. Carter'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Yes', labCertifications: 'CAP', sampleStorage: ['-80°C'], pharmacy: 'Yes', imaging: ['CT'], emergencyCare: 'Yes', hospitalBeds: 900, dedicatedTrialUnit: 'Yes', itInfrastructure: 'Epic' },
+            clinicalCapabilities: { therapeuticAreas: ['Immunology', 'Dermatology'], testingFacilities: ['Flow Cytometry'], patientAccess: 'Metro catchment', crcCount: 20, gcpTrained: 'Yes', languageSupport: 'English, Spanish' },
+            operationalPerformance: { pastTrials: 24, enrollmentRate: '8 pts/mo', retentionRate: '88%', queryTurnaround: '48 hrs', deviationHistory: 'Low', auditHistory: 'FDA (2021) - Clean', aeReporting: 'Compliant', timeToActivate: '65 days' },
+            qualityCompliance: { sops: 'Yes', irb: 'On-site IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'University of Chicago', accreditations: 'JCI', publications: '150+ publications', recruitmentStrategies: 'EMR mining' }
+        }},
+        { rank: 5, site: 'Sunridge Research Group', siteCode: 'SRG-05', state: 'FL', matchScore: 79, compositeScore: 77, details: {
+            siteInfo: { pi: 'Dr. Marco Rivera, MD', address: '402 Palm Ave, Miami, FL', contact: 'mrivera@sunridge.org', website: 'sunridge.org', subInvestigators: ['Dr. Q. Santos'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Partial', labCertifications: 'CLIA', sampleStorage: ['-20°C'], pharmacy: 'Yes', imaging: ['ECG'], emergencyCare: 'Yes', hospitalBeds: 320, dedicatedTrialUnit: 'No', itInfrastructure: 'eSource' },
+            clinicalCapabilities: { therapeuticAreas: ['Endocrinology'], testingFacilities: ['HbA1c'], patientAccess: 'Large Hispanic population', crcCount: 8, gcpTrained: 'Yes', languageSupport: 'English, Spanish' },
+            operationalPerformance: { pastTrials: 9, enrollmentRate: '7 pts/mo', retentionRate: '85%', queryTurnaround: '72 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2021) - Minor', aeReporting: 'Compliant', timeToActivate: '72 days' },
+            qualityCompliance: { sops: 'Yes', irb: 'Central IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'Jackson Health', accreditations: 'AAHRPP', publications: '30+ publications', recruitmentStrategies: 'Community clinics' }
+        }},
+        { rank: 6, site: 'Highland Trials Center', siteCode: 'HTC-06', state: 'NY', matchScore: 77, compositeScore: 75, details: {
+            siteInfo: { pi: 'Dr. Ayesha Khan, MD', address: '88 Broadway, New York, NY', contact: 'akhan@htc.org', website: 'htc.org', subInvestigators: ['Dr. G. Lee'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Yes', labCertifications: 'CAP', sampleStorage: ['-80°C'], pharmacy: 'Yes', imaging: ['MRI 3T', 'CT'], emergencyCare: 'Yes', hospitalBeds: 700, dedicatedTrialUnit: 'Yes', itInfrastructure: 'EPIC EMR' },
+            clinicalCapabilities: { therapeuticAreas: ['Oncology', 'Rare Disease'], testingFacilities: ['NGS'], patientAccess: 'Tri-state', crcCount: 16, gcpTrained: 'Yes', languageSupport: 'English, Spanish' },
+            operationalPerformance: { pastTrials: 19, enrollmentRate: '8 pts/mo', retentionRate: '87%', queryTurnaround: '36 hrs', deviationHistory: 'Low', auditHistory: 'FDA (2022) - Clean', aeReporting: 'Compliant', timeToActivate: '68 days' },
+            qualityCompliance: { sops: 'Yes', irb: 'On-site IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'Columbia Network', accreditations: 'JCI', publications: '95+ publications', recruitmentStrategies: 'Referral network' }
+        }},
+        { rank: 7, site: 'Prairie Health Research', siteCode: 'PHR-07', state: 'KS', matchScore: 74, compositeScore: 72, details: {
+            siteInfo: { pi: 'Dr. Ellen Moore, MD', address: '12 Main St, Wichita, KS', contact: 'emoore@phr.org', website: 'phr.org', subInvestigators: ['Dr. T. Nguyen'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'No', labCertifications: '-', sampleStorage: ['-20°C'], pharmacy: 'Yes', imaging: ['CT'], emergencyCare: 'Limited', hospitalBeds: 150, dedicatedTrialUnit: 'No', itInfrastructure: 'Basic EMR' },
+            clinicalCapabilities: { therapeuticAreas: ['Cardiology'], testingFacilities: ['Echo'], patientAccess: 'Regional', crcCount: 5, gcpTrained: 'Yes', languageSupport: 'English' },
+            operationalPerformance: { pastTrials: 6, enrollmentRate: '5 pts/mo', retentionRate: '83%', queryTurnaround: '72 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2020) - Minor', aeReporting: 'Compliant', timeToActivate: '80 days' },
+            qualityCompliance: { sops: 'Partial', irb: 'Central IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: '-', accreditations: 'None', publications: '10 publications', recruitmentStrategies: 'Local clinics' }
+        }},
+        { rank: 8, site: 'Harborview Trials Unit', siteCode: 'HTU-08', state: 'MA', matchScore: 73, compositeScore: 70, details: {
+            siteInfo: { pi: 'Dr. Grace Lin, MD', address: '400 Harbor Rd, Boston, MA', contact: 'glin@htu.org', website: 'htu.org', subInvestigators: ['Dr. D. Park'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Yes', labCertifications: 'CLIA', sampleStorage: ['-80°C'], pharmacy: 'Yes', imaging: ['CT', 'PET-CT'], emergencyCare: 'Yes', hospitalBeds: 400, dedicatedTrialUnit: 'Yes', itInfrastructure: 'eSource' },
+            clinicalCapabilities: { therapeuticAreas: ['Immunology'], testingFacilities: ['Flow Cytometry'], patientAccess: 'Urban', crcCount: 10, gcpTrained: 'Yes', languageSupport: 'English, Chinese' },
+            operationalPerformance: { pastTrials: 11, enrollmentRate: '6 pts/mo', retentionRate: '85%', queryTurnaround: '48 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2021) - Clean', aeReporting: 'Compliant', timeToActivate: '74 days' },
+            qualityCompliance: { sops: 'Yes', irb: 'On-site IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'Harvard Network', accreditations: 'AAHRPP', publications: '60+ publications', recruitmentStrategies: 'EMR flags' }
+        }},
+        { rank: 9, site: 'Desert Springs Research', siteCode: 'DSR-09', state: 'AZ', matchScore: 71, compositeScore: 68, details: {
+            siteInfo: { pi: 'Dr. Omar Haddad, MD', address: '50 Desert Rd, Phoenix, AZ', contact: 'ohaddad@dsr.org', website: 'dsr.org', subInvestigators: ['Dr. I. Rojas'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Partial', labCertifications: 'CLIA', sampleStorage: ['-20°C'], pharmacy: 'Yes', imaging: ['ECG'], emergencyCare: 'Yes', hospitalBeds: 220, dedicatedTrialUnit: 'No', itInfrastructure: 'Basic EMR' },
+            clinicalCapabilities: { therapeuticAreas: ['Pulmonology'], testingFacilities: ['Spirometry'], patientAccess: 'Suburban', crcCount: 7, gcpTrained: 'Yes', languageSupport: 'English, Spanish' },
+            operationalPerformance: { pastTrials: 8, enrollmentRate: '5 pts/mo', retentionRate: '82%', queryTurnaround: '60 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2019) - Minor', aeReporting: 'Compliant', timeToActivate: '85 days' },
+            qualityCompliance: { sops: 'Partial', irb: 'Central IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: '-', accreditations: 'None', publications: '15 publications', recruitmentStrategies: 'Urgent care partnerships' }
+        }},
+        { rank: 10, site: 'Blue Ridge Medical', siteCode: 'BRM-10', state: 'NC', matchScore: 69, compositeScore: 66, details: {
+            siteInfo: { pi: 'Dr. Robert King, MD', address: '78 Ridge Ave, Raleigh, NC', contact: 'rking@brm.org', website: 'brm.org', subInvestigators: ['Dr. J. Patel'], regulatoryApprovals: 'FDA' },
+            infrastructure: { onSiteLab: 'Yes', labCertifications: 'CLIA', sampleStorage: ['-80°C'], pharmacy: 'Yes', imaging: ['CT'], emergencyCare: 'Yes', hospitalBeds: 300, dedicatedTrialUnit: 'No', itInfrastructure: 'eSource' },
+            clinicalCapabilities: { therapeuticAreas: ['Gastroenterology'], testingFacilities: ['Endoscopy'], patientAccess: 'Regional', crcCount: 6, gcpTrained: 'Yes', languageSupport: 'English' },
+            operationalPerformance: { pastTrials: 10, enrollmentRate: '4 pts/mo', retentionRate: '80%', queryTurnaround: '72 hrs', deviationHistory: 'Low', auditHistory: 'Sponsor (2020) - Minor', aeReporting: 'Compliant', timeToActivate: '90 days' },
+            qualityCompliance: { sops: 'Partial', irb: 'Central IRB', regulatorySubmissions: 'FDA', dataProtection: 'HIPAA Compliant' },
+            additionalNotes: { affiliations: 'UNC Health', accreditations: 'AAHRPP', publications: '25 publications', recruitmentStrategies: 'GI clinics network' }
+        }}
+    ]);
+    
+    const defaultCriteriaWeights = { patientAvailability: 60, enrollmentRate: 70, startupSpeed: 50, piMatch: 80, competition: 40 };
+
+    function generateScenarios(count) {
+        const titles = [
+            'Immuno-Oncology — NSCLC Phase III','Cardiology — HFpEF Phase II','Neurology — Alzheimer’s Phase I','Dermatology — Psoriasis Phase III','Immunology — RA Phase II','Vaccinology — RSV Phase IV','Endocrinology — T2D Phase II','Hematology — AML Phase I','Pulmonology — COPD Phase III','Gastro — IBD Phase II'
+        ];
+        const countries = ['USA','Canada','Germany','UK','France','Spain'];
+        const authors = ['Dr. Evelyn Reed','Dr. Samuel Chen','Dr. Maria Garcia','Dr. Ben Carter','Dr. Priya Natarajan','Dr. Michael Lee'];
+        const sponsors = ['Acme Pharma','HelixBio','NovaThera','Pioneer Labs','Vertexia','ArdentRx'];
+        const scenarios = [];
+        for (let i=1;i<=count;i++) {
+            scenarios.push({
+                id: i,
+                title: `${titles[i%titles.length]} #${i}`,
+                performedBy: authors[i%authors.length],
+                createdDate: new Date(2024, (i%12), 1 + (i%28)).toISOString(),
+                phase: ['Phase I','Phase II','Phase III','Phase IV'][i%4],
+                country: countries[i%countries.length],
+                isPinned: i%11===0,
+                isArchived: i%17===0,
+                siteRankings: generateSites(50, 1000+i),
+                criteriaWeights: { patientAvailability: 50 + (i%50), enrollmentRate: 55 + (i%40), startupSpeed: 45 + (i%35), piMatch: 60 + (i%30), competition: 30 + (i%50) },
+                indication: 'Prod-grade mock indication',
+                drugInfo: 'Investigational product',
+                startDate: new Date(2024, (i%12), 15).toISOString().slice(0,10),
+                objective: 'Mock objective for scenario',
+                sponsor: sponsors[i%sponsors.length],
+                studyId: `PRO${String(i).padStart(4,'0')}`
+            })
+        }
+        return scenarios;
+    }
+
+    const initialScenarios = useRef(generateScenarios(50));
+
+    // --- Effects ---
+    useEffect(() => {
+        // Simulate loading initial data
+        setScenarios(initialScenarios.current);
+        setIsLoading(false);
+    }, []);
+
+    useEffect(() => {
+        // Load external scripts for PDF export
+        const jspdfScript = document.createElement('script');
+        jspdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        jspdfScript.async = true;
+        document.body.appendChild(jspdfScript);
+
+        const html2canvasScript = document.createElement('script');
+        html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        html2canvasScript.async = true;
+        document.body.appendChild(html2canvasScript);
+
+        return () => {
+            document.body.removeChild(jspdfScript);
+            document.body.removeChild(html2canvasScript);
+        };
+    }, []);
+
+    // --- Navigation and Data Handling ---
+    const navigateTo = (page, data = null) => {
+        if (page === 'results') {
+            setCurrentScenario(data);
+        } else if (page === 'comparison') {
+            setComparisonScenarios(data);
+        } else if (page === 'siteDetail') {
+            setCurrentSite(data);
+        }
+        setCurrentPage(page);
+    };
+    
+    const handleSaveScenario = (scenarioToSave) => {
+        const newScenario = {
+            ...scenarioToSave,
+            id: scenarios.length + 1,
+            createdDate: new Date().toISOString(),
+            performedBy: 'Current User',
+            isPinned: false,
+            isArchived: false,
+        };
+        delete newScenario.isPreview;
+        setScenarios(prev => [newScenario, ...prev]);
+        navigateTo('scenarios');
+    };
+
+    // --- Page Components ---
+    const renderPage = () => {
+        if (isLoading) {
+            return <div className="flex items-center justify-center h-screen"><LoadingSpinner className="w-12 h-12 text-blue-600" /></div>;
+        }
+        switch (currentPage) {
+            case 'login':
+                return <LoginPage onLogin={() => navigateTo('scenarios')} />;
+            case 'scenarios':
+                return <ScenariosListPage scenarios={scenarios} setScenarios={setScenarios} navigateTo={navigateTo} />;
+            case 'create':
+                return <CreateScenarioPage navigateTo={navigateTo} siteRankingData={siteRankingData.current} />;
+            case 'results':
+                return <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} />;
+            case 'comparison':
+                return <ComparisonPage scenarios={comparisonScenarios} navigateTo={navigateTo} />;
+            case 'siteDetail':
+                return <SiteDetailPage site={currentSite} navigateTo={navigateTo} scenario={currentScenario} />;
+            default:
+                return <LoginPage onLogin={() => navigateTo('scenarios')} />;
+        }
+    };
+    
+    return (
+        <>
+            {/* Custom styles for components that are difficult to style with Tailwind alone */}
+            <style>{`
+                /* Custom slider track */
+                input[type="range"].sleek-slider::-webkit-slider-runnable-track {
+                    background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value-percent), #e5e7eb var(--value-percent), #e5e7eb 100%);
+                    height: 6px;
+                    border-radius: 3px;
+                }
+                input[type="range"].sleek-slider::-moz-range-track {
+                    background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value-percent), #e5e7eb var(--value-percent), #e5e7eb 100%);
+                    height: 6px;
+                    border-radius: 3px;
+                }
+                /* Custom slider thumb */
+                input[type="range"].sleek-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    margin-top: -5px; /* Adjust to center thumb on track */
+                    background-color: #3b82f6;
+                    height: 16px;
+                    width: 16px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    transition: box-shadow 0.15s ease-in-out;
+                }
+                input[type="range"].sleek-slider:hover::-webkit-slider-thumb,
+                input[type="range"].sleek-slider:focus::-webkit-slider-thumb {
+                    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.25);
+                }
+            `}</style>
+            <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
+                {renderPage()}
+            </div>
+        </>
+    );
+}
+
+// --- Sub-Components (Pages) ---
+
+function LoginPage({ onLogin }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address.');
+            return;
+        }
+        if (password.length < 4) {
+            setError('Password must be at least 4 characters long.');
+            return;
+        }
+        onLogin();
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+                <h1 className="text-3xl font-bold text-center text-gray-900">Login</h1>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                        <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="you@example.com"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="password" className="text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="••••••••"
+                        />
+                    </div>
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+                    <button type="submit" className="w-full py-3 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
+    const [filter, setFilter] = useState('');
+    const [showArchived, setShowArchived] = useState(false);
+    const [createdByFilter, setCreatedByFilter] = useState('All');
+    const [phaseFilter, setPhaseFilter] = useState('All');
+    const [countryFilter, setCountryFilter] = useState('All');
+    const [view, setView] = useState('card'); // 'card', 'table'
+    const [sortConfig, setSortConfig] = useState({ key: 'createdDate', direction: 'descending' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
+    const [selectedForComparison, setSelectedForComparison] = useState([]);
+
+    const createdByOptions = useMemo(() => ['All', ...new Set(scenarios.map(s => s.performedBy))], [scenarios]);
+    const phaseOptions = useMemo(() => ['All', 'Phase I', 'Phase II', 'Phase III', 'Phase IV'], []);
+    const countryOptions = useMemo(() => ['All', ...new Set(scenarios.map(s => s.country))], [scenarios]);
+
+    const togglePin = (id) => {
+        setScenarios(scenarios.map(s => s.id === id ? { ...s, isPinned: !s.isPinned } : s));
+    };
+    const toggleArchive = (id) => {
+        setScenarios(scenarios.map(s => s.id === id ? { ...s, isArchived: !s.isArchived } : s));
+    };
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const handleSelectForComparison = (id) => {
+        setSelectedForComparison(prev => (
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        ));
+    };
+
+    const handleCompare = () => {
+        const scenariosToCompare = scenarios.filter(s => selectedForComparison.includes(s.id));
+        navigateTo('comparison', scenariosToCompare);
+    };
+
+    const filteredAndSortedScenarios = useMemo(() => {
+        let sortableItems = [...scenarios];
+        
+        sortableItems = sortableItems
+            .filter(s => showArchived || !s.isArchived)
+            .filter(s => {
+                const q = filter.trim().toLowerCase();
+                if (!q) return true;
+                return (
+                    (s.title || '').toLowerCase().includes(q) ||
+                    (s.performedBy || '').toLowerCase().includes(q) ||
+                    (s.phase || '').toLowerCase().includes(q) ||
+                    (s.country || '').toLowerCase().includes(q)
+                );
+            })
+            .filter(s => createdByFilter === 'All' || s.performedBy === createdByFilter)
+            .filter(s => phaseFilter === 'All' || s.phase === phaseFilter)
+            .filter(s => countryFilter === 'All' || s.country === countryFilter);
+
+        sortableItems.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+
+            if (a[sortConfig.key] < b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? -1 : 1;
+            }
+            if (a[sortConfig.key] > b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+
+        return sortableItems;
+    }, [scenarios, filter, showArchived, createdByFilter, phaseFilter, countryFilter, sortConfig]);
+    
+    const paginatedScenarios = useMemo(() => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        return filteredAndSortedScenarios.slice(indexOfFirstItem, indexOfLastItem);
+    }, [currentPage, itemsPerPage, filteredAndSortedScenarios]);
+
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Scenarios</h1>
+                    <p className="text-gray-500 mt-1">Manage and review your clinical trial scenarios.</p>
+                </div>
+                <div className="flex gap-4">
+                    <button onClick={handleCompare} disabled={selectedForComparison.length < 2} className="px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap">
+                        Compare ({selectedForComparison.length})
+                    </button>
+                    <button onClick={() => navigateTo('create')} className="px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors whitespace-nowrap">
+                        + Create New Scenario
+                    </button>
+                </div>
+            </header>
+
+            <div className="p-4 bg-white rounded-lg border border-gray-200 mb-6">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+                    <input
+                        type="text"
+                        placeholder="Search title, author, phase, country..."
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        className="flex-1 min-w-[240px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <div className="flex flex-wrap items-center gap-3">
+                    <CustomDropdown options={createdByOptions} selected={createdByFilter} onSelect={setCreatedByFilter} label="Created By:" />
+                    <CustomDropdown options={phaseOptions} selected={phaseFilter} onSelect={setPhaseFilter} label="Phase:" />
+                    <CustomDropdown options={countryOptions} selected={countryFilter} onSelect={setCountryFilter} label="Country:" />
+                    </div>
+                </div>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                    <div className="flex items-center">
+                        <input
+                            id="show-archived"
+                            type="checkbox"
+                            checked={showArchived}
+                            onChange={(e) => setShowArchived(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <label htmlFor="show-archived" className="ml-2 block text-sm text-gray-900">
+                            Show Archived
+                        </label>
+                    </div>
+                    <div className="inline-flex rounded-md shadow-sm">
+                        <button onClick={() => setView('card')} className={`px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>Card View</button>
+                        <button onClick={() => setView('table')} className={`px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>Table View</button>
+                    </div>
+                </div>
+            </div>
+
+            {view === 'card' ? (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {paginatedScenarios.map(scenario => (
+                            <ScenarioCard key={scenario.id} scenario={scenario} onPin={togglePin} onArchive={toggleArchive} navigateTo={navigateTo} onSelect={handleSelectForComparison} isSelected={selectedForComparison.includes(scenario.id)} />
+                        ))}
+                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={Math.ceil(filteredAndSortedScenarios.length / itemsPerPage)}
+                        onPageChange={setCurrentPage}
+                    />
+                </>
+            ) : (
+                <>
+                    <ScenarioTable scenarios={paginatedScenarios} onPin={togglePin} onArchive={toggleArchive} navigateTo={navigateTo} requestSort={requestSort} sortConfig={sortConfig} onSelect={handleSelectForComparison} selectedItems={selectedForComparison} />
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={Math.ceil(filteredAndSortedScenarios.length / itemsPerPage)}
+                        onPageChange={setCurrentPage}
+                    />
+                </>
+            )}
+        </div>
+    );
+}
+
+function ScenarioCard({ scenario, onPin, onArchive, navigateTo, onSelect, isSelected }) {
+    const { id, title, performedBy, createdDate, phase, isPinned, isArchived, country } = scenario;
+    
+    const phaseColors = {
+        'Phase I': 'bg-purple-100 text-purple-800',
+        'Phase II': 'bg-blue-100 text-blue-800',
+        'Phase III': 'bg-green-100 text-green-800',
+        'Phase IV': 'bg-yellow-100 text-yellow-800',
+    };
+
+    return (
+        <div className={`flex flex-col bg-white rounded-lg shadow-md border ${isPinned ? 'border-blue-500' : 'border-gray-200'} ${isSelected ? 'ring-2 ring-indigo-500' : ''} transition-all`}>
+            <div className="p-5 flex-grow cursor-pointer" onClick={() => navigateTo('results', scenario)}>
+                <div className="flex justify-between items-start gap-2">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 flex-1">{title}</h3>
+                    <span className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${phaseColors[phase] || 'bg-gray-100 text-gray-800'}`}>
+                        {phase}
+                    </span>
+                </div>
+                <p className="text-sm text-gray-500">Performed by: {performedBy}</p>
+                <p className="text-sm text-gray-500">Created: {new Date(createdDate).toLocaleDateString()}</p>
+                <p className="text-sm text-gray-500">Country: {country}</p>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                 <div className="flex items-center">
+                    <input type="checkbox" checked={isSelected} onChange={() => onSelect(id)} className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                    <label className="ml-2 text-sm text-gray-600">Compare</label>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Tooltip text={isPinned ? "Unpin Scenario" : "Pin Scenario"}>
+                        <button onClick={(e) => { e.stopPropagation(); onPin(id); }} className={`p-2 rounded-full ${isPinned ? 'text-blue-600 bg-blue-100' : 'text-gray-500 hover:bg-gray-200'} transition-colors`}>
+                            <PinIcon className="w-5 h-5" isPinned={isPinned} />
+                        </button>
+                    </Tooltip>
+                    <Tooltip text={isArchived ? "Unarchive Scenario" : "Archive Scenario"}>
+                        <button onClick={(e) => { e.stopPropagation(); onArchive(id); }} className={`p-2 rounded-full ${isArchived ? 'text-yellow-600 bg-yellow-100' : 'text-gray-500 hover:bg-gray-200'} transition-colors`}>
+                            <ArchiveIcon className="w-5 h-5" />
+                        </button>
+                    </Tooltip>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, sortConfig, onSelect, selectedItems }) {
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null;
+        if (sortConfig.direction === 'ascending') {
+            return <ChevronUpIcon className="w-4 h-4 ml-1 inline" />;
+        }
+        return <ChevronDownIcon className="w-4 h-4 ml-1 inline" />;
+    };
+    
+    return (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                    <tr>
+                        <th className="px-6 py-3"></th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('title')}>
+                            Title {getSortIcon('title')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('performedBy')}>
+                            Performed By {getSortIcon('performedBy')}
+                        </th>
+                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('country')}>
+                            Country {getSortIcon('country')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('createdDate')}>
+                            Created Date {getSortIcon('createdDate')}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('phase')}>
+                            Phase {getSortIcon('phase')}
+                        </th>
+                        <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                    {scenarios.map(scenario => (
+                        <tr key={scenario.id} className={`${selectedItems.includes(scenario.id) ? 'bg-indigo-50' : ''}`}>
+                            <td className="px-6 py-4" onClick={(e)=>e.stopPropagation()}>
+                                <input type="checkbox" checked={selectedItems.includes(scenario.id)} onChange={() => onSelect(scenario.id)} className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer" />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{scenario.title}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.performedBy}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.country}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(scenario.createdDate).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.phase}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e)=>e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-3">
+                                    <Tooltip text={scenario.isPinned ? "Unpin Scenario" : "Pin Scenario"}>
+                                        <button onClick={(e) => { e.stopPropagation(); onPin(scenario.id); }} className={`inline-flex items-center justify-center h-8 w-8 rounded-full ${scenario.isPinned ? 'text-blue-600 bg-blue-100' : 'text-gray-500 hover:bg-gray-200'} transition-colors`}>
+                                            <PinIcon className="w-5 h-5" isPinned={scenario.isPinned} />
+                                        </button>
+                                    </Tooltip>
+                                    <Tooltip text={scenario.isArchived ? "Unarchive Scenario" : "Archive Scenario"}>
+                                        <button onClick={(e) => { e.stopPropagation(); onArchive(scenario.id); }} className={`inline-flex items-center justify-center h-8 w-8 rounded-full ${scenario.isArchived ? 'text-yellow-600 bg-yellow-100' : 'text-gray-500 hover:bg-gray-200'} transition-colors`}>
+                                            <ArchiveIcon className="w-5 h-5" />
+                                        </button>
+                                    </Tooltip>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function CreateScenarioPage({ navigateTo, siteRankingData }) {
+    const [formData, setFormData] = useState({
+        title: '', 
+        sponsor: '',
+        studyId: '',
+        indication: '', 
+        drugInfo: '', 
+        objective: '',
+        protocolDetails: '', 
+        targetSubjects: '',
+        timeline: '', 
+        phase: 'Phase I', 
+        startDate: '', 
+        preferredRegions: [],
+        country: '',
+        criteriaWeights: { patientAvailability: 50, enrollmentRate: 50, startupSpeed: 50, piMatch: 50, competition: 50 }
+    });
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSliderChange = (e) => {
+        const { name, value } = e.target;
+        const slider = e.target;
+        slider.style.setProperty('--value-percent', `${value}%`);
+        setFormData(prev => ({ ...prev, criteriaWeights: { ...prev.criteriaWeights, [name]: parseInt(value) } }));
+    };
+
+    const handlePdfUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setIsUploading(true);
+            setTimeout(() => {
+                const newWeights = { patientAvailability: 75, enrollmentRate: 60, startupSpeed: 80, piMatch: 90, competition: 40 };
+                setFormData({
+                    title: 'Auto-filled Oncology Study',
+                    indication: 'Non-Small Cell Lung Cancer (NSCLC)',
+                    drugInfo: 'Pembrolizumab (Keytruda)',
+                    objective: 'To evaluate the efficacy and safety of Pembrolizumab in combination with chemotherapy for the first-line treatment of metastatic non-small cell lung cancer.',
+                    protocolDetails: 'A Phase III, randomized, double-blind study to evaluate the efficacy and safety of Pembrolizumab in combination with chemotherapy.',
+                    targetSubjects: 500,
+                    timeline: 24,
+                    phase: 'Phase III',
+                    startDate: '2024-09-01',
+                    preferredRegions: ['North America', 'Europe'],
+                    country: 'USA',
+                    criteriaWeights: newWeights
+                });
+                // Manually update slider visual state after auto-fill
+                Object.keys(newWeights).forEach(key => {
+                    const slider = document.querySelector(`input[name="${key}"]`);
+                    if(slider) {
+                        slider.style.setProperty('--value-percent', `${newWeights[key]}%`);
+                    }
+                });
+                setIsUploading(false);
+            }, 2000);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const previewScenario = {
+            ...formData,
+            isPreview: true,
+            siteRankings: siteRankingData, // Attach predefined site ranking data
+        };
+        navigateTo('results', previewScenario);
+    };
+
+    return (
+        <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+            <header className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Create New Scenario</h1>
+                <p className="text-gray-500 mt-1">Define the parameters for your clinical trial simulation.</p>
+            </header>
+            
+            <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="p-6 bg-white rounded-lg border border-gray-200">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-gray-800">Scenario Details</h2>
+                        <div>
+                            <input type="file" accept=".pdf" ref={fileInputRef} onChange={handlePdfUpload} className="hidden" />
+                            <button type="button" onClick={() => fileInputRef.current.click()} disabled={isUploading} className="flex items-center gap-2 px-4 py-2 font-semibold text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                {isUploading ? <LoadingSpinner className="w-5 h-5" /> : <UploadIcon className="w-5 h-5" />}
+                                {isUploading ? 'Processing...' : 'Upload PDF & Auto-fill'}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <InputField label="Title" name="title" value={formData.title} onChange={handleInputChange} />
+                        <InputField label="Sponsor" name="sponsor" value={formData.sponsor} onChange={handleInputChange} />
+                        <InputField label="Study ID" name="studyId" value={formData.studyId} onChange={handleInputChange} />
+                        <InputField label="Indication" name="indication" value={formData.indication} onChange={handleInputChange} />
+                        <InputField label="Drug Info" name="drugInfo" value={formData.drugInfo} onChange={handleInputChange} />
+                        <CustomDropdownField label="Phase" options={['Phase I', 'Phase II', 'Phase III', 'Phase IV']} selected={formData.phase} onSelect={(val) => setFormData(p => ({...p, phase: val}))} />
+                        <InputField label="Target Subjects" name="targetSubjects" type="number" value={formData.targetSubjects} onChange={handleInputChange} />
+                        <InputField label="Timeline (Months)" name="timeline" type="number" value={formData.timeline} onChange={handleInputChange} />
+                        <div className="col-span-1">
+                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input
+                                id="startDate"
+                                type="date"
+                                name="startDate"
+                                value={formData.startDate}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <InputField label="Country" name="country" value={formData.country} onChange={handleInputChange} />
+                        <MultiSelectDropdownField 
+                            label="Preferred Regions"
+                            options={['North America', 'South America', 'Europe', 'Asia', 'Africa', 'Australia']}
+                            selected={formData.preferredRegions}
+                            onSelect={(val) => setFormData(p => ({...p, preferredRegions: val}))}
+                        />
+                         <TextAreaField label="Objective" name="objective" value={formData.objective} onChange={handleInputChange} className="md:col-span-2" />
+                        <TextAreaField label="Protocol Details" name="protocolDetails" value={formData.protocolDetails} onChange={handleInputChange} className="md:col-span-2" />
+                    </div>
+                </div>
+
+                <div className="p-6 bg-white rounded-lg border border-gray-200">
+                    <h2 className="text-xl font-semibold mb-6 text-gray-800">Key Criteria Weights</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+                        <SliderField label="Patient Availability" name="patientAvailability" value={formData.criteriaWeights.patientAvailability} onChange={handleSliderChange} />
+                        <SliderField label="Historical Enrollment Rate" name="enrollmentRate" value={formData.criteriaWeights.enrollmentRate} onChange={handleSliderChange} />
+                        <SliderField label="Start-up Speed" name="startupSpeed" value={formData.criteriaWeights.startupSpeed} onChange={handleSliderChange} />
+                        <SliderField label="PI/Specialty Match" name="piMatch" value={formData.criteriaWeights.piMatch} onChange={handleSliderChange} />
+                        <SliderField label="Competition Load" name="competition" value={formData.criteriaWeights.competition} onChange={handleSliderChange} />
+                    </div>
+                </div>
+
+                <div className="flex justify-end items-center pt-4 gap-4">
+                    <button type="button" onClick={() => navigateTo('scenarios')} className="px-6 py-2 font-semibold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">Cancel</button>
+                    <button type="submit" className="px-6 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">Submit & View Results</button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
+function ResultsPage({ scenario, navigateTo, onSave }) {
+    const [view, setView] = useState('table'); // 'table', 'card'
+    const [expandedRows, setExpandedRows] = useState(new Set());
+    const [chatMessages, setChatMessages] = useState([]);
+    const [isExporting, setIsExporting] = useState(false);
+    const [isChatLoading, setIsChatLoading] = useState(false);
+    const exportRef = useRef(null);
+    const pdfExportRef = useRef(null);
+    const handleExportExcel = () => {
+        try {
+            const rows = scenario.siteRankings.map(s => ({
+                Rank: s.rank,
+                Site: s.site,
+                State: s.state,
+                'Match Score': s.matchScore,
+                'Composite Score': s.compositeScore,
+                'PI': s.details.siteInfo.pi,
+                'Site Code': s.siteCode,
+                'Address': s.details.siteInfo.address,
+                'Email': s.details.siteInfo.contact,
+                'Website': s.details.siteInfo.website,
+                'Enrollment Rate': s.details.operationalPerformance.enrollmentRate,
+                'Retention Rate': s.details.operationalPerformance.retentionRate,
+                'Time to Activate': s.details.operationalPerformance.timeToActivate,
+                'Past Trials': s.details.operationalPerformance.pastTrials,
+                'Query Turnaround': s.details.operationalPerformance.queryTurnaround,
+                'Lab Certifications': s.details.infrastructure.labCertifications,
+                'On-site Lab': s.details.infrastructure.onSiteLab,
+                'Pharmacy': s.details.infrastructure.pharmacy,
+                'Imaging': (s.details.infrastructure.imaging||[]).join(', '),
+                'Therapeutic Areas': (s.details.clinicalCapabilities.therapeuticAreas||[]).join(', '),
+                'CRC Count': s.details.clinicalCapabilities.crcCount,
+            }));
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sites');
+            XLSX.writeFile(wb, `sites-${(scenario.title||'scenario').replace(/\s+/g,'-')}.xlsx`);
+        } catch (e) {
+            console.error('Excel export failed', e);
+        }
+    };
+
+    useEffect(() => {
+        if (scenario?.siteRankings?.[0]) {
+            setChatMessages([{ sender: 'bot', text: `The first rank site is ${scenario.siteRankings[0].site}. How can I help you analyze these results?` }]);
+        }
+    }, [scenario]);
+
+    if (!scenario) {
+        return <div className="p-8">Error: No scenario data found. <button onClick={() => navigateTo('scenarios')} className="text-blue-600">Go back</button></div>;
+    }
+
+    const toggleRow = (rank) => {
+        const newSet = new Set(expandedRows);
+        if (newSet.has(rank)) {
+            newSet.delete(rank);
+        } else {
+            newSet.add(rank);
+        }
+        setExpandedRows(newSet);
+    };
+
+    const handleChatSubmit = async (query) => {
+        const userMessage = { sender: 'user', text: query };
+        setChatMessages(prev => [...prev, userMessage]);
+        setIsChatLoading(true);
+
+        const scenarioContext = JSON.stringify(scenario, null, 2);
+        const prompt = `You are an expert clinical trial analyst. Based on the following scenario data, answer the user's question.
+        Scenario Data: ${scenarioContext}
+        User Question: ${query}`;
+
+        try {
+            const resultText = await callGemini(prompt);
+            const botMessage = { sender: 'bot', text: resultText };
+            setChatMessages(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error("Error with Gemini API:", error);
+            const errorMessage = { sender: 'bot', text: "Sorry, I'm having trouble analyzing that right now." };
+            setChatMessages(prev => [...prev, errorMessage]);
+        }
+        setIsChatLoading(false);
+    };
+    
+    const handleExport = async () => {
+        setIsExporting(true);
+        
+        const exportContainer = pdfExportRef.current;
+        if (!exportContainer) {
+            setIsExporting(false);
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const canvas = await window.html2canvas(exportContainer, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = imgWidth / imgHeight;
+        const newImgHeight = pdfWidth / ratio;
+        
+        let heightLeft = newImgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, newImgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+            position -= pdfHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, newImgHeight);
+            heightLeft -= pdfHeight;
+        }
+        
+        pdf.save(`scenario-results-${scenario.title.replace(/\s+/g, '-')}.pdf`);
+        
+        setIsExporting(false);
+    };
+
+
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <button onClick={() => navigateTo('scenarios')} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Scenarios</button>
+                    <h1 className="text-3xl font-bold text-gray-900">{scenario.title}</h1>
+                    <p className="text-gray-500 mt-1">Results and site ranking based on your criteria.</p>
+                </div>
+                <div className="flex items-center gap-4">
+                    {scenario.isPreview && (
+                        <button onClick={() => onSave(scenario)} className="px-4 py-2 font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors">
+                            Save Scenario
+                        </button>
+                    )}
+                    <button onClick={handleExportExcel} className="px-4 py-2 font-semibold text-emerald-700 bg-emerald-100 rounded-md hover:bg-emerald-200 transition-colors">Export to Excel</button>
+                    <button onClick={handleExport} disabled={isExporting} className="flex items-center gap-2 px-4 py-2 font-semibold text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors disabled:opacity-50">
+                        {isExporting ? <LoadingSpinner className="w-5 h-5" /> : null}
+                        {isExporting ? 'Exporting...' : 'Export to PDF'}
+                    </button>
+                </div>
+            </header>
+
+            <div className="flex flex-col lg:flex-row gap-8">
+                {/* Left Panel: Chat */}
+                <div className="w-full lg:w-[30%] lg:flex-shrink-0">
+                    <div className="sticky top-8">
+                        <ChatPanel messages={chatMessages} onSubmit={handleChatSubmit} isLoading={isChatLoading} />
+                    </div>
+                </div>
+
+                {/* Right Panel: Site Ranking */}
+                <div className="w-full lg:w-[70%]">
+                    <div className="flex justify-end mb-4">
+                        <div className="inline-flex rounded-md shadow-sm">
+                            <button onClick={() => setView('table')} className={`px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>Ranked Table View</button>
+                            <button onClick={() => setView('card')} className={`px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>Card (Summary) View</button>
+                        </div>
+                    </div>
+                    
+                    <div ref={exportRef} className="bg-white p-4 rounded-lg">
+                        <div className="mb-6 p-4 border-b">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-3">Objective</h3>
+                            <p className="text-sm text-gray-600">{scenario.objective}</p>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+                            {scenario.sponsor && (
+                                <div className="text-sm"><span className="font-medium text-gray-600">Sponsor: </span><span className="font-semibold text-gray-900">{scenario.sponsor}</span></div>
+                            )}
+                            {scenario.studyId && (
+                                <div className="text-sm"><span className="font-medium text-gray-600">Study ID: </span><span className="font-semibold text-gray-900">{scenario.studyId}</span></div>
+                            )}
+                        </div>
+                        <div className="mb-6 p-4">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-3">Criteria Weights</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-2">
+                                {Object.entries(scenario?.criteriaWeights || {}).map(([key, value]) => (
+                                    <div key={key} className="text-sm">
+                                        <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}: </span>
+                                        <span className="font-bold text-blue-600">{value}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        {view === 'table' ? (
+                            <SiteTable sites={scenario.siteRankings} expandedRows={expandedRows} toggleRow={toggleRow} navigateTo={navigateTo} />
+                        ) : (
+                            <SiteCardView sites={scenario.siteRankings} />
+                        )}
+                    </div>
+                </div>
+            </div>
+            
+            {/* Hidden component for PDF export */}
+            <div className="absolute -left-[9999px] top-auto w-[1000px] p-4 bg-white" ref={pdfExportRef}>
+                <PdfExportContent scenario={scenario} />
+            </div>
+        </div>
+    );
+}
+
+// --- Reusable Form & UI Components ---
+
+const InputField = ({ label, name, ...props }) => (
+    <div>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <input id={name} name={name} {...props} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+);
+
+const TextAreaField = ({ label, name, ...props }) => (
+    <div>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <textarea id={name} name={name} rows="4" {...props} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+);
+
+
+const SliderField = ({ label, name, value, onChange }) => (
+    <div>
+        <div className="flex justify-between items-center mb-1">
+            <label className="text-sm font-medium text-gray-700">{label}</label>
+            <span className="text-sm font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-md">{value}%</span>
+        </div>
+        <input
+            type="range"
+            name={name}
+            min="0"
+            max="100"
+            value={value}
+            onChange={onChange}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer sleek-slider"
+            style={{ '--value-percent': `${value}%` }}
+        />
+    </div>
+);
+
+function CustomDropdown({ options, selected, onSelect, label }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div className="flex items-center gap-2" ref={dropdownRef}>
+            <label className="text-sm font-medium text-gray-700">{label}</label>
+            <div className="relative">
+                <button type="button" onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-32 px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm">
+                    <span>{selected}</span>
+                    <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+                </button>
+                {isOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                        {options.map(option => (
+                            <div key={option} onClick={() => { onSelect(option); setIsOpen(false); }} className="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                {option}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+const CustomDropdownField = ({ label, options, selected, onSelect }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div ref={dropdownRef}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <div className="relative">
+                <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm">
+                    <span>{selected}</span>
+                    <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+                </button>
+                {isOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                        {options.map(option => (
+                            <div key={option} onClick={() => { onSelect(option); setIsOpen(false); }} className="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                {option}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const MultiSelectDropdownField = ({ label, options, selected, onSelect }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    const handleToggleOption = (option) => {
+        const newSelected = selected.includes(option)
+            ? selected.filter(item => item !== option)
+            : [...selected, option];
+        onSelect(newSelected);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div ref={dropdownRef}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <div className="relative">
+                <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm min-h-[42px]">
+                    <div className="flex flex-wrap gap-1">
+                        {selected.length > 0 ? selected.map(item => (
+                            <span key={item} className="px-2 py-0.5 text-sm bg-blue-100 text-blue-800 rounded-full">{item}</span>
+                        )) : <span className="text-gray-500">Select regions...</span>}
+                    </div>
+                    <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+                </button>
+                {isOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {options.map(option => (
+                            <div key={option} onClick={() => handleToggleOption(option)} className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100">
+                                <span>{option}</span>
+                                {selected.includes(option) && <CheckIcon className="w-5 h-5 text-blue-600" />}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+function Tooltip({ children, text }) {
+    return (
+        <div className="relative group">
+            {children}
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                {text}
+            </div>
+        </div>
+    );
+}
+
+function ChatPanel({ messages, onSubmit, isLoading }) {
+    const [input, setInput] = useState('');
+    const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (input.trim() && !isLoading) {
+            onSubmit(input.trim());
+            setInput('');
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-[70vh]">
+            <h2 className="text-lg font-semibold p-4 border-b border-gray-200 flex items-center gap-2">
+                <SparklesIcon className="w-5 h-5 text-blue-500" />
+                Ask about this result
+            </h2>
+            <div className="flex-grow p-4 overflow-y-auto space-y-4">
+                {messages.map((msg, index) => (
+                    <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[80%] p-3 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                            {msg.text}
+                        </div>
+                    </div>
+                ))}
+                {isLoading && (
+                    <div className="flex justify-start">
+                        <div className="max-w-[80%] p-3 rounded-lg bg-gray-200 text-gray-800">
+                            <LoadingSpinner className="w-5 h-5" />
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+            <div className="p-4 border-t border-gray-200">
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Ask a question..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isLoading}
+                    />
+                </form>
+            </div>
+        </div>
+    );
+}
+
+function SiteTable({ sites, expandedRows, toggleRow, navigateTo }) {
+    return (
+        <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                    <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Score</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Composite Score</th>
+                        <th className="relative px-6 py-3"><span className="sr-only">Details</span></th>
+                    </tr>
+                </thead>
+                {sites.map(site => (
+                    <tbody key={site.rank} className="pdf-site-section bg-white divide-y divide-gray-200">
+                        <tr className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{site.rank}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{site.site}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{site.state}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{site.matchScore}%</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{site.compositeScore}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <div className="inline-flex items-center gap-2 justify-center">
+                                    <button onClick={() => navigateTo('siteDetail', site)} className="text-indigo-600 hover:text-indigo-700">View Details</button>
+                                    <button onClick={() => toggleRow(site.rank)} className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-gray-200">
+                                        <ArrowDownIcon className={`w-4 h-4 text-gray-400 transition-transform ${expandedRows.has(site.rank) ? 'rotate-180' : ''}`} />
+                                </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {expandedRows.has(site.rank) && (
+                            <tr>
+                                <td colSpan="6" className="p-0">
+                                    <div className="p-4 bg-gray-50">
+                                        <ExpandedRowContent details={site.details} />
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                ))}
+            </table>
+        </div>
+    );
+}
+
+function SiteCardView({ sites }) {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sites.map(site => (
+                <div key={site.rank} className="bg-white rounded-lg border border-gray-200 p-5">
+                    <div className="flex justify-between items-start mb-3">
+                        <div>
+                            <p className="text-xs text-gray-500">Rank #{site.rank}</p>
+                            <h3 className="font-bold text-lg text-gray-900">{site.site}</h3>
+                            <p className="text-sm text-gray-600">{site.state}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-xs text-gray-500">Composite</p>
+                            <p className="font-bold text-2xl text-blue-600">{site.compositeScore}</p>
+                        </div>
+                    </div>
+                    <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                            <span className="text-gray-600">Match Score:</span>
+                            <span className="font-semibold px-2 bg-green-100 text-green-800 rounded-full">{site.matchScore}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-600">Enrollment Rate:</span>
+                            <span className="font-semibold">{site.details.operationalPerformance.enrollmentRate}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-600">Activation Time:</span>
+                            <span className="font-semibold">{site.details.operationalPerformance.timeToActivate}</span>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+const PdfExportContent = ({ scenario }) => (
+    <div>
+        <div id="pdf-header-section">
+            <div className="mb-6 p-4 border-b">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{scenario.title}</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4 text-sm">
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Indication:</span> <span className="text-gray-800">{scenario.indication}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Phase:</span> <span className="text-gray-800">{scenario.phase}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Drug:</span> <span className="text-gray-800">{scenario.drugInfo}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Start Date:</span> <span className="text-gray-800">{scenario.startDate}</span></div>
+                </div>
+            </div>
+            <div className="mb-6 p-4">
+                <h3 className="text-lg font-semibold text-gray-700 mb-3">Criteria Weights</h3>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                    {Object.entries(scenario?.criteriaWeights || {}).map(([key, value]) => (
+                        <div key={key} className="text-sm">
+                            <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}: </span>
+                            <span className="font-bold text-blue-600">{value}%</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+        <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+                <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Score</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Composite Score</th>
+                </tr>
+            </thead>
+            {scenario.siteRankings.map(site => (
+                <tbody key={site.rank} className="pdf-site-section bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{site.rank}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{site.site}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{site.state}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{site.matchScore}%</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{site.compositeScore}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan="5" className="p-0">
+                            <div className="p-4 bg-gray-50">
+                                <ExpandedRowContent details={site.details} />
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            ))}
+        </table>
+    </div>
+);
+
+function ExpandedRowContent({ details }) {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DetailCard title="Past Performance">
+                <DetailItem label="Trials Conducted" value={details.operationalPerformance.pastTrials} />
+                <DetailItem label="Enrollment Rate" value={details.operationalPerformance.enrollmentRate} />
+                <DetailItem label="Retention Rate" value={details.operationalPerformance.retentionRate} />
+                <DetailItem label="Time to Activate" value={details.operationalPerformance.timeToActivate} />
+            </DetailCard>
+            <DetailCard title="Patient Population">
+                <DetailItem label="Total Registry Size" value={details.clinicalCapabilities.patientAccess} />
+                <DetailItem label="Therapeutic Areas" value={details.clinicalCapabilities.therapeuticAreas.join(', ')} />
+            </DetailCard>
+            <DetailCard title="Infrastructure">
+                <DetailItem label="On-site Lab" value={details.infrastructure.onSiteLab} />
+                <DetailItem label="Imaging Facilities" value={details.infrastructure.imaging.join(', ')} />
+            </DetailCard>
+            <DetailCard title="Site Info">
+                <DetailItem label="Principal Investigator" value={details.siteInfo.pi} />
+                <DetailItem label="Contact Info">
+                    <a href={`mailto:${details.siteInfo.contact}`} className="text-blue-600 hover:underline break-all">{details.siteInfo.contact}</a>
+                </DetailItem>
+            </DetailCard>
+        </div>
+    );
+}
+
+const DetailCard = ({ title, children }) => (
+    <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <h4 className="font-bold text-md mb-3 text-gray-800">{title}</h4>
+        <div className="space-y-2">{children}</div>
+    </div>
+);
+
+const DetailItem = ({ label, value, children }) => (
+    <div className="min-w-0">
+        <p className="text-xs text-gray-500">{label}</p>
+        <p className="text-sm font-medium text-gray-900 break-words">{value || children}</p>
+    </div>
+);
+
+function Pagination({ currentPage, totalPages, onPageChange }) {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+    }
+
+    return (
+        <div className="flex justify-center items-center mt-8">
+            <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 mx-1 rounded-md bg-white border border-gray-300 disabled:opacity-50"
+            >
+                <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            {pageNumbers.map(number => (
+                <button
+                    key={number}
+                    onClick={() => onPageChange(number)}
+                    className={`px-3 py-1 mx-1 rounded-md border ${currentPage === number ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300'}`}
+                >
+                    {number}
+                </button>
+            ))}
+            <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 mx-1 rounded-md bg-white border border-gray-300 disabled:opacity-50"
+            >
+                <ChevronRightIcon className="w-5 h-5" />
+            </button>
+        </div>
+    );
+}
+
+function ComparisonPage({ scenarios, navigateTo }) {
+    if (scenarios.length < 2) {
+        return (
+            <div className="p-8 text-center">
+                <h1 className="text-2xl font-bold mb-4">Comparison</h1>
+                <p>Select two or more scenarios to compare.</p>
+                <button onClick={() => navigateTo('scenarios')} className="mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    Back to Scenarios
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+            <header className="mb-6 flex items-center justify-between">
+                <div>
+                 <button onClick={() => navigateTo('scenarios')} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Scenarios</button>
+                    <h1 className="text-3xl font-bold text-gray-900">Scenario Comparison ({scenarios.length})</h1>
+                    <p className="text-gray-500">Review key attributes side-by-side and deep-dive into full site results for each scenario.</p>
+                </div>
+            </header>
+
+            {/* Overview matrix header */}
+            <div className="overflow-x-auto mb-8">
+                <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Field</th>
+                            {scenarios.map(s => (
+                                <th key={s.id} className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase whitespace-nowrap">{s.title}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {[
+                            ['Indication', (s)=>s.indication],
+                            ['Phase', (s)=>s.phase],
+                            ['Drug', (s)=>s.drugInfo],
+                            ['Start Date', (s)=>s.startDate],
+                            ['Country', (s)=>s.country],
+                            ['Objective', (s)=>s.objective],
+                        ].map(([label, getter]) => (
+                            <tr key={label} className="align-top hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm font-medium text-gray-700">{label}</td>
+                                {scenarios.map(s => (
+                                    <td key={s.id+String(label)} className="px-4 py-3 text-sm text-gray-800">{getter(s) || '-'}</td>
+                                ))}
+                            </tr>
+                        ))}
+                        {/* Criteria weights row */}
+                        <tr>
+                            <td className="px-4 py-3 text-sm font-medium text-gray-700">Criteria Weights</td>
+                            {scenarios.map(s => (
+                                <td key={s.id+':weights'} className="px-4 py-3 text-sm">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {Object.entries(s.criteriaWeights || {}).map(([k,v]) => (
+                                            <div key={k} className="flex justify-between items-center text-xs bg-gray-50 border rounded px-2 py-1">
+                                                <span className="capitalize">{String(k).replace(/([A-Z])/g,' $1')}</span>
+                                                <span className="font-semibold text-blue-600">{v}%</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </td>
+                            ))}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Sites results per scenario */}
+            <div className="space-y-8">
+                {scenarios.map(s => (
+                    <div key={'results-'+s.id} className="bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <div className="p-4 border-b flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold text-gray-900">All Results — {s.title}</h2>
+                                <p className="text-sm text-gray-500">Site ranking table with details</p>
+                            </div>
+                        </div>
+                        <div className="p-4">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Site</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">State</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Match</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Composite</th>
+                                        <th className="px-4 py-2"></th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {s.siteRankings.map(site => (
+                                        <React.Fragment key={s.id+':'+site.rank}>
+                                            <tr>
+                                                <td className="px-4 py-2 text-sm font-medium text-gray-900">{site.rank}</td>
+                                                <td className="px-4 py-2 text-sm text-gray-800">{site.site}</td>
+                                                <td className="px-4 py-2 text-sm text-gray-600">{site.state}</td>
+                                                <td className="px-4 py-2"><span className="px-2 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-800">{site.matchScore}%</span></td>
+                                                <td className="px-4 py-2 text-sm font-bold text-gray-900">{site.compositeScore}</td>
+                                                <td className="px-4 py-2"></td>
+                                            </tr>
+                                            <tr>
+                                                <td colSpan="6" className="px-4 py-3 bg-gray-50">
+                                                    <ExpandedRowContent details={site.details} />
+                                                </td>
+                                            </tr>
+                                        </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+const ScenarioDetailColumn = ({ scenario }) => (
+    <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800 border-b pb-4">{scenario.title}</h2>
+        
+        <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Details</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+                <DetailItem label="Indication" value={scenario.indication} />
+                <DetailItem label="Phase" value={scenario.phase} />
+                <DetailItem label="Drug" value={scenario.drugInfo} />
+                <DetailItem label="Start Date" value={scenario.startDate} />
+                <DetailItem label="Country" value={scenario.country} />
+            </div>
+        </div>
+
+        <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Objective</h3>
+            <p className="text-sm text-gray-600">{scenario.objective}</p>
+        </div>
+
+        <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Criteria Weights</h3>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                {Object.entries(scenario.criteriaWeights).map(([key, value]) => (
+                     <div key={key} className="text-sm">
+                        <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}: </span>
+                        <span className="font-bold text-blue-600">{value}%</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">Top Ranked Site</h3>
+            {scenario.siteRankings && scenario.siteRankings.length > 0 ? (
+                <div className="bg-gray-50 p-4 rounded-md">
+                    <p className="font-bold text-md">{scenario.siteRankings[0].site}</p>
+                    <p className="text-sm text-gray-600">{scenario.siteRankings[0].state}</p>
+                    <div className="flex justify-between mt-2 text-sm">
+                        <span>Match Score: <span className="font-semibold">{scenario.siteRankings[0].matchScore}%</span></span>
+                        <span>Composite Score: <span className="font-bold">{scenario.siteRankings[0].compositeScore}</span></span>
+                    </div>
+                </div>
+            ) : <p>No ranking data available.</p>}
+        </div>
+    </div>
+);
+
+function SiteDetailPage({ site, scenario, navigateTo }) {
+    if (!site) {
+        return (
+            <div className="p-8 text-center">
+                <h1 className="text-2xl font-bold mb-4">Site Not Found</h1>
+                <button onClick={() => navigateTo('scenarios')} className="mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    Back to Scenarios
+                </button>
+            </div>
+        );
+    }
+    const { details } = site;
+
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+            <header className="mb-8">
+                 <button onClick={() => navigateTo('results', scenario)} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Results</button>
+                <h1 className="text-3xl font-bold text-gray-900">{site.site}</h1>
+                <p className="text-gray-500 mt-1">{details.siteInfo.address}</p>
+            </header>
+            <div className="space-y-8">
+                <DetailSection title="Basic Site Information">
+                    <DetailItem label="Site Name" value={site.site} />
+                    <DetailItem label="Site Code / Identifier" value={site.siteCode} />
+                    <DetailItem label="Address" value={details.siteInfo.address} />
+                    <DetailItem label="Contact" value={details.siteInfo.contact} />
+                    <DetailItem label="Website" value={details.siteInfo.website} />
+                    <DetailItem label="Principal Investigator (PI)" value={details.siteInfo.pi} />
+                    <DetailItem label="Sub-Investigators" value={details.siteInfo.subInvestigators.join(', ')} />
+                    <DetailItem label="Regulatory Authority Approvals" value={details.siteInfo.regulatoryApprovals} />
+                </DetailSection>
+
+                <DetailSection title="Infrastructure & Facilities">
+                    <DetailItem label="On-site Laboratory" value={details.infrastructure.onSiteLab} />
+                    <DetailItem label="Lab Certifications" value={details.infrastructure.labCertifications} />
+                    <DetailItem label="Sample Collection & Storage" value={details.infrastructure.sampleStorage.join(', ')} />
+                    <DetailItem label="Pharmacy / Investigational Product Storage" value={details.infrastructure.pharmacy} />
+                    <DetailItem label="Imaging Facilities" value={details.infrastructure.imaging.join(', ')} />
+                    <DetailItem label="Emergency Care Facilities" value={details.infrastructure.emergencyCare} />
+                    <DetailItem label="Number of Hospital Beds" value={details.infrastructure.hospitalBeds} />
+                    <DetailItem label="Dedicated Clinical Trial Unit" value={details.infrastructure.dedicatedTrialUnit} />
+                    <DetailItem label="IT Infrastructure" value={details.infrastructure.itInfrastructure} />
+                </DetailSection>
+
+                <DetailSection title="Clinical Capabilities">
+                    <DetailItem label="Therapeutic Areas of Expertise" value={details.clinicalCapabilities.therapeuticAreas.join(', ')} />
+                    <DetailItem label="Available Testing Facilities" value={details.clinicalCapabilities.testingFacilities.join(', ')} />
+                    <DetailItem label="Access to Patient Populations" value={details.clinicalCapabilities.patientAccess} />
+                    <DetailItem label="Number of Trained CRCs" value={details.clinicalCapabilities.crcCount} />
+                    <DetailItem label="GCP Training Records" value={details.clinicalCapabilities.gcpTrained} />
+                    <DetailItem label="Language & Translation Support" value={details.clinicalCapabilities.languageSupport} />
+                </DetailSection>
+                
+                <DetailSection title="Operational Performance">
+                    <DetailItem label="Past Trials Conducted" value={details.operationalPerformance.pastTrials} />
+                    <DetailItem label="Enrollment Performance" value={details.operationalPerformance.enrollmentRate} />
+                    <DetailItem label="Retention Rates" value={details.operationalPerformance.retentionRate} />
+                    <DetailItem label="Query Resolution Turnaround Time" value={details.operationalPerformance.queryTurnaround} />
+                    <DetailItem label="Protocol Deviation History" value={details.operationalPerformance.deviationHistory} />
+                    <DetailItem label="Inspection / Audit History" value={details.operationalPerformance.auditHistory} />
+                    <DetailItem label="Adverse Event Reporting Compliance" value={details.operationalPerformance.aeReporting} />
+                </DetailSection>
+                
+                <DetailSection title="Quality & Compliance">
+                    <DetailItem label="SOPs for Clinical Research" value={details.qualityCompliance.sops} />
+                    <DetailItem label="Ethics Committee / IRB Details" value={details.qualityCompliance.irb} />
+                    <DetailItem label="Regulatory Submissions Experience" value={details.qualityCompliance.regulatorySubmissions} />
+                    <DetailItem label="Data Protection & Patient Confidentiality Compliance" value={details.qualityCompliance.dataProtection} />
+                </DetailSection>
+
+                <DetailSection title="Additional Notes">
+                    <DetailItem label="Affiliations" value={details.additionalNotes.affiliations} />
+                    <DetailItem label="Accreditations" value={details.additionalNotes.accreditations} />
+                    <DetailItem label="Investigator Publications" value={details.additionalNotes.publications} />
+                    <DetailItem label="Recruitment Strategies" value={details.additionalNotes.recruitmentStrategies} />
+                </DetailSection>
+            </div>
+        </div>
+    );
+}
+
+const DetailSection = ({ title, children }) => (
+    <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+            {children}
+        </div>
+    </div>
+);
+
+
+// --- Gemini API Helper ---
+async function callGemini(prompt, retries = 3, delay = 1000) {
+    const apiKey = ""; // Leave empty, will be handled by the environment
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+    
+    const payload = {
+        contents: [{ role: "user", parts: [{ text: prompt }] }]
+    };
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error("Invalid response structure from Gemini API");
+            }
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+        }
+    }
+}
+
+const domContainer = document.querySelector('#root');
+const root = ReactDOM.createRoot(domContainer);
+root.render(<App />);   
     </script>
 </body>
 </html>
