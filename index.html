@@ -23,9 +23,14 @@
       window.exports = window.exports || {};
       window.module = window.module || { exports: window.exports };
       // Redirect any deep link like /login to root so SPA works and URL shows domain only
-      if (location.pathname !== '/' && !location.pathname.endsWith('.html')) {
-        history.replaceState(null, '', '/');
-      }
+      const repoName = "clinical-research-site-finder"; // your repo name
+  const basePath = location.hostname.includes("github.io")
+    ? `/${repoName}/`
+    : "/";
+
+  if (location.pathname !== basePath && !location.pathname.endsWith(".html")) {
+    history.replaceState(null, "", basePath);
+  }
     </script>
 </head>
 <body class="bg-gray-50">
