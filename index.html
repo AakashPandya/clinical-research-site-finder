@@ -616,6 +616,10 @@ function App() {
         const timer = setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 100);
+        
+        // Clear navigation flag after page change
+        localStorage.removeItem('isNavigating');
+        
         return () => clearTimeout(timer);
     }, [currentPage]);
 
@@ -624,12 +628,17 @@ function App() {
         const savedPage = localStorage.getItem('currentPage');
         if (savedPage && savedPage !== 'login') {
             // If we're trying to restore a page that requires data, check if data exists
+            // Only redirect if we're not actively navigating to a new page
             if ((savedPage === 'results' && !currentScenario) ||
                 (savedPage === 'comparison' && !comparisonScenarios) ||
                 (savedPage === 'siteDetail' && !currentSite)) {
-                // Redirect to scenarios if required data is missing
-                setCurrentPage('scenarios');
-                localStorage.setItem('currentPage', 'scenarios');
+                // Check if we're in the middle of navigation
+                const isNavigating = localStorage.getItem('isNavigating');
+                if (!isNavigating) {
+                    // Redirect to scenarios if required data is missing
+                    setCurrentPage('scenarios');
+                    localStorage.setItem('currentPage', 'scenarios');
+                }
             }
         }
     }, [currentScenario, comparisonScenarios, currentSite]);
@@ -677,12 +686,28 @@ function App() {
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
+    // Debug useEffect to monitor state changes
+    useEffect(() => {
+        console.log('State changed - currentPage:', currentPage, 'currentScenario:', currentScenario);
+    }, [currentPage, currentScenario]);
+
     // --- Navigation and Data Handling ---
     const navigateTo = (page, data = null) => {
+        console.log('navigateTo called with:', page, data);
+        
+        // Set navigation flag to prevent interference
+        localStorage.setItem('isNavigating', 'true');
+        
         if (page === 'results') {
-            setCurrentScenario(data);
+            // Ensure the scenario always has an ID
+            const scenarioWithId = {
+                ...data,
+                id: data.id || Date.now()
+            };
+            console.log('Setting current scenario:', scenarioWithId);
+            setCurrentScenario(scenarioWithId);
             // Save data to localStorage for refresh persistence
-            localStorage.setItem('pageData', JSON.stringify({ results: [data] }));
+            localStorage.setItem('pageData', JSON.stringify({ results: [scenarioWithId] }));
         } else if (page === 'comparison') {
             setComparisonScenarios(data);
             localStorage.setItem('pageData', JSON.stringify({ comparison: data }));
@@ -700,6 +725,7 @@ function App() {
             localStorage.setItem('pageData', JSON.stringify({ page: 'create' }));
         }
         
+        console.log('Setting current page to:', page);
         setCurrentPage(page);
         localStorage.setItem('currentPage', page);
         
@@ -711,7 +737,8 @@ function App() {
         if (page === 'scenarios') {
             url = `${basePath}/scenarios`;
         } else if (page === 'results' && data) {
-            url = `${basePath}/results/${data.id}`;
+            const scenarioId = data.id || Date.now(); // Ensure we always have an ID
+            url = `${basePath}/results/${scenarioId}`;
         } else if (page === 'siteDetail' && data) {
             url = `${basePath}/site/${data.siteCode}`;
         } else if (page === 'comparison' && data) {
@@ -856,6 +883,8 @@ function App() {
     
     // --- Page Components ---
     const renderPage = () => {
+        console.log('renderPage called, currentPage:', currentPage, 'currentScenario:', currentScenario);
+        
         if (isLoading) {
             return <div className="flex items-center justify-center h-screen"><LoadingSpinner className="w-12 h-12 text-blue-600" /></div>;
         }
@@ -866,7 +895,7 @@ function App() {
             case 'scenarios':
                 return <ScenariosListPage scenarios={scenarios} setScenarios={setScenarios} navigateTo={navigateTo} />;
             case 'create':
-                return <CreateScenarioPage navigateTo={navigateTo} onSave={handleSaveScenario} />;
+                return <CreateScenarioPage navigateTo={navigateTo} onSave={handleSaveScenario} siteRankingData={generateSites(50, Date.now())} />;
             case 'results':
                 return currentScenario ? <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} /> : null;
             case 'comparison':
@@ -1288,7 +1317,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                             </label>
                         </div>
                         {selectedForComparison.length >= 2 && (
-                            <button onClick={handleCompare} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+                            <button onClick={handleCompare} className="flex items-center gap-2 px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
@@ -1297,13 +1326,13 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                         )}
                     </div>
                     <div className="inline-flex rounded-md shadow-sm">
-                        <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
+                        <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
                             Table View
                         </button>
-                        <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
+                        <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
                             </svg>
@@ -1331,7 +1360,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                                 <div className="text-center mt-6">
                                     <button 
                                         onClick={loadMoreItems}
-                                        className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                        className="flex items-center gap-2 px-6 py-3 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1357,11 +1386,13 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
             ) : (
                 <>
                     <ScenarioTable scenarios={paginatedScenarios} onPin={togglePin} onArchive={toggleArchive} navigateTo={navigateTo} requestSort={requestSort} sortConfig={sortConfig} onSelect={handleSelectForComparison} selectedItems={selectedForComparison} />
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={Math.ceil(filteredAndSortedScenarios.length / itemsPerPage)}
-                        onPageChange={setCurrentPage}
-                    />
+                    {filteredAndSortedScenarios.length > 0 && (
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={Math.ceil(filteredAndSortedScenarios.length / itemsPerPage)}
+                            onPageChange={setCurrentPage}
+                        />
+                    )}
                 </>
             )}
         </div>
@@ -1503,7 +1534,7 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
     );
 }
 
-function CreateScenarioPage({ navigateTo, siteRankingData }) {
+function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
     const [formData, setFormData] = useState({
         title: '', 
         sponsor: '',
@@ -1569,18 +1600,32 @@ function CreateScenarioPage({ navigateTo, siteRankingData }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log('Form submitted with data:', formData);
+        console.log('Site ranking data:', siteRankingData);
+        
+        // Basic validation
+        if (!formData.title.trim()) {
+            alert('Please enter a scenario title');
+            return;
+        }
+        
         const previewScenario = {
             ...formData,
+            id: Date.now(), // Ensure scenario has a proper ID
             isPreview: true,
-            siteRankings: siteRankingData, // Attach predefined site ranking data
+            siteRankings: siteRankingData || [], // siteRankingData is already an array
         };
+        
+        console.log('Preview scenario created:', previewScenario);
+        console.log('Navigating to results...');
+        
         navigateTo('results', previewScenario);
     };
 
     return (
         <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
             <header className="mb-8">
-                <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
+                <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -1995,7 +2040,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                                 )}
                              </div>
                             <div className="inline-flex rounded-md shadow-sm">
-                                <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
+                                <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
@@ -2058,22 +2103,22 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
 
 // --- Reusable Form & UI Components ---
 
-const InputField = ({ label, name, ...props }) => (
+const InputField = ({ label, name, value = '', ...props }) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <input id={name} name={name} {...props} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        <input id={name} name={name} value={value} {...props} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
     </div>
 );
 
-const TextAreaField = ({ label, name, ...props }) => (
+const TextAreaField = ({ label, name, value = '', ...props }) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <textarea id={name} name={name} rows="4" {...props} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        <textarea id={name} name={name} value={value} rows="4" {...props} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
     </div>
 );
 
 
-const SliderField = ({ label, name, value, onChange }) => (
+const SliderField = ({ label, name, value = 50, onChange }) => (
     <div>
         <div className="flex justify-between items-center mb-1">
             <label className="text-sm font-medium text-gray-700">{label}</label>
@@ -2453,16 +2498,21 @@ function SiteCardView({ sites, navigateTo, onSelect, selectedSites }) {
     );
 }
 
-const PdfExportContent = ({ scenario }) => (
+const PdfExportContent = ({ scenario }) => {
+    if (!scenario) {
+        return <div>No scenario data available for PDF export</div>;
+    }
+    
+    return (
     <div>
         <div id="pdf-header-section">
             <div className="mb-6 p-4 border-b">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">{scenario.title}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{scenario.title || 'Untitled Scenario'}</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4 text-sm">
-                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Indication:</span> <span className="text-gray-800">{scenario.indication}</span></div>
-                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Phase:</span> <span className="text-gray-800">{scenario.phase}</span></div>
-                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Drug:</span> <span className="text-gray-800">{scenario.drugInfo}</span></div>
-                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Start Date:</span> <span className="text-gray-800">{scenario.startDate}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Indication:</span> <span className="text-gray-800">{scenario.indication || 'N/A'}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Phase:</span> <span className="text-gray-800">{scenario.phase || 'N/A'}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Drug:</span> <span className="text-gray-800">{scenario.drugInfo || 'N/A'}</span></div>
+                    <div className="flex flex-col"><span className="font-semibold text-gray-600">Start Date:</span> <span className="text-gray-800">{scenario.startDate || 'N/A'}</span></div>
                 </div>
             </div>
             <div className="mb-6 p-4">
@@ -2487,25 +2537,25 @@ const PdfExportContent = ({ scenario }) => (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Composite Score</th>
                 </tr>
             </thead>
-            {scenario.siteRankings.map(site => (
-                <tbody key={site.rank} className="pdf-site-section bg-white divide-y divide-gray-200">
+            {(scenario.siteRankings || []).map(site => (
+                <tbody key={site.rank || site.siteCode || Math.random()} className="pdf-site-section bg-white divide-y divide-gray-200">
                     <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{site.rank}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{site.site}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{site.state}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{site.rank || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{site.site || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{site.state || 'N/A'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">
-                            <Tooltip text={getMatchScoreReasoning(site.matchScore, site.details)}>
+                            <Tooltip text={getMatchScoreReasoning(site.matchScore || 0, site.details)}>
                                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                    site.matchScore >= 90 ? 'bg-green-100 text-green-800' :
-                                    site.matchScore >= 80 ? 'bg-blue-100 text-blue-800' :
-                                    site.matchScore >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                                    (site.matchScore || 0) >= 90 ? 'bg-green-100 text-green-800' :
+                                    (site.matchScore || 0) >= 80 ? 'bg-blue-100 text-blue-800' :
+                                    (site.matchScore || 0) >= 70 ? 'bg-yellow-100 text-yellow-800' :
                                     'bg-red-100 text-red-800'
                                 }`}>
-                                    {site.matchScore}%
+                                    {site.matchScore || 0}%
                                 </span>
                             </Tooltip>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{site.compositeScore}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{site.compositeScore || 'N/A'}</td>
                     </tr>
                     <tr>
                         <td colSpan="5" className="p-0">
@@ -2518,7 +2568,8 @@ const PdfExportContent = ({ scenario }) => (
             ))}
         </table>
     </div>
-);
+    );
+};
 
 function ExpandedRowContent({ details }) {
     // Add null check to prevent errors
