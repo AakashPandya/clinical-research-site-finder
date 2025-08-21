@@ -418,7 +418,7 @@ function App() {
 
 function LoginPage({ onLogin }) {
     const [email, setEmail] = useState('demo@gmail.com');
-    const [password, setPassword] = useState('1234');
+    const [password, setPassword] = useState('Cr3@t!veP@ssw0rd2025!');
     const [error, setError] = useState('');
 
     const handleSubmit = (e) => {
@@ -896,40 +896,52 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
     const [expandedRows, setExpandedRows] = useState(new Set());
     const [chatMessages, setChatMessages] = useState([]);
     const [isExporting, setIsExporting] = useState(false);
+    const [isExportingExcel, setIsExportingExcel] = useState(false);
     const [isChatLoading, setIsChatLoading] = useState(false);
     const exportRef = useRef(null);
     const pdfExportRef = useRef(null);
     const handleExportExcel = () => {
+        setIsExportingExcel(true);
         try {
-            const rows = scenario.siteRankings.map(s => ({
-                Rank: s.rank,
-                Site: s.site,
-                State: s.state,
-                'Match Score': s.matchScore,
-                'Composite Score': s.compositeScore,
-                'PI': s.details.siteInfo.pi,
-                'Site Code': s.siteCode,
-                'Address': s.details.siteInfo.address,
-                'Email': s.details.siteInfo.contact,
-                'Website': s.details.siteInfo.website,
-                'Enrollment Rate': s.details.operationalPerformance.enrollmentRate,
-                'Retention Rate': s.details.operationalPerformance.retentionRate,
-                'Time to Activate': s.details.operationalPerformance.timeToActivate,
-                'Past Trials': s.details.operationalPerformance.pastTrials,
-                'Query Turnaround': s.details.operationalPerformance.queryTurnaround,
-                'Lab Certifications': s.details.infrastructure.labCertifications,
-                'On-site Lab': s.details.infrastructure.onSiteLab,
-                'Pharmacy': s.details.infrastructure.pharmacy,
-                'Imaging': (s.details.infrastructure.imaging||[]).join(', '),
-                'Therapeutic Areas': (s.details.clinicalCapabilities.therapeuticAreas||[]).join(', '),
-                'CRC Count': s.details.clinicalCapabilities.crcCount,
-            }));
-            const ws = XLSX.utils.json_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Sites');
-            XLSX.writeFile(wb, `sites-${(scenario.title||'scenario').replace(/\s+/g,'-')}.xlsx`);
+            // Use a short timeout to allow the UI to update to the loading state
+            setTimeout(() => {
+                try {
+                    const rows = scenario.siteRankings.map(s => ({
+                        Rank: s.rank,
+                        Site: s.site,
+                        State: s.state,
+                        'Match Score': s.matchScore,
+                        'Composite Score': s.compositeScore,
+                        'PI': s.details.siteInfo.pi,
+                        'Site Code': s.siteCode,
+                        'Address': s.details.siteInfo.address,
+                        'Email': s.details.siteInfo.contact,
+                        'Website': s.details.siteInfo.website,
+                        'Enrollment Rate': s.details.operationalPerformance.enrollmentRate,
+                        'Retention Rate': s.details.operationalPerformance.retentionRate,
+                        'Time to Activate': s.details.operationalPerformance.timeToActivate,
+                        'Past Trials': s.details.operationalPerformance.pastTrials,
+                        'Query Turnaround': s.details.operationalPerformance.queryTurnaround,
+                        'Lab Certifications': s.details.infrastructure.labCertifications,
+                        'On-site Lab': s.details.infrastructure.onSiteLab,
+                        'Pharmacy': s.details.infrastructure.pharmacy,
+                        'Imaging': (s.details.infrastructure.imaging||[]).join(', '),
+                        'Therapeutic Areas': (s.details.clinicalCapabilities.therapeuticAreas||[]).join(', '),
+                        'CRC Count': s.details.clinicalCapabilities.crcCount,
+                    }));
+                    const ws = XLSX.utils.json_to_sheet(rows);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Sites');
+                    XLSX.writeFile(wb, `sites-${(scenario.title||'scenario').replace(/\s+/g,'-')}.xlsx`);
+                } catch (e) {
+                    console.error('Excel export failed', e);
+                } finally {
+                    setIsExportingExcel(false);
+                }
+            }, 100);
         } catch (e) {
             console.error('Excel export failed', e);
+            setIsExportingExcel(false);
         }
     };
 
@@ -1034,7 +1046,10 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                             Save Scenario
                         </button>
                     )}
-                    <button onClick={handleExportExcel} className="px-4 py-2 font-semibold text-emerald-700 bg-emerald-100 rounded-md hover:bg-emerald-200 transition-colors">Export to Excel</button>
+                    <button onClick={handleExportExcel} disabled={isExportingExcel} className="flex items-center gap-2 px-4 py-2 font-semibold text-emerald-700 bg-emerald-100 rounded-md hover:bg-emerald-200 transition-colors disabled:opacity-50">
+                        {isExportingExcel ? <LoadingSpinner className="w-5 h-5" /> : null}
+                        {isExportingExcel ? 'Exporting...' : 'Export to Excel'}
+                    </button>
                     <button onClick={handleExport} disabled={isExporting} className="flex items-center gap-2 px-4 py-2 font-semibold text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors disabled:opacity-50">
                         {isExporting ? <LoadingSpinner className="w-5 h-5" /> : null}
                         {isExporting ? 'Exporting...' : 'Export to PDF'}
