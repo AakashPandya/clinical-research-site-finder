@@ -104,14 +104,10 @@ const ChevronRightIcon = ({ className }) => (
 // --- Main App Component ---
 function App() {
     // --- State Management ---
-    const [currentPage, setCurrentPage] = useState(() => {
-        // Try to restore the last page from localStorage, default to login
-        const savedPage = localStorage.getItem('currentPage');
-        return savedPage || 'login';
-    });
+    const [currentPage, setCurrentPage] = useState('login'); // Always start with login, let URL restoration handle the rest
     const [scenarios, setScenarios] = useState([]);
     const [currentScenario, setCurrentScenario] = useState(null);
-    const [comparisonScenarios, setComparisonScenarios] = useState([]);
+    const [comparisonScenarios, setComparisonScenarios] = useState(null);
     const [currentSite, setCurrentSite] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -244,7 +240,16 @@ function App() {
 
     function generateScenarios(count) {
         const titles = [
-            'Immuno-Oncology — NSCLC Phase III','Cardiology — HFpEF Phase II','Neurology — Alzheimer’s Phase I','Dermatology — Psoriasis Phase III','Immunology — RA Phase II','Vaccinology — RSV Phase IV','Endocrinology — T2D Phase II','Hematology — AML Phase I','Pulmonology — COPD Phase III','Gastro — IBD Phase II'
+            'Immuno-Oncology — NSCLC Phase III',
+            'Cardiology — HFpEF Phase II',
+            'Neurology — Alzheimer\'s Phase I',
+            'Dermatology — Psoriasis Phase III',
+            'Immunology — RA Phase II',
+            'Vaccinology — RSV Phase IV',
+            'Endocrinology — T2D Phase II',
+            'Hematology — AML Phase I',
+            'Pulmonology — COPD Phase III',
+            'Gastro — IBD Phase II'
         ];
         const countries = ['USA','Canada','Germany','UK','France','Spain'];
         const authors = ['Dr. Evelyn Reed','Dr. Samuel Chen','Dr. Maria Garcia','Dr. Ben Carter','Dr. Priya Natarajan','Dr. Michael Lee'];
@@ -280,6 +285,13 @@ function App() {
         // Simulate loading initial data
         setScenarios(initialScenarios.current);
         setIsLoading(false);
+        
+        // Restore data from URL after scenarios are loaded (only if not on root)
+        if (window.location.pathname !== '/') {
+            setTimeout(() => {
+                restoreDataFromURL();
+            }, 100);
+        }
     }, []);
 
     useEffect(() => {
@@ -315,7 +327,7 @@ function App() {
         if (savedPage && savedPage !== 'login') {
             // If we're trying to restore a page that requires data, check if data exists
             if ((savedPage === 'results' && !currentScenario) ||
-                (savedPage === 'comparison' && !comparisonScenarios.length) ||
+                (savedPage === 'comparison' && !comparisonScenarios) ||
                 (savedPage === 'siteDetail' && !currentSite)) {
                 // Redirect to scenarios if required data is missing
                 setCurrentPage('scenarios');
@@ -324,18 +336,186 @@ function App() {
         }
     }, [currentScenario, comparisonScenarios, currentSite]);
 
+    // Handle direct URL navigation on component mount
+    useEffect(() => {
+        console.log('URL navigation effect running, path:', window.location.pathname);
+        const path = window.location.pathname;
+        if (path === '/') {
+            // Root path - ensure we show login
+            console.log('Setting page to login');
+            setCurrentPage('login');
+        } else {
+            // We're on a specific page, restore data
+            console.log('Restoring data from URL');
+            setTimeout(() => {
+                restoreDataFromURL();
+            }, 100);
+        }
+    }, []);
+
+    // Handle browser back/forward navigation
+    useEffect(() => {
+        const handlePopState = (event) => {
+            if (event.state && event.state.page) {
+                const { page, data } = event.state;
+                if (page === 'results' && data) {
+                    setCurrentScenario(data);
+                } else if (page === 'comparison' && data) {
+                    setComparisonScenarios(data);
+                } else if (page === 'siteDetail' && data) {
+                    setCurrentSite(data);
+                }
+                setCurrentPage(page);
+                localStorage.setItem('currentPage', page);
+            } else {
+                // If no state, try to restore from URL
+                setTimeout(() => {
+                    restoreDataFromURL();
+                }, 100);
+            }
+        };
+        
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
     // --- Navigation and Data Handling ---
     const navigateTo = (page, data = null) => {
         if (page === 'results') {
             setCurrentScenario(data);
+            // Save data to localStorage for refresh persistence
+            localStorage.setItem('pageData', JSON.stringify({ results: [data] }));
         } else if (page === 'comparison') {
             setComparisonScenarios(data);
+            localStorage.setItem('pageData', JSON.stringify({ comparison: data }));
         } else if (page === 'siteDetail') {
             setCurrentSite(data);
+            localStorage.setItem('pageData', JSON.stringify({ 
+                siteDetail: [data], 
+                currentScenario: currentScenario 
+            }));
+        } else if (page === 'scenarios') {
+            // For scenarios page, just save the page info
+            localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios' }));
+        } else if (page === 'create') {
+            // For create page, just save the page info
+            localStorage.setItem('pageData', JSON.stringify({ page: 'create' }));
         }
+        
         setCurrentPage(page);
-        // Save current page to localStorage to persist on refresh
         localStorage.setItem('currentPage', page);
+        
+        // Update URL for proper routing with data
+        let url;
+        if (page === 'scenarios') {
+            url = '/scenarios';
+        } else if (page === 'results' && data) {
+            url = `/results/${data.id}`;
+        } else if (page === 'siteDetail' && data) {
+            url = `/site/${data.siteCode}`;
+        } else if (page === 'comparison' && data) {
+            url = `/comparison`;
+        } else if (page === 'create') {
+            url = `/create`;
+        } else {
+            url = `/${page}`;
+        }
+        window.history.pushState({ page, data }, '', url);
+    };
+
+    // Function to restore data from URL
+    const restoreDataFromURL = () => {
+        console.log('restoreDataFromURL called');
+        const path = window.location.pathname;
+        const pathParts = path.split('/').filter(Boolean);
+        console.log('Path parts:', pathParts);
+        
+        if (pathParts.length === 0) {
+            // Root path - show login page
+            console.log('Root path, setting to login');
+            setCurrentPage('login');
+            return;
+        }
+        
+        const page = pathParts[0];
+        console.log('Page from URL:', page);
+        const savedData = localStorage.getItem('pageData');
+        let parsedData = null;
+        
+        try {
+            if (savedData) {
+                parsedData = JSON.parse(savedData);
+                console.log('Parsed saved data:', parsedData);
+            }
+        } catch (e) {
+            console.error('Failed to parse saved data:', e);
+        }
+
+        if (page === 'scenarios') {
+            console.log('Setting page to scenarios');
+            setCurrentPage('scenarios');
+            localStorage.setItem('currentPage', 'scenarios');
+            return;
+        }
+        
+        if (page === 'create') {
+            console.log('Setting page to create');
+            setCurrentPage('create');
+            localStorage.setItem('currentPage', 'create');
+            return;
+        }
+        
+        if (page === 'results' && pathParts[1]) {
+            const scenarioId = parseInt(pathParts[1]);
+            console.log('Looking for scenario with ID:', scenarioId);
+            if (parsedData?.results) {
+                const scenario = parsedData.results.find(s => s.id === scenarioId);
+                if (scenario) {
+                    console.log('Found scenario, setting to results page');
+                    setCurrentScenario(scenario);
+                    setCurrentPage('results');
+                    localStorage.setItem('currentPage', 'results');
+                    return;
+                }
+            }
+        }
+        
+        if (page === 'site' && pathParts[1]) {
+            const siteCode = pathParts[1];
+            console.log('Looking for site with code:', siteCode);
+            if (parsedData?.siteDetail) {
+                const site = parsedData.siteDetail.find(s => s.siteCode === siteCode);
+                if (site) {
+                    console.log('Found site, setting to siteDetail page');
+                    setCurrentSite(site);
+                    if (parsedData.currentScenario) {
+                        setCurrentScenario(parsedData.currentScenario);
+                    }
+                    setCurrentPage('siteDetail');
+                    localStorage.setItem('currentPage', 'siteDetail');
+                    return;
+                }
+            }
+        }
+        
+        if (page === 'comparison' && parsedData?.comparison) {
+            console.log('Setting page to comparison');
+            setComparisonScenarios(parsedData.comparison);
+            setCurrentPage('comparison');
+            localStorage.setItem('currentPage', 'comparison');
+            return;
+        }
+        
+        // If no data found or invalid route, redirect to scenarios
+        console.log('Unknown page or data not found, redirecting to scenarios');
+        setCurrentPage('scenarios');
+        localStorage.setItem('currentPage', 'scenarios');
+        window.history.replaceState({ page: 'scenarios' }, '', '/scenarios');
+        
+        // Show a brief message that the page couldn't be found
+        setTimeout(() => {
+            alert('The requested page data was not found. Redirecting to scenarios.');
+        }, 100);
     };
     
     const handleSaveScenario = (scenarioToSave) => {
@@ -484,6 +664,8 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(6);
     const [selectedForComparison, setSelectedForComparison] = useState([]);
+    const [displayedItems, setDisplayedItems] = useState(6);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const createdByOptions = useMemo(() => ['All', ...new Set(scenarios.map(s => s.performedBy))], [scenarios]);
     const phaseOptions = useMemo(() => ['All', 'Phase I', 'Phase II', 'Phase III', 'Phase IV'], []);
@@ -549,12 +731,72 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
 
         return sortableItems;
     }, [scenarios, filter, showArchived, createdByFilter, phaseFilter, countryFilter, sortConfig]);
+
+    // Reset displayed items when filters change
+    useEffect(() => {
+        setDisplayedItems(6);
+        setCurrentPage(1);
+    }, [filter, showArchived, createdByFilter, phaseFilter, countryFilter, sortConfig]);
+
+    // Adjust displayed items based on content height
+    useEffect(() => {
+        if (view === 'card' && filteredAndSortedScenarios.length > 0) {
+            // If we have less than 6 items, show all
+            if (filteredAndSortedScenarios.length <= 6) {
+                setDisplayedItems(filteredAndSortedScenarios.length);
+            } else {
+                // Start with 6, but if page won't be scrollable, show more
+                const initialCount = Math.min(12, filteredAndSortedScenarios.length);
+                setDisplayedItems(initialCount);
+            }
+        }
+    }, [view, filteredAndSortedScenarios.length]);
+
+    // Lazy loading for card view
+    useEffect(() => {
+        if (view !== 'card') return;
+
+        const handleScroll = () => {
+            if (isLoadingMore) return;
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // Load more when user is near bottom (within 100px)
+            if (scrollTop + windowHeight >= documentHeight - 100) {
+                loadMoreItems();
+            }
+        };
+
+        // Only add scroll listener if there are more items to load and page is scrollable
+        if (hasMoreItems && document.documentElement.scrollHeight > window.innerHeight) {
+            window.addEventListener('scroll', handleScroll);
+            return () => window.removeEventListener('scroll', handleScroll);
+        }
+    }, [view, isLoadingMore, filteredAndSortedScenarios.length, displayedItems, hasMoreItems]);
+
+    const loadMoreItems = () => {
+        if (displayedItems >= filteredAndSortedScenarios.length) return;
+        
+        setIsLoadingMore(true);
+        setTimeout(() => {
+            setDisplayedItems(prev => Math.min(prev + 6, filteredAndSortedScenarios.length));
+            setIsLoadingMore(false);
+        }, 300);
+    };
+
+    // Check if there are more items to load
+    const hasMoreItems = displayedItems < filteredAndSortedScenarios.length;
     
     const paginatedScenarios = useMemo(() => {
+        if (view === 'card') {
+            return filteredAndSortedScenarios.slice(0, displayedItems);
+        }
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         return filteredAndSortedScenarios.slice(indexOfFirstItem, indexOfLastItem);
-    }, [currentPage, itemsPerPage, filteredAndSortedScenarios]);
+    }, [currentPage, itemsPerPage, filteredAndSortedScenarios, view, displayedItems]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
@@ -610,16 +852,41 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
 
             {view === 'card' ? (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {paginatedScenarios.map(scenario => (
-                            <ScenarioCard key={scenario.id} scenario={scenario} onPin={togglePin} onArchive={toggleArchive} navigateTo={navigateTo} onSelect={handleSelectForComparison} isSelected={selectedForComparison.includes(scenario.id)} />
-                        ))}
-                    </div>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={Math.ceil(filteredAndSortedScenarios.length / itemsPerPage)}
-                        onPageChange={setCurrentPage}
-                    />
+                    {paginatedScenarios.length > 0 ? (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {paginatedScenarios.map(scenario => (
+                                    <ScenarioCard key={scenario.id} scenario={scenario} onPin={togglePin} onArchive={toggleArchive} navigateTo={navigateTo} onSelect={handleSelectForComparison} isSelected={selectedForComparison.includes(scenario.id)} />
+                                ))}
+                            </div>
+                            {isLoadingMore && (
+                                <div className="flex justify-center mt-6">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                </div>
+                            )}
+                            {hasMoreItems && !isLoadingMore && (
+                                <div className="text-center mt-6">
+                                    <button 
+                                        onClick={loadMoreItems}
+                                        className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Load More Scenarios ({filteredAndSortedScenarios.length - displayedItems} remaining)
+                                    </button>
+                                    <p className="text-gray-500 mt-2">Or scroll down to load automatically</p>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center">
+                            <div className="text-gray-500">
+                                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No scenarios found</h3>
+                                <p className="text-gray-500">Try adjusting your search criteria or filters to find scenarios.</p>
+                            </div>
+                        </div>
+                    )}
                 </>
             ) : (
                 <>
@@ -688,6 +955,20 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
         }
         return <ChevronDownIcon className="w-4 h-4 ml-1 inline" />;
     };
+    
+    if (!scenarios || scenarios.length === 0) {
+        return (
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center">
+                <div className="text-gray-500">
+                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No scenarios found</h3>
+                    <p className="text-gray-500">Try adjusting your search criteria or filters to find scenarios.</p>
+                </div>
+            </div>
+        );
+    }
     
     return (
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-x-auto">
@@ -898,8 +1179,82 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
     const [isExportingPdf, setIsExportingPdf] = useState(false);
     const [isExportingExcel, setIsExportingExcel] = useState(false);
     const [isChatLoading, setIsChatLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const [displayedSites, setDisplayedSites] = useState(6);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const exportRef = useRef(null);
     const pdfExportRef = useRef(null);
+
+    // Calculate pagination for sites
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentSites = scenario?.siteRankings?.slice(indexOfFirstItem, indexOfLastItem) || [];
+    const totalPages = Math.ceil((scenario?.siteRankings?.length || 0) / itemsPerPage);
+
+    // Check if there are more sites to load for card view
+    const hasMoreItems = displayedSites < (scenario?.siteRankings?.length || 0);
+
+    // Lazy loading for card view
+    useEffect(() => {
+        if (view !== 'card') return;
+
+        const handleScroll = () => {
+            if (isLoadingMore) return;
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // Load more when user is near bottom (within 100px)
+            if (scrollTop + windowHeight >= documentHeight - 100) {
+                loadMoreSites();
+            }
+        };
+
+        // Only add scroll listener if there are more items to load and page is scrollable
+        if (hasMoreItems && document.documentElement.scrollHeight > window.innerHeight) {
+            window.addEventListener('scroll', handleScroll);
+            return () => window.removeEventListener('scroll', handleScroll);
+        }
+    }, [view, isLoadingMore, scenario?.siteRankings?.length, displayedSites, hasMoreItems]);
+
+    const loadMoreSites = () => {
+        if (!scenario?.siteRankings || displayedSites >= scenario.siteRankings.length) return;
+        
+        setIsLoadingMore(true);
+        setTimeout(() => {
+            setDisplayedSites(prev => Math.min(prev + 6, scenario.siteRankings.length));
+            setIsLoadingMore(false);
+        }, 300);
+    };
+
+    // Reset displayed sites when view changes
+    useEffect(() => {
+        if (view === 'card') {
+            setDisplayedSites(6);
+        }
+    }, [view]);
+
+    // Adjust displayed sites based on content height
+    useEffect(() => {
+        if (view === 'card' && scenario?.siteRankings?.length > 0) {
+            // If we have less than 6 sites, show all
+            if (scenario.siteRankings.length <= 6) {
+                setDisplayedSites(scenario.siteRankings.length);
+            } else {
+                // Start with 6, but if page won't be scrollable, show more
+                const initialCount = Math.min(12, scenario.siteRankings.length);
+                setDisplayedSites(initialCount);
+            }
+        }
+    }, [view, scenario?.siteRankings?.length]);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        setExpandedRows(new Set()); // Reset expanded rows when page changes
+    };
+
     const handleExportExcel = () => {
         setIsExportingExcel(true);
         // Use a short timeout to allow the UI to update to the loading state
@@ -911,22 +1266,22 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                     State: s.state,
                     'Match Score': s.matchScore,
                     'Composite Score': s.compositeScore,
-                    'PI': s.details.siteInfo.pi,
+                    'PI': s.details?.siteInfo?.pi || 'N/A',
                     'Site Code': s.siteCode,
-                    'Address': s.details.siteInfo.address,
-                    'Email': s.details.siteInfo.contact,
-                    'Website': s.details.siteInfo.website,
-                    'Enrollment Rate': s.details.operationalPerformance.enrollmentRate,
-                    'Retention Rate': s.details.operationalPerformance.retentionRate,
-                    'Time to Activate': s.details.operationalPerformance.timeToActivate,
-                    'Past Trials': s.details.operationalPerformance.pastTrials,
-                    'Query Turnaround': s.details.operationalPerformance.queryTurnaround,
-                    'Lab Certifications': s.details.infrastructure.labCertifications,
-                    'On-site Lab': s.details.infrastructure.onSiteLab,
-                    'Pharmacy': s.details.infrastructure.pharmacy,
-                    'Imaging': (s.details.infrastructure.imaging||[]).join(', '),
-                    'Therapeutic Areas': (s.details.clinicalCapabilities.therapeuticAreas||[]).join(', '),
-                    'CRC Count': s.details.clinicalCapabilities.crcCount,
+                    'Address': s.details?.siteInfo?.address || 'N/A',
+                    'Email': s.details?.siteInfo?.contact || 'N/A',
+                    'Website': s.details?.siteInfo?.website || 'N/A',
+                    'Enrollment Rate': s.details?.operationalPerformance?.enrollmentRate || 'N/A',
+                    'Retention Rate': s.details?.operationalPerformance?.retentionRate || 'N/A',
+                    'Time to Activate': s.details?.operationalPerformance?.timeToActivate || 'N/A',
+                    'Past Trials': s.details?.operationalPerformance?.pastTrials || 'N/A',
+                    'Query Turnaround': s.details?.operationalPerformance?.queryTurnaround || 'N/A',
+                    'Lab Certifications': s.details?.infrastructure?.labCertifications || 'N/A',
+                    'On-site Lab': s.details?.infrastructure?.onSiteLab || 'N/A',
+                    'Pharmacy': s.details?.infrastructure?.pharmacy || 'N/A',
+                    'Imaging': (s.details?.infrastructure?.imaging || []).join(', ') || 'N/A',
+                    'Therapeutic Areas': (s.details?.clinicalCapabilities?.therapeuticAreas || []).join(', ') || 'N/A',
+                    'CRC Count': s.details?.clinicalCapabilities?.crcCount || 'N/A',
                 }));
                 const ws = XLSX.utils.json_to_sheet(rows);
                 const wb = XLSX.utils.book_new();
@@ -1031,7 +1386,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="mb-6 flex items-center justify-between">
                 <div>
-                 <button onClick={() => navigateTo('scenarios')} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Scenarios</button>
+                    <button onClick={() => navigateTo('scenarios')} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Scenarios</button>
                     <h1 className="text-3xl font-bold text-gray-900">{scenario.title}</h1>
                     <p className="text-gray-500 mt-1">Results and site ranking based on your criteria.</p>
                 </div>
@@ -1041,7 +1396,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                             Save Scenario
                         </button>
                     )}
-                    <button onClick={handleExportExcel} disabled={isExportingExcel} className="flex items-center gap-2 px-4 py-2 font-semibold text-emerald-700 bg-emerald-100 rounded-md hover:bg-emerald-200 transition-colors disabled:opacity-50">
+                    <button onClick={handleExportExcel} disabled={isExportingExcel} className="flex items-center gap-2 px-4 py-2 font-semibold text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200 transition-colors disabled:opacity-50">
                         {isExportingExcel ? <LoadingSpinner className="w-5 h-5" /> : null}
                         {isExportingExcel ? 'Exporting...' : 'Export to Excel'}
                     </button>
@@ -1062,14 +1417,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
 
                 {/* Right Panel: Site Ranking */}
                 <div className="lg:col-span-3">
-                    <div className="flex justify-end mb-4">
-                        <div className="inline-flex rounded-md shadow-sm">
-                            <button onClick={() => setView('table')} className={`px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>Ranked Table View</button>
-                            <button onClick={() => setView('card')} className={`px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>Card (Summary) View</button>
-                        </div>
-                    </div>
-                    
-                    <div ref={exportRef} className="bg-white p-4 rounded-lg">
+                    <div ref={exportRef} className="bg-white p-4 rounded-lg border border-gray-200">
                         <div className="mb-6 p-4 border-b">
                             <h3 className="text-lg font-semibold text-gray-700 mb-3">Objective</h3>
                             <p className="text-sm text-gray-600">{scenario.objective}</p>
@@ -1093,10 +1441,44 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                                 ))}
                             </div>
                         </div>
+                        <div className="flex justify-between items-center mb-4 px-4">
+                             <h3 className="text-lg font-semibold text-gray-700">Site Rankings</h3>
+                            <div className="inline-flex rounded-md shadow-sm">
+                                <button onClick={() => setView('table')} className={`px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>Ranked Table View</button>
+                                <button onClick={() => setView('card')} className={`px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>Card (Summary) View</button>
+                            </div>
+                        </div>
                         {view === 'table' ? (
-                            <SiteTable sites={scenario.siteRankings} expandedRows={expandedRows} toggleRow={toggleRow} navigateTo={navigateTo} />
+                            <>
+                                <SiteTable sites={currentSites} expandedRows={expandedRows} toggleRow={toggleRow} navigateTo={navigateTo} />
+                                {totalPages > 1 && (
+                                    <Pagination 
+                                        currentPage={currentPage} 
+                                        totalPages={totalPages} 
+                                        onPageChange={handlePageChange} 
+                                    />
+                                )}
+                            </>
                         ) : (
-                            <SiteCardView sites={scenario.siteRankings} navigateTo={navigateTo} />
+                            <div className="p-4">
+                                <SiteCardView sites={scenario.siteRankings.slice(0, displayedSites)} navigateTo={navigateTo} />
+                                {isLoadingMore && (
+                                    <div className="flex justify-center mt-6">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    </div>
+                                )}
+                                {displayedSites < (scenario.siteRankings?.length || 0) && !isLoadingMore && (
+                                    <div className="text-center mt-6">
+                                        <button 
+                                            onClick={loadMoreSites}
+                                            className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                        >
+                                            Load More Sites ({scenario.siteRankings.length - displayedSites} remaining)
+                                        </button>
+                                        <p className="text-gray-500 mt-2">Or scroll down to load automatically</p>
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -1361,6 +1743,20 @@ function ChatPanel({ messages, onSubmit, isLoading }) {
 }
 
 function SiteTable({ sites, expandedRows, toggleRow, navigateTo }) {
+    if (!sites || sites.length === 0) {
+        return (
+            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+                <div className="text-gray-500">
+                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No sites found</h3>
+                    <p className="text-gray-500">No sites match the current criteria.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -1436,11 +1832,11 @@ function SiteCardView({ sites, navigateTo }) {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Enrollment Rate:</span>
-                            <span className="font-semibold">{site.details.operationalPerformance.enrollmentRate}</span>
+                            <span className="font-semibold">{site.details?.operationalPerformance?.enrollmentRate || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Activation Time:</span>
-                            <span className="font-semibold">{site.details.operationalPerformance.timeToActivate}</span>
+                            <span className="font-semibold">{site.details?.operationalPerformance?.timeToActivate || 'N/A'}</span>
                         </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-gray-100">
@@ -1513,26 +1909,39 @@ const PdfExportContent = ({ scenario }) => (
 );
 
 function ExpandedRowContent({ details }) {
+    // Add null check to prevent errors
+    if (!details) {
+        return (
+            <div className="p-4 text-center text-gray-500">
+                <p>Site details not available</p>
+            </div>
+        );
+    }
+    
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <DetailCard title="Past Performance">
-                <DetailItem label="Trials Conducted" value={details.operationalPerformance.pastTrials} />
-                <DetailItem label="Enrollment Rate" value={details.operationalPerformance.enrollmentRate} />
-                <DetailItem label="Retention Rate" value={details.operationalPerformance.retentionRate} />
-                <DetailItem label="Time to Activate" value={details.operationalPerformance.timeToActivate} />
+                <DetailItem label="Trials Conducted" value={details.operationalPerformance?.pastTrials || 'N/A'} />
+                <DetailItem label="Enrollment Rate" value={details.operationalPerformance?.enrollmentRate || 'N/A'} />
+                <DetailItem label="Retention Rate" value={details.operationalPerformance?.retentionRate || 'N/A'} />
+                <DetailItem label="Time to Activate" value={details.operationalPerformance?.timeToActivate || 'N/A'} />
             </DetailCard>
             <DetailCard title="Patient Population">
-                <DetailItem label="Total Registry Size" value={details.clinicalCapabilities.patientAccess} />
-                <DetailItem label="Therapeutic Areas" value={details.clinicalCapabilities.therapeuticAreas.join(', ')} />
+                <DetailItem label="Total Registry Size" value={details.clinicalCapabilities?.patientAccess || 'N/A'} />
+                <DetailItem label="Therapeutic Areas" value={details.clinicalCapabilities?.therapeuticAreas?.join(', ') || 'N/A'} />
             </DetailCard>
             <DetailCard title="Infrastructure">
-                <DetailItem label="On-site Lab" value={details.infrastructure.onSiteLab} />
-                <DetailItem label="Imaging Facilities" value={details.infrastructure.imaging.join(', ')} />
+                <DetailItem label="On-site Lab" value={details.infrastructure?.onSiteLab || 'N/A'} />
+                <DetailItem label="Imaging Facilities" value={details.infrastructure?.imaging?.join(', ') || 'N/A'} />
             </DetailCard>
             <DetailCard title="Site Info">
-                <DetailItem label="Principal Investigator" value={details.siteInfo.pi} />
+                <DetailItem label="Principal Investigator" value={details.siteInfo?.pi || 'N/A'} />
                 <DetailItem label="Contact Info">
-                    <a href={`mailto:${details.siteInfo.contact}`} className="text-blue-600 hover:underline break-all">{details.siteInfo.contact}</a>
+                    {details.siteInfo?.contact ? (
+                        <a href={`mailto:${details.siteInfo.contact}`} className="text-blue-600 hover:underline break-all">{details.siteInfo.contact}</a>
+                    ) : (
+                        'N/A'
+                    )}
                 </DetailItem>
             </DetailCard>
         </div>
@@ -1605,7 +2014,7 @@ function ComparisonPage({ scenarios, navigateTo }) {
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="mb-6 flex items-center justify-between">
                 <div>
-                 <button onClick={() => navigateTo('scenarios')} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Scenarios</button>
+                    <button onClick={() => navigateTo('scenarios')} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Scenarios</button>
                     <h1 className="text-3xl font-bold text-gray-900">Scenario Comparison ({scenarios.length})</h1>
                     <p className="text-gray-500">Review key attributes side-by-side and deep-dive into full site results for each scenario.</p>
                 </div>
@@ -1658,51 +2067,169 @@ function ComparisonPage({ scenarios, navigateTo }) {
                 </table>
             </div>
 
-            {/* Sites results per scenario */}
-            <div className="space-y-8">
-                {scenarios.map(s => (
-                    <div key={'results-'+s.id} className="bg-white border border-gray-200 rounded-xl shadow-sm">
-                        <div className="p-4 border-b flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-semibold text-gray-900">All Results — {s.title}</h2>
-                                <p className="text-sm text-gray-500">Site ranking table with details</p>
+            {/* Top 3 Sites Comparison */}
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Top 3 Sites Comparison</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {scenarios.map(s => (
+                        <div key={'summary-'+s.id} className="border border-gray-200 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-md font-semibold text-gray-900 truncate">{s.title}</h4>
+                                <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">{s.phase}</span>
+                            </div>
+                            
+                            {/* Top 3 Sites Summary */}
+                            <div className="space-y-3">
+                                {s.siteRankings.slice(0, 3).map((site, index) => (
+                                    <div key={site.rank} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-6 h-6 bg-blue-100 text-blue-800 text-xs font-bold rounded-full flex items-center justify-center">
+                                                {site.rank}
+                                            </span>
+                                            <span className="text-sm font-medium text-gray-800 truncate">{site.site}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-600">{site.state}</span>
+                                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                {site.matchScore}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Performance Metrics */}
+                            <div className="grid grid-cols-2 gap-4 pt-4 mt-4 border-t border-gray-100">
+                                <div className="text-center">
+                                    <div className="text-xl font-bold text-blue-600">
+                                        {s.siteRankings.length}
+                                    </div>
+                                    <div className="text-xs text-gray-500">Total Sites</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xl font-bold text-green-600">
+                                        {Math.round(s.siteRankings.reduce((sum, site) => sum + site.matchScore, 0) / s.siteRankings.length)}%
+                                    </div>
+                                    <div className="text-xs text-gray-500">Avg Match</div>
+                                </div>
                             </div>
                         </div>
-                        <div className="p-4">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Site</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">State</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Match</th>
-                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Composite</th>
-                                        <th className="px-4 py-2"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {s.siteRankings.map(site => (
-                                        <React.Fragment key={s.id+':'+site.rank}>
-                                            <tr>
-                                                <td className="px-4 py-2 text-sm font-medium text-gray-900">{site.rank}</td>
-                                                <td className="px-4 py-2 text-sm text-gray-800">{site.site}</td>
-                                                <td className="px-4 py-2 text-sm text-gray-600">{site.state}</td>
-                                                <td className="px-4 py-2"><span className="px-2 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-800">{site.matchScore}%</span></td>
-                                                <td className="px-4 py-2 text-sm font-bold text-gray-900">{site.compositeScore}</td>
-                                                <td className="px-4 py-2"></td>
-                                            </tr>
-                                            <tr>
-                                                <td colSpan="6" className="px-4 py-3 bg-gray-50">
-                                                    <ExpandedRowContent details={site.details} />
-                                                </td>
-                                            </tr>
-                                        </React.Fragment>
-                                    ))}
-                                </tbody>
-                            </table>
+                    ))}
+                </div>
+            </div>
+
+            {/* Performance Comparison Chart */}
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Performance Comparison</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Match Score Distribution */}
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-4">Match Score Distribution</h4>
+                        <div className="space-y-3">
+                            {scenarios.map(s => {
+                                const excellent = s.siteRankings.filter(site => site.matchScore >= 90).length;
+                                const good = s.siteRankings.filter(site => site.matchScore >= 80 && site.matchScore < 90).length;
+                                const moderate = s.siteRankings.filter(site => site.matchScore >= 70 && site.matchScore < 80).length;
+                                const poor = s.siteRankings.filter(site => site.matchScore < 70).length;
+                                
+                                return (
+                                    <div key={s.id} className="space-y-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="font-medium text-gray-800 truncate">{s.title}</span>
+                                            <span className="text-gray-500">{s.siteRankings.length} sites</span>
+                                        </div>
+                                        <div className="flex gap-1 h-3">
+                                            <div className="bg-green-500 rounded-l-full" style={{width: `${(excellent/s.siteRankings.length)*100}%`}} title={`Excellent: ${excellent}`}></div>
+                                            <div className="bg-blue-500" style={{width: `${(good/s.siteRankings.length)*100}%`}} title={`Good: ${good}`}></div>
+                                            <div className="bg-yellow-500" style={{width: `${(moderate/s.siteRankings.length)*100}%`}} title={`Moderate: ${moderate}`}></div>
+                                            <div className="bg-red-500 rounded-r-full" style={{width: `${(poor/s.siteRankings.length)*100}%`}} title={`Poor: ${poor}`}></div>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-gray-500">
+                                            <span>90%+</span>
+                                            <span>80%+</span>
+                                            <span>70%+</span>
+                                            <span>&lt;70%</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                ))}
+                    
+                    {/* Geographic Distribution */}
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-700 mb-4">Geographic Distribution</h4>
+                        <div className="space-y-3">
+                            {scenarios.map(s => {
+                                const stateCounts = {};
+                                s.siteRankings.forEach(site => {
+                                    stateCounts[site.state] = (stateCounts[site.state] || 0) + 1;
+                                });
+                                const topStates = Object.entries(stateCounts)
+                                    .sort(([,a], [,b]) => b - a)
+                                    .slice(0, 3);
+                                
+                                return (
+                                    <div key={s.id} className="space-y-2">
+                                        <div className="text-sm font-medium text-gray-800 truncate">{s.title}</div>
+                                        <div className="space-y-1">
+                                            {topStates.map(([state, count]) => (
+                                                <div key={state} className="flex items-center justify-between text-xs">
+                                                    <span className="text-gray-600">{state}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                            <div 
+                                                                className="bg-blue-500 h-2 rounded-full" 
+                                                                style={{width: `${(count/s.siteRankings.length)*100}%`}}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-gray-500 w-8 text-right">{count}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Key Insights */}
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Insights</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {scenarios.map(s => {
+                        const topSite = s.siteRankings[0];
+                        const avgScore = Math.round(s.siteRankings.reduce((sum, site) => sum + site.matchScore, 0) / s.siteRankings.length);
+                        const highQualitySites = s.siteRankings.filter(site => site.matchScore >= 85).length;
+                        
+                        return (
+                            <div key={s.id} className="space-y-3">
+                                <h4 className="font-medium text-gray-800">{s.title}</h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Best Site:</span>
+                                        <span className="font-medium">{topSite?.site || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Best Score:</span>
+                                        <span className="font-medium text-green-600">{topSite?.matchScore || 'N/A'}%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Avg Score:</span>
+                                        <span className="font-medium">{avgScore}%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">High Quality:</span>
+                                        <span className="font-medium text-blue-600">{highQualitySites} sites</span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
@@ -1776,65 +2303,65 @@ function SiteDetailPage({ site, scenario, navigateTo }) {
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
             <header className="mb-8">
-                 <button onClick={() => navigateTo('results', scenario)} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Results</button>
+                <button onClick={() => navigateTo('results', scenario)} className="text-sm text-blue-600 hover:underline mb-2">&larr; Back to Results</button>
                 <h1 className="text-3xl font-bold text-gray-900">{site.site}</h1>
-                <p className="text-gray-500 mt-1">{details.siteInfo.address}</p>
+                <p className="text-gray-500 mt-1">{details.siteInfo?.address || 'N/A'}</p>
             </header>
             <div className="space-y-8">
                 <DetailSection title="Basic Site Information">
                     <DetailItem label="Site Name" value={site.site} />
                     <DetailItem label="Site Code / Identifier" value={site.siteCode} />
-                    <DetailItem label="Address" value={details.siteInfo.address} />
-                    <DetailItem label="Contact" value={details.siteInfo.contact} />
-                    <DetailItem label="Website" value={details.siteInfo.website} />
-                    <DetailItem label="Principal Investigator (PI)" value={details.siteInfo.pi} />
-                    <DetailItem label="Sub-Investigators" value={details.siteInfo.subInvestigators.join(', ')} />
-                    <DetailItem label="Regulatory Authority Approvals" value={details.siteInfo.regulatoryApprovals} />
+                    <DetailItem label="Address" value={details.siteInfo?.address || 'N/A'} />
+                    <DetailItem label="Contact" value={details.siteInfo?.contact || 'N/A'} />
+                    <DetailItem label="Website" value={details.siteInfo?.website || 'N/A'} />
+                    <DetailItem label="Principal Investigator (PI)" value={details.siteInfo?.pi || 'N/A'} />
+                    <DetailItem label="Sub-Investigators" value={details.siteInfo?.subInvestigators?.join(', ') || 'N/A'} />
+                    <DetailItem label="Regulatory Authority Approvals" value={details.siteInfo?.regulatoryApprovals || 'N/A'} />
                 </DetailSection>
 
                 <DetailSection title="Infrastructure & Facilities">
-                    <DetailItem label="On-site Laboratory" value={details.infrastructure.onSiteLab} />
-                    <DetailItem label="Lab Certifications" value={details.infrastructure.labCertifications} />
-                    <DetailItem label="Sample Collection & Storage" value={details.infrastructure.sampleStorage.join(', ')} />
-                    <DetailItem label="Pharmacy / Investigational Product Storage" value={details.infrastructure.pharmacy} />
-                    <DetailItem label="Imaging Facilities" value={details.infrastructure.imaging.join(', ')} />
-                    <DetailItem label="Emergency Care Facilities" value={details.infrastructure.emergencyCare} />
-                    <DetailItem label="Number of Hospital Beds" value={details.infrastructure.hospitalBeds} />
-                    <DetailItem label="Dedicated Clinical Trial Unit" value={details.infrastructure.dedicatedTrialUnit} />
-                    <DetailItem label="IT Infrastructure" value={details.infrastructure.itInfrastructure} />
+                    <DetailItem label="On-site Laboratory" value={details.infrastructure?.onSiteLab || 'N/A'} />
+                    <DetailItem label="Lab Certifications" value={details.infrastructure?.labCertifications || 'N/A'} />
+                    <DetailItem label="Sample Collection & Storage" value={details.infrastructure?.sampleStorage?.join(', ') || 'N/A'} />
+                    <DetailItem label="Pharmacy / Investigational Product Storage" value={details.infrastructure?.pharmacy || 'N/A'} />
+                    <DetailItem label="Imaging Facilities" value={details.infrastructure?.imaging?.join(', ') || 'N/A'} />
+                    <DetailItem label="Emergency Care Facilities" value={details.infrastructure?.emergencyCare || 'N/A'} />
+                    <DetailItem label="Number of Hospital Beds" value={details.infrastructure?.hospitalBeds || 'N/A'} />
+                    <DetailItem label="Dedicated Clinical Trial Unit" value={details.infrastructure?.dedicatedTrialUnit || 'N/A'} />
+                    <DetailItem label="IT Infrastructure" value={details.infrastructure?.itInfrastructure || 'N/A'} />
                 </DetailSection>
 
                 <DetailSection title="Clinical Capabilities">
-                    <DetailItem label="Therapeutic Areas of Expertise" value={details.clinicalCapabilities.therapeuticAreas.join(', ')} />
-                    <DetailItem label="Available Testing Facilities" value={details.clinicalCapabilities.testingFacilities.join(', ')} />
-                    <DetailItem label="Access to Patient Populations" value={details.clinicalCapabilities.patientAccess} />
-                    <DetailItem label="Number of Trained CRCs" value={details.clinicalCapabilities.crcCount} />
-                    <DetailItem label="GCP Training Records" value={details.clinicalCapabilities.gcpTrained} />
-                    <DetailItem label="Language & Translation Support" value={details.clinicalCapabilities.languageSupport} />
+                    <DetailItem label="Therapeutic Areas of Expertise" value={details.clinicalCapabilities?.therapeuticAreas?.join(', ') || 'N/A'} />
+                    <DetailItem label="Available Testing Facilities" value={details.clinicalCapabilities?.testingFacilities?.join(', ') || 'N/A'} />
+                    <DetailItem label="Access to Patient Populations" value={details.clinicalCapabilities?.patientAccess || 'N/A'} />
+                    <DetailItem label="Number of Trained CRCs" value={details.clinicalCapabilities?.crcCount || 'N/A'} />
+                    <DetailItem label="GCP Training Records" value={details.clinicalCapabilities?.gcpTrained || 'N/A'} />
+                    <DetailItem label="Language & Translation Support" value={details.clinicalCapabilities?.languageSupport || 'N/A'} />
                 </DetailSection>
                 
                 <DetailSection title="Operational Performance">
-                    <DetailItem label="Past Trials Conducted" value={details.operationalPerformance.pastTrials} />
-                    <DetailItem label="Enrollment Performance" value={details.operationalPerformance.enrollmentRate} />
-                    <DetailItem label="Retention Rates" value={details.operationalPerformance.retentionRate} />
-                    <DetailItem label="Query Resolution Turnaround Time" value={details.operationalPerformance.queryTurnaround} />
-                    <DetailItem label="Protocol Deviation History" value={details.operationalPerformance.deviationHistory} />
-                    <DetailItem label="Inspection / Audit History" value={details.operationalPerformance.auditHistory} />
-                    <DetailItem label="Adverse Event Reporting Compliance" value={details.operationalPerformance.aeReporting} />
+                    <DetailItem label="Past Trials Conducted" value={details.operationalPerformance?.pastTrials || 'N/A'} />
+                    <DetailItem label="Enrollment Performance" value={details.operationalPerformance?.enrollmentRate || 'N/A'} />
+                    <DetailItem label="Retention Rates" value={details.operationalPerformance?.retentionRate || 'N/A'} />
+                    <DetailItem label="Query Resolution Turnaround Time" value={details.operationalPerformance?.queryTurnaround || 'N/A'} />
+                    <DetailItem label="Protocol Deviation History" value={details.operationalPerformance?.deviationHistory || 'N/A'} />
+                    <DetailItem label="Inspection / Audit History" value={details.operationalPerformance?.auditHistory || 'N/A'} />
+                    <DetailItem label="Adverse Event Reporting Compliance" value={details.operationalPerformance?.aeReporting || 'N/A'} />
                 </DetailSection>
                 
                 <DetailSection title="Quality & Compliance">
-                    <DetailItem label="SOPs for Clinical Research" value={details.qualityCompliance.sops} />
-                    <DetailItem label="Ethics Committee / IRB Details" value={details.qualityCompliance.irb} />
-                    <DetailItem label="Regulatory Submissions Experience" value={details.qualityCompliance.regulatorySubmissions} />
-                    <DetailItem label="Data Protection & Patient Confidentiality Compliance" value={details.qualityCompliance.dataProtection} />
+                    <DetailItem label="SOPs for Clinical Research" value={details.qualityCompliance?.sops || 'N/A'} />
+                    <DetailItem label="Ethics Committee / IRB Details" value={details.qualityCompliance?.irb || 'N/A'} />
+                    <DetailItem label="Regulatory Submissions Experience" value={details.qualityCompliance?.regulatorySubmissions || 'N/A'} />
+                    <DetailItem label="Data Protection & Patient Confidentiality Compliance" value={details.qualityCompliance?.dataProtection || 'N/A'} />
                 </DetailSection>
 
                 <DetailSection title="Additional Notes">
-                    <DetailItem label="Affiliations" value={details.additionalNotes.affiliations} />
-                    <DetailItem label="Accreditations" value={details.additionalNotes.accreditations} />
-                    <DetailItem label="Investigator Publications" value={details.additionalNotes.publications} />
-                    <DetailItem label="Recruitment Strategies" value={details.additionalNotes.recruitmentStrategies} />
+                    <DetailItem label="Affiliations" value={details.additionalNotes?.affiliations || 'N/A'} />
+                    <DetailItem label="Accreditations" value={details.additionalNotes?.accreditations || 'N/A'} />
+                    <DetailItem label="Investigator Publications" value={details.additionalNotes?.publications || 'N/A'} />
+                    <DetailItem label="Recruitment Strategies" value={details.additionalNotes?.recruitmentStrategies || 'N/A'} />
                 </DetailSection>
             </div>
         </div>
@@ -1853,6 +2380,11 @@ const DetailSection = ({ title, children }) => (
 
 // --- Match Score Reasoning Helper ---
 function getMatchScoreReasoning(matchScore, siteDetails) {
+    // Add null checks to prevent errors
+    if (!siteDetails || !siteDetails.operationalPerformance || !siteDetails.clinicalCapabilities) {
+        return `Match Score: ${matchScore}%\n\nSite details not available.`;
+    }
+    
     const score = parseInt(matchScore);
     let reasoning = '';
     
@@ -1868,8 +2400,13 @@ function getMatchScoreReasoning(matchScore, siteDetails) {
         reasoning = `❌ Poor Match (${score}%)\n\nThis site has significant limitations:\n• Very limited patient access\n• PI lacks relevant experience\n• Infrastructure doesn't meet requirements\n• High competition in area\n• Regulatory compliance concerns`;
     }
     
-    // Add specific site details
-    reasoning += `\n\nSite Strengths:\n• ${siteDetails.operationalPerformance.pastTrials} past trials completed\n• ${siteDetails.operationalPerformance.enrollmentRate} enrollment rate\n• ${siteDetails.operationalPerformance.timeToActivate} activation time\n• ${siteDetails.clinicalCapabilities.therapeuticAreas.join(', ')} therapeutic expertise`;
+    // Add specific site details with safe property access
+    const pastTrials = siteDetails.operationalPerformance?.pastTrials || 'N/A';
+    const enrollmentRate = siteDetails.operationalPerformance?.enrollmentRate || 'N/A';
+    const timeToActivate = siteDetails.operationalPerformance?.timeToActivate || 'N/A';
+    const therapeuticAreas = siteDetails.clinicalCapabilities?.therapeuticAreas || [];
+    
+    reasoning += `\n\nSite Strengths:\n• ${pastTrials} past trials completed\n• ${enrollmentRate} enrollment rate\n• ${timeToActivate} activation time\n• ${therapeuticAreas.length > 0 ? therapeuticAreas.join(', ') : 'N/A'} therapeutic expertise`;
     
     return reasoning;
 }
@@ -1913,7 +2450,6 @@ async function callGemini(prompt, retries = 3, delay = 1000) {
 
 const domContainer = document.querySelector('#root');
 const root = ReactDOM.createRoot(domContainer);
-root.render(<App />);   
-    </script>
+root.render(<App />);    </script>
 </body>
 </html>
