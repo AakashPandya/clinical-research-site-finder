@@ -294,6 +294,11 @@ function App() {
         };
     }, []);
 
+    // Scroll to top when page changes
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
+
     // --- Navigation and Data Handling ---
     const navigateTo = (page, data = null) => {
         if (page === 'results') {
@@ -447,7 +452,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
     const [createdByFilter, setCreatedByFilter] = useState('All');
     const [phaseFilter, setPhaseFilter] = useState('All');
     const [countryFilter, setCountryFilter] = useState('All');
-    const [view, setView] = useState('card'); // 'card', 'table'
+    const [view, setView] = useState('table'); // 'card', 'table'
     const [sortConfig, setSortConfig] = useState({ key: 'createdDate', direction: 'descending' });
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(6);
@@ -570,8 +575,8 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                         </label>
                     </div>
                     <div className="inline-flex rounded-md shadow-sm">
-                        <button onClick={() => setView('card')} className={`px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>Card View</button>
-                        <button onClick={() => setView('table')} className={`px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>Table View</button>
+                        <button onClick={() => setView('table')} className={`px-4 py-2 text-sm font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>Table View</button>
+                        <button onClick={() => setView('card')} className={`px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>Card View</button>
                     </div>
                 </div>
             </div>
@@ -687,7 +692,7 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
                             <td className="px-6 py-4" onClick={(e)=>e.stopPropagation()}>
                                 <input type="checkbox" checked={selectedItems.includes(scenario.id)} onChange={() => onSelect(scenario.id)} className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer" />
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{scenario.title}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 hover:underline" onClick={() => navigateTo('results', scenario)}>{scenario.title}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.performedBy}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.country}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(scenario.createdDate).toLocaleDateString()}</td>
@@ -1765,6 +1770,29 @@ const DetailSection = ({ title, children }) => (
     </div>
 );
 
+
+// --- Match Score Reasoning Helper ---
+function getMatchScoreReasoning(matchScore, siteDetails) {
+    const score = parseInt(matchScore);
+    let reasoning = '';
+    
+    if (score >= 90) {
+        reasoning = `🎯 Excellent Match (${score}%)\n\nThis site demonstrates exceptional alignment with your criteria:\n• High patient availability and enrollment capacity\n• Strong PI expertise in your therapeutic area\n• Proven track record with similar trials\n• Optimal infrastructure and regulatory compliance\n• Competitive advantage in the region`;
+    } else if (score >= 80) {
+        reasoning = `✅ Strong Match (${score}%)\n\nThis site shows strong potential:\n• Good patient population and enrollment rates\n• Experienced PI with relevant background\n• Solid infrastructure and operational efficiency\n• Competitive positioning in the market\n• Reliable regulatory track record`;
+    } else if (score >= 70) {
+        reasoning = `⚠️ Moderate Match (${score}%)\n\nThis site meets most requirements:\n• Adequate patient access and enrollment\n• Qualified PI with some experience\n• Basic infrastructure meets needs\n• Moderate competition in area\n• Standard regulatory compliance`;
+    } else if (score >= 60) {
+        reasoning = `⚠️ Limited Match (${score}%)\n\nThis site has some limitations:\n• Lower patient availability\n• PI may need additional training\n• Infrastructure gaps may exist\n• Higher competition in region\n• Regulatory challenges possible`;
+    } else {
+        reasoning = `❌ Poor Match (${score}%)\n\nThis site has significant limitations:\n• Very limited patient access\n• PI lacks relevant experience\n• Infrastructure doesn't meet requirements\n• High competition in area\n• Regulatory compliance concerns`;
+    }
+    
+    // Add specific site details
+    reasoning += `\n\nSite Strengths:\n• ${siteDetails.operationalPerformance.pastTrials} past trials completed\n• ${siteDetails.operationalPerformance.enrollmentRate} enrollment rate\n• ${siteDetails.operationalPerformance.timeToActivate} activation time\n• ${siteDetails.clinicalCapabilities.therapeuticAreas.join(', ')} therapeutic expertise`;
+    
+    return reasoning;
+}
 
 // --- Gemini API Helper ---
 async function callGemini(prompt, retries = 3, delay = 1000) {
