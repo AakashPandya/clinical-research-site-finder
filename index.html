@@ -1086,7 +1086,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                         {view === 'table' ? (
                             <SiteTable sites={scenario.siteRankings} expandedRows={expandedRows} toggleRow={toggleRow} navigateTo={navigateTo} />
                         ) : (
-                            <SiteCardView sites={scenario.siteRankings} />
+                            <SiteCardView sites={scenario.siteRankings} navigateTo={navigateTo} />
                         )}
                     </div>
                 </div>
@@ -1401,7 +1401,7 @@ function SiteTable({ sites, expandedRows, toggleRow, navigateTo }) {
     );
 }
 
-function SiteCardView({ sites }) {
+function SiteCardView({ sites, navigateTo }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {sites.map(site => (
@@ -1421,7 +1421,7 @@ function SiteCardView({ sites }) {
                         <div className="flex justify-between">
                             <span className="text-gray-600">Match Score:</span>
                             <Tooltip text={getMatchScoreReasoning(site.matchScore, site.details)}>
-                                <span className="font-semibold px-2 bg-green-100 text-green-800 rounded-full hover:bg-green-200 transition-colors">{site.matchScore}%</span>
+                                <span className="font-semibold px-2 bg-green-100 text-green-800 rounded-full hover:bg-green-200 transition-colors cursor-pointer">{site.matchScore}%</span>
                             </Tooltip>
                         </div>
                         <div className="flex justify-between">
@@ -1432,6 +1432,9 @@ function SiteCardView({ sites }) {
                             <span className="text-gray-600">Activation Time:</span>
                             <span className="font-semibold">{site.details.operationalPerformance.timeToActivate}</span>
                         </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-gray-100">
+                        <button onClick={() => navigateTo('siteDetail', site)} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">View Details &rarr;</button>
                     </div>
                 </div>
             ))}
