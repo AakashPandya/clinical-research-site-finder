@@ -275,16 +275,7 @@ const ChevronUpIcon = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
     </svg>
 );
-const ChevronLeftIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-);
-const ChevronRightIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-    </svg>
-);
+
 
 
 // --- Main App Component ---
@@ -332,6 +323,10 @@ function App() {
     });
     const [isUploading, setIsUploading] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // --- Utility Functions ---
+    const isGitHubPages = () => window.location.hostname === 'aakashpandya.github.io';
+    const getBasePath = () => isGitHubPages() ? '/clinical-research-site-finder' : '';
 
     // --- Data ---
     function generateSites(count, seedBase) {
@@ -532,8 +527,17 @@ function App() {
         setScenarios(initialScenarios.current);
         setIsLoading(false);
         
-        // Restore data from URL after scenarios are loaded (only if not on root)
-        if (window.location.pathname !== '/') {
+        // For GitHub Pages, only try to restore data if we're not on the root/index.html
+        const path = window.location.pathname;
+        const pathParts = path.split('/').filter(Boolean);
+        
+        // Check if we're on root or index.html
+        if (pathParts.length === 0 || pathParts[pathParts.length - 1] === 'index.html') {
+            // Root path - show login page
+            setCurrentPage('login');
+            localStorage.setItem('currentPage', 'login');
+        } else {
+            // Try to restore data from URL
             setTimeout(() => {
                 restoreDataFromURL();
             }, 100);
@@ -663,20 +667,23 @@ function App() {
         setCurrentPage(page);
         localStorage.setItem('currentPage', page);
         
+        // Get base path for current environment
+        const basePath = getBasePath();
+        
         // Update URL for proper routing with data
         let url;
         if (page === 'scenarios') {
-            url = '/scenarios';
+            url = `${basePath}/scenarios`;
         } else if (page === 'results' && data) {
-            url = `/results/${data.id}`;
+            url = `${basePath}/results/${data.id}`;
         } else if (page === 'siteDetail' && data) {
-            url = `/site/${data.siteCode}`;
+            url = `${basePath}/site/${data.siteCode}`;
         } else if (page === 'comparison' && data) {
-            url = `/comparison`;
+            url = `${basePath}/comparison`;
         } else if (page === 'create') {
-            url = `/create`;
+            url = `${basePath}/create`;
         } else {
-            url = `/${page}`;
+            url = `${basePath}/${page}`;
         }
         window.history.pushState({ page, data }, '', url);
     };
@@ -688,15 +695,53 @@ function App() {
         const pathParts = path.split('/').filter(Boolean);
         console.log('Path parts:', pathParts);
         
-        if (pathParts.length === 0) {
-            // Root path - show login page
-            console.log('Root path, setting to login');
+        // Detect if we're on GitHub Pages or local development
+        const isOnGitHubPages = isGitHubPages();
+        
+        // For GitHub Pages, check if we're on the root or index.html
+        if (pathParts.length === 0 || pathParts[pathParts.length - 1] === 'index.html') {
+            // Root path or index.html - show login page
+            console.log('Root path or index.html, setting to login');
             setCurrentPage('login');
             return;
         }
         
-        const page = pathParts[0];
-        console.log('Page from URL:', page);
+        // Handle routing based on environment
+        let page, scenarioId, siteCode;
+        
+        if (isOnGitHubPages) {
+            // GitHub Pages structure: /clinical-research-site-finder/page
+            if (pathParts[0] === 'clinical-research-site-finder') {
+                if (pathParts.length === 1) {
+                    // Just /clinical-research-site-finder/ - show login
+                    setCurrentPage('login');
+                    return;
+                }
+                // Extract the actual page from the second part
+                page = pathParts[1];
+                if (page === 'results' && pathParts.length > 2) {
+                    scenarioId = parseInt(pathParts[2]); // Third part
+                } else if (page === 'site' && pathParts.length > 2) {
+                    siteCode = pathParts[2]; // Third part
+                }
+            }
+        } else {
+            // Local development structure: /page
+            page = pathParts[0];
+            if (page === 'results' && pathParts.length > 1) {
+                scenarioId = parseInt(pathParts[1]); // Second part
+            } else if (page === 'site' && pathParts.length > 1) {
+                siteCode = pathParts[1]; // Second part
+            }
+        }
+        
+        console.log('Page from URL:', page, 'Scenario ID:', scenarioId, 'Site Code:', siteCode);
+        
+        if (!page) {
+            setCurrentPage('login');
+            return;
+        }
+        
         const savedData = localStorage.getItem('pageData');
         let parsedData = null;
         
@@ -723,8 +768,7 @@ function App() {
             return;
         }
         
-        if (page === 'results' && pathParts[1]) {
-            const scenarioId = parseInt(pathParts[1]);
+        if (page === 'results' && scenarioId) {
             console.log('Looking for scenario with ID:', scenarioId);
             if (parsedData?.results) {
                 const scenario = parsedData.results.find(s => s.id === scenarioId);
@@ -738,8 +782,7 @@ function App() {
             }
         }
         
-        if (page === 'site' && pathParts[1]) {
-            const siteCode = pathParts[1];
+        if (page === 'site' && siteCode) {
             console.log('Looking for site with code:', siteCode);
             if (parsedData?.siteDetail) {
                 const site = parsedData.siteDetail.find(s => s.siteCode === siteCode);
@@ -764,16 +807,15 @@ function App() {
             return;
         }
         
-        // If no data found or invalid route, redirect to scenarios
-        console.log('Unknown page or data not found, redirecting to scenarios');
-        setCurrentPage('scenarios');
-        localStorage.setItem('currentPage', 'scenarios');
-        window.history.replaceState({ page: 'scenarios' }, '', '/scenarios');
+        // If no data found or invalid route, show login page instead of redirecting
+        console.log('Unknown page or data not found, showing login page');
+        setCurrentPage('login');
+        localStorage.setItem('currentPage', 'login');
         
-        // Show a brief message that the page couldn't be found
-        setTimeout(() => {
-            alert('The requested page data was not found. Redirecting to scenarios.');
-        }, 100);
+        // Don't show alert for unknown routes - just show login
+        // setTimeout(() => {
+        //     alert('The requested page data was not found. Redirecting to scenarios.');
+        // }, 100);
     };
     
     // --- Page Components ---
@@ -844,10 +886,16 @@ function App() {
                                             </button>
                                             <div className="border-t border-gray-100"></div>
                                             <button 
-                                                onClick={() => setCurrentPage('login')}
-                                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                                onClick={() => {
+                                                    setCurrentPage('login');
+                                                    setSidebarOpen(false);
+                                                }}
+                                                className="flex items-center w-full px-2 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors"
                                             >
-                                                Sign Out
+                                                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                </svg>
+                                                Logout
                                             </button>
                                         </div>
                                     )}
@@ -876,7 +924,10 @@ function App() {
                                 <div className="flex-1 flex flex-col pt-2 pb-4 overflow-y-auto">
                                     <nav className="flex-1 px-2 space-y-1">
                                         <button
-                                            onClick={() => navigateTo('scenarios')}
+                                            onClick={() => {
+                                                navigateTo('scenarios');
+                                                setSidebarOpen(false);
+                                            }}
                                             className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left ${
                                                 currentPage === 'scenarios' 
                                                     ? 'bg-blue-100 text-blue-900' 
@@ -889,7 +940,10 @@ function App() {
                                             Scenarios
                                         </button>
                                         <button
-                                            onClick={() => navigateTo('create')}
+                                            onClick={() => {
+                                                navigateTo('create');
+                                                setSidebarOpen(false);
+                                            }}
                                             className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left ${
                                                 currentPage === 'create' 
                                                     ? 'bg-blue-100 text-blue-900' 
@@ -2455,28 +2509,50 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
     return (
         <div className="flex justify-center items-center mt-8">
+            {/* Previous Button */}
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 mx-1 rounded-md bg-white border border-gray-300 disabled:opacity-50"
+                className="px-3 py-2 mx-1 rounded-md bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
             >
-                <ChevronLeftIcon className="w-5 h-5" />
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
             </button>
-            {pageNumbers.map(number => (
-                <button
-                    key={number}
-                    onClick={() => onPageChange(number)}
-                    className={`px-3 py-1 mx-1 rounded-md border ${currentPage === number ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-300'}`}
-                >
-                    {number}
-                </button>
-            ))}
+            
+            {/* Mobile: Show only current page */}
+            <div className="block sm:hidden">
+                <span className="px-4 py-2 mx-1 text-sm font-medium text-gray-700 bg-blue-50 border border-blue-200 rounded-md">
+                    {currentPage} of {totalPages}
+                </span>
+            </div>
+            
+            {/* Desktop: Show all page numbers */}
+            <div className="hidden sm:flex">
+                {pageNumbers.map(number => (
+                    <button
+                        key={number}
+                        onClick={() => onPageChange(number)}
+                        className={`px-3 py-2 mx-1 rounded-md border transition-colors ${
+                            currentPage === number 
+                                ? 'bg-blue-600 text-white border-blue-600' 
+                                : 'bg-white border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                        {number}
+                    </button>
+                ))}
+            </div>
+            
+            {/* Next Button */}
             <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 mx-1 rounded-md bg-white border border-gray-300 disabled:opacity-50"
+                className="px-3 py-2 mx-1 rounded-md bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
             >
-                <ChevronRightIcon className="w-5 h-5" />
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
             </button>
         </div>
     );
