@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>Clinical Trial Scenario Management</title>
+    <title>CRSFinder</title>
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>" />
     <!-- Tailwind CSS -->
@@ -37,62 +37,7 @@
             opacity: 0.8;
         }
         
-        .sortable-header {
-            cursor: pointer;
-            position: relative;
-            user-select: none;
-        }
-        
-        .sortable-header:hover {
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-        
-        .sort-icon {
-            display: inline-block;
-            margin-left: 4px;
-            width: 16px;
-            height: 16px;
-            position: relative;
-        }
-        
-        .sort-icon.neutral::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 4px solid #9CA3AF;
-        }
-        
-        .sort-icon.asc::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-bottom: 4px solid #3B82F6;
-        }
-        
-        .sort-icon.desc::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 4px solid #3B82F6;
-        }
+
         
         @media (max-width: 768px) {
             .sidebar {
@@ -347,11 +292,7 @@ const SparklesIcon = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.455-2.456L12.5 18l1.178-.398a3.375 3.375 0 002.455-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456L20.25 18l-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
     </svg>
 );
-const ChevronUpIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-    </svg>
-);
+
 
 
 
@@ -1000,7 +941,7 @@ function App() {
             {currentPage !== 'login' && (
                 <header className="bg-white shadow-sm border-b border-gray-200 relative">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-16 w-full">
+                        <div className="flex items-center h-16 w-full">
                             {/* Left side - Mobile menu button */}
                             <div className="flex items-center gap-3">
                                 <button
@@ -1013,12 +954,16 @@ function App() {
                                 </button>
                             </div>
                             
-                            {/* Right side - Profile icon */}
-                            <div className="flex items-center">
+                            {/* Right side - Profile icon and name */}
+                            <div className="flex items-center gap-3 ml-auto">
+                                <div className="hidden sm:block text-right">
+                                    <div className="text-sm font-medium text-gray-900">Dr. Sarah Chen</div>
+                                    <div className="text-xs text-gray-500">Principal Investigator</div>
+                                </div>
                                 <div className="relative profile-dropdown">
                                     <button 
                                         onClick={() => setIsOpen(!isOpen)}
-                                        className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"
+                                        className="text-gray-500 hover:text-gray-700 p-2 rounded-md hover:bg-gray-100"
                                     >
                                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -1026,6 +971,10 @@ function App() {
                                     </button>
                                     {isOpen && (
                                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 profile-dropdown-menu">
+                                            <div className="px-4 py-2 border-b border-gray-100">
+                                                <div className="text-sm font-medium text-gray-900">Dr. Sarah Chen</div>
+                                                <div className="text-xs text-gray-500">sarah.chen@research.org</div>
+                                            </div>
                                             <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 Profile Settings
                                             </button>
@@ -1068,7 +1017,7 @@ function App() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                                         </svg>
                                     </div>
-                                    <h2 className="text-lg font-bold text-gray-900">Clinical Research Site Finder</h2>
+                                    <h2 className="text-lg font-bold text-gray-900">CRSFinder</h2>
                                 </div>
                                 <div className="flex-1 flex flex-col pt-2 pb-4 overflow-y-auto">
                                     <nav className="flex-1 px-2 space-y-1">
@@ -1543,13 +1492,6 @@ function ScenarioCard({ scenario, onPin, onArchive, navigateTo, onSelect, isSele
 }
 
 function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, sortConfig, onSelect, selectedItems }) {
-    const getSortIcon = (key) => {
-        if (sortConfig.key !== key) return null;
-        if (sortConfig.direction === 'ascending') {
-            return <ChevronUpIcon className="w-4 h-4 ml-1 inline" />;
-        }
-        return <ChevronDownIcon className="w-4 h-4 ml-1 inline" />;
-    };
     
     if (!scenarios || scenarios.length === 0) {
         return (
@@ -1571,20 +1513,70 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
                 <thead className="bg-gray-50">
                     <tr>
                         <th className="px-6 py-3"></th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable-header" onClick={() => requestSort('title')}>
-                            Title <span className="sort-icon neutral"></span>
+                        <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'title' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('title')}>
+                            <div className="flex items-center justify-between">
+                                <span>Title</span>
+                                <div className="flex flex-col items-center ml-2">
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'title' && sortConfig.direction === 'ascending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                    </svg>
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'title' && sortConfig.direction === 'descending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable-header" onClick={() => requestSort('performedBy')}>
-                            Performed By <span className="sort-icon neutral"></span>
+                        <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'performedBy' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('performedBy')}>
+                            <div className="flex items-center justify-between">
+                                <span>Performed By</span>
+                                <div className="flex flex-col items-center ml-2">
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'performedBy' && sortConfig.direction === 'ascending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                    </svg>
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'performedBy' && sortConfig.direction === 'descending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable-header" onClick={() => requestSort('country')}>
-                            Country <span className="sort-icon neutral"></span>
+                        <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'country' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('country')}>
+                            <div className="flex items-center justify-between">
+                                <span>Country</span>
+                                <div className="flex flex-col items-center ml-2">
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'country' && sortConfig.direction === 'ascending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                    </svg>
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'country' && sortConfig.direction === 'descending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable-header" onClick={() => requestSort('createdDate')}>
-                            Created Date <span className="sort-icon neutral"></span>
+                        <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'createdDate' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('createdDate')}>
+                            <div className="flex items-center justify-between">
+                                <span>Created Date</span>
+                                <div className="flex flex-col items-center ml-2">
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'createdDate' && sortConfig.direction === 'ascending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                    </svg>
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'createdDate' && sortConfig.direction === 'descending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable-header" onClick={() => requestSort('phase')}>
-                            Phase <span className="sort-icon neutral"></span>
+                        <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'phase' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('phase')}>
+                            <div className="flex items-center justify-between">
+                                <span>Phase</span>
+                                <div className="flex flex-col items-center ml-2">
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'phase' && sortConfig.direction === 'ascending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                    </svg>
+                                    <svg className={`w-3 h-3 ${sortConfig.key === 'phase' && sortConfig.direction === 'descending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </th>
                         <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                     </tr>
