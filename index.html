@@ -953,21 +953,21 @@ function App() {
                             </button>
                         </div>
                         
-                        {/* Right side - Profile icon and name */}
-                        <div className="flex items-center gap-3 ml-auto">
-                            <div className="hidden sm:block text-right">
-                                <div className="text-sm font-medium text-gray-900">Dr. Sarah Chen</div>
-                                <div className="text-xs text-gray-500">Principal Investigator</div>
-                            </div>
-                            <div className="relative profile-dropdown">
-                                <button 
-                                    onClick={() => setIsOpen(!isOpen)}
-                                    className="text-gray-500 hover:text-gray-700 p-2 rounded-md hover:bg-gray-100"
-                                >
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </button>
+                                                    {/* Right side - Profile icon and name */}
+                            <div className="flex items-center gap-3 ml-auto">
+                                <div className="relative profile-dropdown">
+                                    <button 
+                                        onClick={() => setIsOpen(!isOpen)}
+                                        className="flex items-center gap-3 text-left hover:bg-gray-100 rounded-md p-2 transition-colors"
+                                    >
+                                        <div className="hidden sm:block text-right">
+                                            <div className="text-sm font-medium text-gray-900">Dr. Sarah Chen</div>
+                                            <div className="text-xs text-gray-500">Principal Investigator</div>
+                                        </div>
+                                        <svg className="h-5 w-5 text-gray-500 hover:text-gray-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </button>
                                 {isOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 profile-dropdown-menu">
                                         <div className="px-4 py-2 border-b border-gray-100">
@@ -2024,7 +2024,38 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                     'Therapeutic Areas': (s.details?.clinicalCapabilities?.therapeuticAreas || []).join(', ') || 'N/A',
                     'CRC Count': s.details?.clinicalCapabilities?.crcCount || 'N/A',
                 }));
+                // Create worksheet with proper formatting
                 const ws = XLSX.utils.json_to_sheet(rows);
+                
+                // Set column widths for better readability
+                const colWidths = [
+                    { wch: 8 },   // Rank
+                    { wch: 30 },  // Site
+                    { wch: 12 },  // State
+                    { wch: 12 },  // Match Score
+                    { wch: 15 },  // Composite Score
+                    { wch: 25 },  // PI
+                    { wch: 15 },  // Site Code
+                    { wch: 35 },  // Address
+                    { wch: 25 },  // Email
+                    { wch: 20 },  // Website
+                    { wch: 15 },  // Enrollment Rate
+                    { wch: 15 },  // Retention Rate
+                    { wch: 18 },  // Time to Activate
+                    { wch: 12 },  // Past Trials
+                    { wch: 18 },  // Query Turnaround
+                    { wch: 20 },  // Lab Certifications
+                    { wch: 15 },  // On-site Lab
+                    { wch: 12 },  // Pharmacy
+                    { wch: 20 },  // Imaging
+                    { wch: 25 },  // Therapeutic Areas
+                    { wch: 12 }   // CRC Count
+                ];
+                ws['!cols'] = colWidths;
+                
+                // Add auto-filter to the entire data range
+                ws['!autofilter'] = { ref: ws['!ref'] };
+                
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Sites');
                 XLSX.writeFile(wb, `sites-${(scenario.title||'scenario').replace(/\s+/g,'-')}.xlsx`);
