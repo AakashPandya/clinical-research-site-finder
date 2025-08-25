@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -190,13 +190,426 @@
             background-color: transparent;
         }
         
-        @media (min-width: 1024px) {
-            .sidebar-container {
-                transform: translateX(0);
+        /* Top Navigation Styles */
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+            border-radius: 8px;
+            margin: 0 4px;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Chat Panel Styles */
+        .chat-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            width: 400px;
+            background: white;
+            box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+        }
+        
+        .chat-panel.open {
+            transform: translateX(0);
+        }
+        
+        .chat-toggle {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            z-index: 50;
+        }
+        
+        .chat-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .chat-toggle.open {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        /* Create Scenario Form Improvements */
+        .upload-area {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
+        
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            transform: scale(1.02);
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .form-section:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Gradient Button Styles */
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-gradient:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive Grid for Cards */
+        .responsive-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            width: 100%;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .upload-area {
+                min-height: 150px;
+                padding: 2rem 1rem;
             }
             
-            .main-content {
-                margin-left: 16rem; /* 256px = 16rem */
+            .form-section {
+                padding: 1.5rem;
+                margin: 0 1rem;
+            }
+            
+            .responsive-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            /* Fix mobile layout issues */
+            .chat-toggle {
+                right: 1rem;
+                bottom: 1rem;
+                z-index: 50;
+            }
+
+            .chat-panel {
+                width: 100%;
+                right: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 60;
+            }
+
+            /* Prevent horizontal scroll */
+            body {
+                overflow-x: hidden;
+            }
+
+            .max-w-screen-2xl {
+                max-width: 100%;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            /* Mobile form adjustments */
+            .grid.grid-cols-1.md\\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+
+            /* Mobile button adjustments */
+            .flex.gap-4 {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            /* Mobile table adjustments */
+            .overflow-x-auto {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Mobile navigation adjustments */
+            .nav-item {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            /* Mobile header adjustments */
+            .flex.items-center.space-x-8 {
+                gap: 1rem;
+            }
+
+            .flex.items-center.space-x-8 > * {
+                flex-shrink: 0;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .responsive-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 1.5rem;
+                width: 100%;
+            }
+
+            /* Tablet specific adjustments */
+            .chat-panel {
+                width: 400px;
+            }
+
+            .max-w-screen-2xl {
+                max-width: 100%;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            /* Tablet form adjustments */
+            .grid.grid-cols-1.md\\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Prevent horizontal scroll on all devices */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        /* Ensure all containers respect viewport width */
+        .container, .max-w-screen-2xl, .max-w-7xl, .max-w-5xl {
+            max-width: 100%;
+            box-sizing: border-box;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Mobile-specific container adjustments */
+        @media (max-width: 768px) {
+            .container, .max-w-screen-2xl, .max-w-7xl, .max-w-5xl {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+        }
+
+        /* Ensure tables don't cause horizontal scroll on mobile */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+
+        /* Fix mobile button touch targets */
+        button, .cursor-pointer {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Mobile form improvements */
+        input, select, textarea {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+
+        /* Fresh, clean checkbox styling */
+        input[type="checkbox"] {
+            height: 1.25rem;
+            width: 1.25rem;
+            color: #2563eb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #dbeafe;
+            border-color: #2563eb;
+        }
+
+        input[type="checkbox"]:hover {
+            @apply border-blue-400;
+        }
+
+        /* Site comparison checkboxes - Subtle indigo theme */
+        .site-checkbox {
+            @apply text-indigo-600 focus:ring-indigo-500;
+        }
+
+        /* Checkbox container improvements */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Ensure checkbox and label are perfectly aligned */
+        .checkbox-container input[type="checkbox"] {
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .checkbox-container label {
+            margin: 0;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Match score badge alignment */
+        .match-score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.5rem;
+        }
+
+        /* Tooltip positioning improvements */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Fix chat icon positioning and functionality */
+        .chat-toggle {
+            position: fixed;
+            right: 2rem;
+            bottom: 2rem;
+            z-index: 50;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .chat-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Chat panel positioning */
+        .chat-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease-in-out;
+            z-index: 60;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .chat-panel.open {
+            right: 0;
+        }
+
+        /* Ensure chat panel content is properly contained */
+        .chat-panel .flex.flex-col.h-full {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .chat-panel .flex-1.p-4.overflow-y-auto {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            .chat-toggle {
+                right: 1rem;
+                bottom: 1rem;
+                width: 3rem;
+                height: 3rem;
+            }
+
+            .chat-toggle .w-6.h-6 {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
+
+            .chat-panel {
+                width: 100%;
+                right: -100%;
+                left: 0;
+            }
+
+            .chat-panel.open {
+                right: 0;
+                left: 0;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .chat-toggle {
+                right: 1.5rem;
+                bottom: 1.5rem;
+            }
+
+            .chat-panel {
+                width: 350px;
             }
         }
         
@@ -299,6 +712,8 @@ const SparklesIcon = ({ className }) => (
 // --- Main App Component ---
 function App() {
     const [currentPage, setCurrentPage] = useState('login'); // Always start with login, let URL restoration handle the rest
+    const [projects, setProjects] = useState([]);
+    const [currentProject, setCurrentProject] = useState(null);
     const [scenarios, setScenarios] = useState([]);
     const [currentScenario, setCurrentScenario] = useState(null);
     const [currentSite, setCurrentSite] = useState(null);
@@ -341,12 +756,97 @@ function App() {
     });
     const [isUploading, setIsUploading] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [chatOpen, setChatOpen] = useState(false);
 
     // --- Utility Functions ---
     const isGitHubPages = () => window.location.hostname === 'aakashpandya.github.io';
     const getBasePath = () => isGitHubPages() ? '/clinical-research-site-finder' : '';
 
     // --- Data ---
+    // Initialize mock projects data and link scenarios
+    useEffect(() => {
+        if (projects.length === 0) {
+            const mockProjects = [
+                {
+                    id: 1,
+                    name: 'Neurology Research Program',
+                    description: 'Comprehensive neurology clinical trials focusing on neurodegenerative diseases including Alzheimer\'s, Parkinson\'s, Multiple Sclerosis, and Epilepsy',
+                    therapeuticArea: 'Neurology',
+                    sponsor: 'NeuroPharma Inc.',
+                    createdDate: '2024-01-15',
+                    status: 'Active',
+                    scenarios: [],
+                    totalScenarios: 15,
+                    completedTrials: 3,
+                    activeTrials: 12
+                },
+                {
+                    id: 2,
+                    name: 'Oncology Drug Development',
+                    description: 'Multi-phase oncology trials for novel cancer treatments across solid tumors and hematological malignancies',
+                    therapeuticArea: 'Oncology',
+                    sponsor: 'OncoCorp',
+                    createdDate: '2024-02-20',
+                    status: 'Active',
+                    scenarios: [],
+                    totalScenarios: 15,
+                    completedTrials: 2,
+                    activeTrials: 13
+                },
+                {
+                    id: 3,
+                    name: 'Cardiovascular Health Initiative',
+                    description: 'Cardiovascular disease prevention and treatment studies covering heart failure, hypertension, and coronary artery disease',
+                    therapeuticArea: 'Cardiovascular',
+                    sponsor: 'CardioHealth Ltd.',
+                    createdDate: '2024-03-10',
+                    status: 'Active',
+                    scenarios: [],
+                    totalScenarios: 20,
+                    completedTrials: 5,
+                    activeTrials: 15
+                }
+            ];
+            setProjects(mockProjects);
+        }
+    }, []);
+
+    // Link scenarios to projects after both are loaded - ensure one-to-many relationship
+    useEffect(() => {
+        if (projects.length > 0 && scenarios.length > 0) {
+            // Each scenario belongs to exactly one project (no duplication)
+            const updatedProjects = projects.map(project => ({
+                ...project,
+                scenarios: scenarios.filter(scenario => scenario.projectId === project.id)
+            }));
+            setProjects(updatedProjects);
+            
+            // Log to verify one-to-many relationship
+            console.log('Project-Scenario Distribution (One-to-Many):');
+            updatedProjects.forEach(project => {
+                console.log(`${project.name}: ${project.scenarios.length} scenarios`);
+                project.scenarios.forEach(scenario => {
+                    console.log(`  - ${scenario.title} (ID: ${scenario.id}, ProjectID: ${scenario.projectId})`);
+                });
+            });
+            
+            // Verify no scenario duplication
+            const allScenarioIds = new Set();
+            updatedProjects.forEach(project => {
+                project.scenarios.forEach(scenario => {
+                    allScenarioIds.add(scenario.id);
+                });
+            });
+            
+            console.log(`Total unique scenarios across all projects: ${allScenarioIds.size}`);
+            console.log(`Total scenarios in database: ${scenarios.length}`);
+            
+            if (allScenarioIds.size !== scenarios.length) {
+                console.warn('Warning: Some scenarios may be duplicated across projects!');
+            }
+        }
+    }, [scenarios, projects]);
+
     function generateSites(count, seedBase) {
         const rand = (seed) => () => (seed = (seed * 48271) % 2147483647) / 2147483647;
         const states = ['CA','TX','NY','MA','FL','IL','WA','NC','AZ','PA','OH','MI','GA','CO','MN'];
@@ -487,46 +987,142 @@ function App() {
     const defaultCriteriaWeights = { patientAvailability: 60, enrollmentRate: 70, startupSpeed: 50, piMatch: 80, competition: 40 };
 
     function generateScenarios(count) {
-        const titles = [
-            'Immuno-Oncology — NSCLC Phase III',
-            'Cardiology — HFpEF Phase II',
-            'Neurology — Alzheimer\'s Phase I',
-            'Dermatology — Psoriasis Phase III',
-            'Immunology — RA Phase II',
-            'Vaccinology — RSV Phase IV',
-            'Endocrinology — T2D Phase II',
-            'Hematology — AML Phase I',
-            'Pulmonology — COPD Phase III',
-            'Gastro — IBD Phase II'
-        ];
         const countries = ['USA','Canada','Germany','UK','France','Spain'];
         const authors = ['Dr. Evelyn Reed','Dr. Samuel Chen','Dr. Maria Garcia','Dr. Ben Carter','Dr. Priya Natarajan','Dr. Michael Lee'];
         const sponsors = ['Acme Pharma','HelixBio','NovaThera','Pioneer Labs','Vertexia','ArdentRx'];
         const scenarios = [];
+        
+        // Project 1: Neurology Research Program
+        const neurologyTitles = [
+            'Alzheimer\'s Disease — Amyloid Beta Phase III',
+            'Parkinson\'s Disease — Dopamine Therapy Phase II',
+            'Multiple Sclerosis — Immunomodulation Phase I',
+            'Epilepsy — Seizure Control Phase III',
+            'Stroke Recovery — Neural Regeneration Phase II',
+            'Migraine — CGRP Inhibition Phase IV',
+            'ALS — Motor Neuron Protection Phase I',
+            'Huntington\'s Disease — Gene Therapy Phase II',
+            'Dementia — Cognitive Enhancement Phase III',
+            'Neuropathic Pain — Nerve Block Phase II'
+        ];
+        
+        // Project 2: Oncology Drug Development
+        const oncologyTitles = [
+            'Non-Small Cell Lung Cancer — EGFR-TKI Phase III',
+            'Breast Cancer — HER2+ Targeted Therapy Phase II',
+            'Melanoma — Immunotherapy Checkpoint Phase I',
+            'Colorectal Cancer — Anti-Angiogenesis Phase III',
+            'Prostate Cancer — Hormone Therapy Phase II',
+            'Leukemia — CAR-T Cell Therapy Phase I',
+            'Ovarian Cancer — PARP Inhibition Phase III',
+            'Pancreatic Cancer — Gemcitabine Plus Phase II',
+            'Lymphoma — Rituximab Combination Phase IV',
+            'Brain Cancer — Blood-Brain Barrier Phase I'
+        ];
+        
+        // Project 3: Cardiovascular Health Initiative
+        const cardiovascularTitles = [
+            'Heart Failure — ACE Inhibitor Phase III',
+            'Hypertension — Calcium Channel Blocker Phase II',
+            'Coronary Artery Disease — Statin Therapy Phase IV',
+            'Arrhythmia — Beta Blocker Phase III',
+            'Peripheral Artery Disease — Antiplatelet Phase II',
+            'Cardiomyopathy — Beta Agonist Phase I',
+            'Atherosclerosis — PCSK9 Inhibition Phase III',
+            'Valvular Heart Disease — Surgical Repair Phase II',
+            'Myocardial Infarction — Thrombolytic Phase I',
+            'Congestive Heart Failure — Diuretic Phase III'
+        ];
+        
         for (let i=1;i<=count;i++) {
+            // Each scenario belongs to exactly one project (no duplication)
+            let projectId, title, indication, drugInfo, objective, sponsor;
+            
+            if (i <= 15) {
+                // Project 1: Neurology (scenarios 1-15)
+                projectId = 1;
+                title = `${neurologyTitles[(i - 1) % neurologyTitles.length]} #${i}`;
+                indication = 'Neurodegenerative Disease Management';
+                drugInfo = 'Novel Neurological Compound NX-' + (1000 + i);
+                objective = 'Evaluate safety and efficacy of novel neurological compounds in neurodegenerative disease patients';
+                sponsor = sponsors[(i - 1) % sponsors.length];
+            } else if (i <= 30) {
+                // Project 2: Oncology (scenarios 16-30)
+                projectId = 2;
+                title = `${oncologyTitles[(i - 16) % oncologyTitles.length]} #${i}`;
+                indication = 'Advanced Cancer Treatment';
+                drugInfo = 'Novel Oncology Compound OX-' + (2000 + i);
+                objective = 'Assess safety and efficacy of novel oncology compounds in advanced cancer patients';
+                sponsor = sponsors[(i - 16) % sponsors.length];
+            } else {
+                // Project 3: Cardiovascular (scenarios 31-50)
+                projectId = 3;
+                title = `${cardiovascularTitles[(i - 31) % cardiovascularTitles.length]} #${i}`;
+                indication = 'Cardiovascular Disease Management';
+                drugInfo = 'Novel Cardiovascular Compound CX-' + (3000 + i);
+                objective = 'Evaluate safety and efficacy of novel cardiovascular compounds in heart disease patients';
+                sponsor = sponsors[(i - 31) % sponsors.length];
+            }
+            
             scenarios.push({
                 id: i,
-                title: `${titles[i%titles.length]} #${i}`,
-                performedBy: authors[i%authors.length],
-                createdDate: new Date(2024, (i%12), 1 + (i%28)).toISOString(),
-                phase: ['Phase I','Phase II','Phase III','Phase IV'][i%4],
-                country: countries[i%countries.length],
-                isPinned: i%11===0,
-                isArchived: i%17===0,
-                siteRankings: generateSites(50, 1000+i),
-                criteriaWeights: { patientAvailability: 50 + (i%50), enrollmentRate: 55 + (i%40), startupSpeed: 45 + (i%35), piMatch: 60 + (i%30), competition: 30 + (i%50) },
-                indication: 'Advanced Non-Small Cell Lung Cancer (NSCLC)',
-                drugInfo: 'Novel EGFR-TKI Inhibitor Compound XR-8472',
-                startDate: new Date(2024, (i%12), 15).toISOString().slice(0,10),
-                objective: 'Evaluate safety and efficacy of XR-8472 in treatment-naive NSCLC patients with EGFR mutations',
-                sponsor: sponsors[i%sponsors.length],
+                projectId: projectId, // Single project ID - no duplication
+                title: title,
+                performedBy: authors[i % authors.length],
+                createdDate: new Date(2024, (i % 12), 1 + (i % 28)).toISOString(),
+                phase: ['Phase I','Phase II','Phase III','Phase IV'][i % 4],
+                country: countries[i % countries.length],
+                isPinned: i % 11 === 0,
+                isArchived: i % 17 === 0,
+                siteRankings: generateSites(50, 1000 + i),
+                criteriaWeights: { 
+                    patientAvailability: 50 + (i % 50), 
+                    enrollmentRate: 55 + (i % 40), 
+                    startupSpeed: 45 + (i % 35), 
+                    piMatch: 60 + (i % 30), 
+                    competition: 30 + (i % 50) 
+                },
+                indication: indication,
+                drugInfo: drugInfo,
+                startDate: new Date(2024, (i % 12), 15).toISOString().slice(0,10),
+                objective: objective,
+                sponsor: sponsor,
                 studyId: `PRO${String(i).padStart(4,'0')}`
             })
         }
         return scenarios;
     }
 
-    const initialScenarios = useRef(generateScenarios(50));
+    // Force complete cache clearing and data refresh
+    useEffect(() => {
+        // Clear all localStorage data
+        localStorage.clear();
+        console.log('Completely cleared all cached data');
+        
+        // Force regenerate scenarios with new structure
+        const freshScenarios = generateScenarios(50);
+        console.log('Regenerated scenarios with new structure:');
+        freshScenarios.slice(0, 10).forEach(scenario => {
+            console.log(`Scenario ${scenario.id}: ${scenario.title} -> Project ${scenario.projectId}`);
+        });
+        
+        // Update the scenarios state
+        setScenarios(freshScenarios);
+        
+        // Verify project assignment
+        console.log('=== PROJECT-SCENARIO ASSIGNMENT VERIFICATION ===');
+        const project1Scenarios = freshScenarios.filter(s => s.projectId === 1);
+        const project2Scenarios = freshScenarios.filter(s => s.projectId === 2);
+        const project3Scenarios = freshScenarios.filter(s => s.projectId === 3);
+        
+        console.log(`Project 1 (Neurology): ${project1Scenarios.length} scenarios`);
+        console.log(`Project 2 (Oncology): ${project2Scenarios.length} scenarios`);
+        console.log(`Project 3 (Cardiovascular): ${project3Scenarios.length} scenarios`);
+        console.log('Total scenarios:', freshScenarios.length);
+        console.log('===============================================');
+    }, []);
+
+
 
     // --- Session Management Functions ---
     const setSession = (page, data = null) => {
@@ -575,10 +1171,39 @@ function App() {
     const handleLogin = (credentials) => {
         // Simple login validation
         if (credentials.email === 'jeremy@gmail.com' && credentials.password === 'Kj9mP2xQ') {
-            setCurrentPage('scenarios');
-            setSession('scenarios');
+            setCurrentPage('projects');
+            setSession('projects');
         } else {
             // Invalid credentials handled silently - user can see the error state
+        }
+    };
+
+    const handleChatSubmit = async (query) => {
+        const userMessage = { sender: 'user', text: query };
+        setChatMessages(prev => [...prev, userMessage]);
+        setIsChatLoading(true);
+
+        try {
+            // Simple AI response simulation
+            const responses = [
+                "Based on your clinical trial data, I can see that the top-ranked sites have excellent patient availability and enrollment rates. Would you like me to analyze specific aspects of these results?",
+                "I notice your criteria weights are well-balanced. The patient availability and PI match scores are particularly strong for the top sites. What specific insights are you looking for?",
+                "Your scenario shows promising site matches. The top 3 sites all have >90% match scores, which is excellent. How can I help you dive deeper into these results?",
+                "Looking at your trial parameters, the sites with the highest composite scores also show strong historical performance. Would you like me to explain the ranking methodology?"
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            setTimeout(() => {
+                const botMessage = { sender: 'bot', text: randomResponse };
+                setChatMessages(prev => [...prev, botMessage]);
+                setIsChatLoading(false);
+            }, 1000);
+        } catch (error) {
+            console.error("Error with chat:", error);
+            const errorMessage = { sender: 'bot', text: "Sorry, I'm having trouble processing that right now. Please try again." };
+            setChatMessages(prev => [...prev, errorMessage]);
+            setIsChatLoading(false);
         }
     };
 
@@ -597,10 +1222,6 @@ function App() {
 
     // --- Effects ---
     useEffect(() => {
-        // Simulate loading initial data
-        setScenarios(initialScenarios.current);
-        setIsLoading(false);
-        
         // Check for valid session first
         const session = getSession();
         if (session && session.page !== 'login') {
@@ -624,7 +1245,20 @@ function App() {
             // No valid session, default to login page
             setCurrentPage('login');
         }
+        
+        // Set loading to false after session check
+        setIsLoading(false);
     }, []);
+
+    // Initialize chat messages when scenario changes
+    useEffect(() => {
+        if (currentScenario?.siteRankings?.[0]) {
+            setChatMessages([{ 
+                sender: 'bot', 
+                text: `Welcome! I can see your scenario "${currentScenario.title}" has ${currentScenario.siteRankings.length} sites. The top-ranked site is ${currentScenario.siteRankings[0].site} with a ${currentScenario.siteRankings[0].matchScore}% match score. How can I help you analyze these results?` 
+            }]);
+        }
+    }, [currentScenario]);
 
     // Handle click outside profile dropdown
     useEffect(() => {
@@ -682,9 +1316,9 @@ function App() {
                 // Check if we're in the middle of navigation
                 const isNavigating = localStorage.getItem('isNavigating');
                 if (!isNavigating) {
-                    // Redirect to scenarios if required data is missing
-                    setCurrentPage('scenarios');
-                    setSession('scenarios');
+                                // Redirect to projects if required data is missing
+            setCurrentPage('projects');
+            setSession('projects');
                 }
             }
         }
@@ -739,8 +1373,13 @@ function App() {
                 currentScenario: currentScenario 
             }));
         } else if (page === 'scenarios') {
-            // For scenarios page, just save the page info
-            localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios' }));
+            // For scenarios page, set current project if data is provided
+            if (data) {
+                setCurrentProject(data);
+                localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios', project: data }));
+            } else {
+                localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios' }));
+            }
         } else if (page === 'create') {
             // For create page, just save the page info
             localStorage.setItem('pageData', JSON.stringify({ page: 'create' }));
@@ -758,7 +1397,11 @@ function App() {
         // Update URL for proper routing with data
         let url;
         if (page === 'scenarios') {
-            url = `${basePath}/scenarios`;
+            if (data && data.id) {
+                url = `${basePath}/scenarios/project/${data.id}`;
+            } else {
+                url = `${basePath}/scenarios`;
+            }
         } else if (page === 'results' && data) {
             const scenarioId = data.id || Date.now(); // Ensure we always have an ID
             url = `${basePath}/results/${scenarioId}`;
@@ -807,6 +1450,10 @@ function App() {
                     scenarioId = parseInt(pathParts[2]); // Third part
                 } else if (page === 'site' && pathParts.length > 2) {
                     siteCode = pathParts[2]; // Third part
+                } else if (page === 'scenarios' && pathParts.length > 3 && pathParts[2] === 'project') {
+                    // Handle project-specific scenario URLs: /scenarios/project/1
+                    const projectId = parseInt(pathParts[3]);
+                    console.log('Project ID from GitHub Pages URL:', projectId);
                 }
             }
         } else {
@@ -816,6 +1463,10 @@ function App() {
                 scenarioId = parseInt(pathParts[1]); // Second part
             } else if (page === 'site' && pathParts.length > 1) {
                 siteCode = pathParts[1]; // Second part
+            } else if (page === 'scenarios' && pathParts.length > 2 && pathParts[1] === 'project') {
+                // Handle project-specific scenario URLs: /scenarios/project/1
+                const projectId = parseInt(pathParts[2]);
+                console.log('Project ID from local URL:', projectId);
             }
         }
         
@@ -842,6 +1493,19 @@ function App() {
             console.log('Setting page to scenarios');
             setCurrentPage('scenarios');
             localStorage.setItem('currentPage', 'scenarios');
+            
+            // Check if we have a project ID in the URL
+            if (pathParts.length > 2 && pathParts[2] === 'project' && pathParts[3]) {
+                const projectId = parseInt(pathParts[3]);
+                console.log('Project ID from URL:', projectId);
+                
+                // Find the project and set it as current
+                const project = projects.find(p => p.id === projectId);
+                if (project) {
+                    setCurrentProject(project);
+                    console.log('Set current project from URL:', project.name);
+                }
+            }
             return;
         }
         
@@ -913,12 +1577,14 @@ function App() {
         switch (currentPage) {
             case 'login':
                 return <LoginPage onLogin={handleLogin} />;
+            case 'projects':
+                return <ProjectsPage projects={projects} setProjects={setProjects} navigateTo={navigateTo} />;
             case 'scenarios':
-                return <ScenariosListPage scenarios={scenarios} setScenarios={setScenarios} navigateTo={navigateTo} />;
+                return <ScenariosListPage scenarios={scenarios} setScenarios={setScenarios} navigateTo={navigateTo} currentProject={currentProject} setCurrentProject={setCurrentProject} />;
             case 'create':
                 return <CreateScenarioPage navigateTo={navigateTo} onSave={handleSaveScenario} siteRankingData={generateSites(50, Date.now())} />;
             case 'results':
-                return currentScenario ? <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} /> : null;
+                return currentScenario ? <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} chatMessages={chatMessages} isChatLoading={isChatLoading} onSubmitChat={handleChatSubmit} /> : null;
             case 'comparison':
                 return comparisonScenarios ? <ComparisonPage scenarios={comparisonScenarios} navigateTo={navigateTo} /> : null;
             case 'siteDetail':
@@ -939,35 +1605,87 @@ function App() {
         <div className={`min-h-screen ${currentPage === 'login' ? 'bg-gray-100' : 'bg-gray-50'}`}>
             {/* Header */}
             {currentPage !== 'login' && (
-                <header className="bg-white shadow-sm border-b border-gray-200 relative">
-                    <div className="flex items-center h-16 w-full px-4 sm:px-6 lg:px-8">
-                        {/* Left side - Mobile menu button */}
-                        <div className="flex items-center gap-3">
+                <header className="top-nav relative">
+                    <div className="flex items-center justify-between h-16 w-full px-4 sm:px-6 lg:px-8">
+                        {/* Left side - Logo and Navigation */}
+                        <div className="flex items-center gap-6">
+                            {/* Mobile menu button */}
                             <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                                className="md:hidden p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10"
                             >
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
                             </button>
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-xl font-bold text-white">CRSFinder</h2>
+                            </div>
+                            
+                            {/* Navigation Items */}
+                            <nav className="hidden md:flex items-center gap-2">
+                                <button
+                                    onClick={() => navigateTo('projects')}
+                                    className={`nav-item px-4 py-2 text-sm font-medium text-white transition-all ${
+                                        currentPage === 'projects' ? 'active' : ''
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                                        </svg>
+                                        Projects
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => navigateTo('scenarios')}
+                                    className={`nav-item px-4 py-2 text-sm font-medium text-white transition-all ${
+                                        currentPage === 'scenarios' ? 'active' : ''
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Scenarios
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => navigateTo('create')}
+                                    className={`nav-item px-4 py-2 text-sm font-medium text-white transition-all ${
+                                        currentPage === 'create' ? 'active' : ''
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        Create Scenario
+                                    </div>
+                                </button>
+                            </nav>
                         </div>
                         
-                                                    {/* Right side - Profile icon and name */}
-                            <div className="flex items-center gap-3 ml-auto">
-                                <div className="relative profile-dropdown">
-                                    <button 
-                                        onClick={() => setIsOpen(!isOpen)}
-                                        className="flex items-center gap-3 text-left hover:bg-gray-100 rounded-md p-2 transition-colors"
-                                    >
-                                        <div className="hidden sm:block text-right">
-                                            <div className="text-sm font-medium text-gray-900">Dr. Sarah Chen</div>
-                                            <div className="text-xs text-gray-500">Principal Investigator</div>
-                                        </div>
-                                        <svg className="h-5 w-5 text-gray-500 hover:text-gray-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                    </button>
+                        {/* Right side - Profile icon and name */}
+                        <div className="flex items-center gap-3">
+                            <div className="relative profile-dropdown">
+                                <button 
+                                    onClick={() => setIsOpen(!isOpen)}
+                                    className="flex items-center gap-3 text-left hover:bg-white/10 rounded-md p-2 transition-colors"
+                                >
+                                    <div className="hidden sm:block text-right">
+                                        <div className="text-sm font-medium text-white">Dr. Sarah Chen</div>
+                                        <div className="text-xs text-white/80">Principal Investigator</div>
+                                    </div>
+                                    <svg className="h-5 w-5 text-white/80 hover:text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </button>
                                 {isOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 profile-dropdown-menu">
                                         <div className="px-4 py-2 border-b border-gray-100">
@@ -1002,91 +1720,146 @@ function App() {
                 </header>
             )}
 
-            {/* Sidebar */}
-            {currentPage !== 'login' && (
-                <>
-                    <div className={`sidebar-container ${sidebarOpen ? 'open' : ''}`}>
-                        <div className="w-64 h-full bg-white shadow-lg relative">
-                            <div className="h-full flex flex-col">
-                                {/* Sidebar Header */}
-                                <div className="flex items-center gap-3 p-4 border-b border-gray-200">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                        </svg>
-                                    </div>
-                                    <h2 className="text-lg font-bold text-gray-900">CRSFinder</h2>
-                                </div>
-                                <div className="flex-1 flex flex-col pt-2 pb-4 overflow-y-auto">
-                                    <nav className="flex-1 px-2 space-y-1">
-                                        <button
-                                            onClick={() => {
-                                                navigateTo('scenarios');
-                                                setSidebarOpen(false);
-                                            }}
-                                            className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left ${
-                                                currentPage === 'scenarios' 
-                                                    ? 'bg-blue-100 text-blue-900' 
-                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                            }`}
-                                        >
-                                            <svg className="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                            Scenarios
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                navigateTo('create');
-                                                setSidebarOpen(false);
-                                            }}
-                                            className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left ${
-                                                currentPage === 'create' 
-                                                    ? 'bg-blue-100 text-blue-900' 
-                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                            }`}
-                                        >
-                                            <svg className="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                            Create Scenario
-                                        </button>
-                                    </nav>
-                                </div>
-                                {/* Logout Section */}
-                                <div className="p-4 border-t border-gray-200">
-                                    <button
-                                        onClick={() => {
-                                            clearSession();
-                                            setCurrentPage('login');
-                                            setCurrentScenario(null);
-                                            setComparisonScenarios([]);
-                                            setCurrentSite(null);
-                                        }}
-                                        className="flex items-center w-full px-2 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors"
-                                    >
-                                        <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        Logout
-                                    </button>
-                                </div>
-                            </div>
+            {/* Mobile Navigation Menu */}
+            {currentPage !== 'login' && sidebarOpen && (
+                <div className="md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-40">
+                    <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                            <h2 className="text-lg font-bold text-gray-900">CRSFinder</h2>
+                            <button
+                                onClick={() => setSidebarOpen(false)}
+                                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                            >
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                                                <nav className="p-4 space-y-2">
+                            <button
+                                onClick={() => {
+                                    navigateTo('projects');
+                                    setSidebarOpen(false);
+                                }}
+                                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                                    currentPage === 'projects'
+                                        ? 'btn-gradient' 
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                            >
+                                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                                </svg>
+                                Projects
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigateTo('scenarios');
+                                    setSidebarOpen(false);
+                                }}
+                                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                                    currentPage === 'scenarios'
+                                        ? 'btn-gradient' 
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                            >
+                                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Scenarios
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigateTo('create');
+                                    setSidebarOpen(false);
+                                }}
+                                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                                    currentPage === 'create'
+                                        ? 'btn-gradient' 
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                            >
+                                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Create Scenario
+                            </button>
+                        </nav>
+                        <div className="p-4 border-t border-gray-200">
+                            <button
+                                onClick={() => {
+                                    clearSession();
+                                    setCurrentPage('login');
+                                    setCurrentScenario(null);
+                                    setComparisonScenarios([]);
+                                    setCurrentSite(null);
+                                    setSidebarOpen(false);
+                                }}
+                                className="flex items-center w-full px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors"
+                            >
+                                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                Logout
+                            </button>
                         </div>
                     </div>
-                    
-                    {/* Mobile overlay */}
-                    {sidebarOpen && (
-                        <div 
-                            className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
-                            onClick={() => setSidebarOpen(false)}
-                        ></div>
+                </div>
+            )}
+
+            {/* Chat Panel Toggle Button - Only on Results Page */}
+            {currentPage === 'results' && (
+                <div 
+                    className={`chat-toggle ${chatOpen ? 'open' : ''}`}
+                    onClick={() => setChatOpen(!chatOpen)}
+                    title={chatOpen ? 'Close Chat' : 'Open Chat'}
+                >
+                    {chatOpen ? (
+                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    ) : (
+                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
                     )}
-                </>
+                </div>
+            )}
+
+            {/* Chat Panel */}
+            {currentPage === 'results' && (
+                <div className={`chat-panel ${chatOpen ? 'open' : ''}`}>
+                    <div className="flex flex-col h-full">
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600">
+                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <SparklesIcon className="w-5 h-5" />
+                                AI Assistant
+                            </h2>
+                            <button 
+                                onClick={() => setChatOpen(false)}
+                                className="text-white/80 hover:text-white transition-colors p-2 rounded-md hover:bg-white/10"
+                                title="Close Chat"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="flex-1 p-4 overflow-y-auto">
+                            {currentScenario ? (
+                                <ChatPanel messages={chatMessages} onSubmit={handleChatSubmit} isLoading={isChatLoading} />
+                            ) : (
+                                <div className="text-center text-gray-500 mb-4">
+                                    <p className="text-sm">Loading scenario data...</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Main Content */}
-            <div className={`main-content ${currentPage !== 'login' ? 'lg:ml-64' : ''}`}>
+            <div className="main-content">
                 {renderPage()}
             </div>
         </div>
@@ -1118,46 +1891,351 @@ function LoginPage({ onLogin }) {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-                <h1 className="text-3xl font-bold text-center text-gray-900">Login</h1>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={input.email}
-                            onChange={(e) => setInput({ ...input, email: e.target.value })}
-                            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="you@example.com"
-                        />
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+            <div className="w-full max-w-md mx-auto">
+                <div className="bg-white rounded-xl shadow-2xl p-8 space-y-8 border border-gray-100">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Login</h1>
+                        <p className="text-gray-600">Welcome to CRSFinder</p>
                     </div>
-                    <div>
-                        <label htmlFor="password" className="text-sm font-medium text-gray-700">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={input.password}
-                            onChange={(e) => setInput({ ...input, password: e.target.value })}
-                            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="••••••••"
-                        />
-                    </div>
-                    {error && <p className="text-sm text-red-600">{error}</p>}
-                    <button type="submit" className="flex items-center justify-center gap-2 w-full py-3 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
-                        Login
-                    </button>
-                </form>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={input.email}
+                                onChange={(e) => setInput({ ...input, email: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="you@example.com"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input
+                                id="password"
+                                type="password"
+                                value={input.password}
+                                onChange={(e) => setInput({ ...input, password: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="••••••••"
+                            />
+                        </div>
+                        {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+                        <button type="submit" className="w-full flex items-center justify-center gap-3 py-3 px-4 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02]">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                            </svg>
+                            Login
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
 }
 
-function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
+function ProjectsPage({ projects, setProjects, navigateTo }) {
+    const [filter, setFilter] = useState('');
+    const [therapeuticAreaFilter, setTherapeuticAreaFilter] = useState('All');
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [view, setView] = useState('card'); // 'card', 'table'
+    const [sortConfig, setSortConfig] = useState({ key: 'createdDate', direction: 'descending' });
+
+    const therapeuticAreaOptions = useMemo(() => ['All', ...new Set(projects.map(p => p.therapeuticArea))], [projects]);
+    const statusOptions = useMemo(() => ['All', 'Active', 'Completed', 'On Hold'], []);
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const filteredAndSortedProjects = useMemo(() => {
+        let sortableItems = [...projects];
+        
+        sortableItems = sortableItems
+            .filter(p => {
+                const q = filter.trim().toLowerCase();
+                if (!q) return true;
+                return (
+                    (p.name || '').toLowerCase().includes(q) ||
+                    (p.description || '').toLowerCase().includes(q) ||
+                    (p.therapeuticArea || '').toLowerCase().includes(q) ||
+                    (p.sponsor || '').toLowerCase().includes(q)
+                );
+            })
+            .filter(p => therapeuticAreaFilter === 'All' || p.therapeuticArea === therapeuticAreaFilter)
+            .filter(p => statusFilter === 'All' || p.status === statusFilter);
+
+        sortableItems.sort((a, b) => {
+            if (a[sortConfig.key] < b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? -1 : 1;
+            }
+            if (a[sortConfig.key] > b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+
+        return sortableItems;
+    }, [projects, filter, therapeuticAreaFilter, statusFilter, sortConfig]);
+
+    return (
+        <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+                    <p className="text-gray-500 mt-1">Manage your clinical research projects and their scenarios.</p>
+                </div>
+                <div className="flex gap-4">
+                    <button onClick={() => navigateTo('create')} className="btn-gradient flex items-center gap-2 px-4 py-2 font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all whitespace-nowrap">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Create New Project
+                    </button>
+                </div>
+            </header>
+
+            <div className="p-4 bg-white rounded-lg border border-gray-200 mb-6">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+                    <input
+                        type="text"
+                        placeholder="Search project name, description, therapeutic area..."
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        className="flex-1 min-w-[240px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <div className="flex flex-wrap items-center gap-3">
+                        <CustomDropdown options={therapeuticAreaOptions} selected={therapeuticAreaFilter} onSelect={setTherapeuticAreaFilter} label="Therapeutic Area:" />
+                        <CustomDropdown options={statusOptions} selected={statusFilter} onSelect={setStatusFilter} label="Status:" />
+                    </div>
+                </div>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                    <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-600">
+                            {filteredAndSortedProjects.length} project{filteredAndSortedProjects.length !== 1 ? 's' : ''} found
+                        </span>
+                    </div>
+                    <div className="inline-flex rounded-md shadow-sm">
+                        <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z" />
+                            </svg>
+                            Table View
+                        </button>
+                        <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'card' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                            </svg>
+                            Card View
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {view === 'card' ? (
+                <>
+                    {filteredAndSortedProjects.length > 0 ? (
+                        <div className="responsive-grid">
+                            {filteredAndSortedProjects.map(project => (
+                                <ProjectCard key={project.id} project={project} navigateTo={navigateTo} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center">
+                            <div className="text-gray-500">
+                                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                                </svg>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+                                <p className="text-gray-500">Try adjusting your search criteria or create a new project.</p>
+                            </div>
+                        </div>
+                    )}
+                </>
+            ) : (
+                <ProjectTable projects={filteredAndSortedProjects} navigateTo={navigateTo} requestSort={requestSort} sortConfig={sortConfig} />
+            )}
+        </div>
+    );
+}
+
+function ProjectCard({ project, navigateTo }) {
+    return (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 cursor-pointer hover:shadow-lg transition-all h-full flex flex-col" onClick={() => navigateTo('scenarios', project)}>
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{project.name}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{project.description}</p>
+                </div>
+                <div className="text-right">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        project.status === 'Active' ? 'bg-green-100 text-green-800' :
+                        project.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
+                    }`}>
+                        {project.status}
+                    </span>
+                </div>
+            </div>
+            <div className="space-y-2 text-sm flex-grow">
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Therapeutic Area:</span>
+                    <span className="font-semibold text-gray-900">{project.therapeuticArea}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Sponsor:</span>
+                    <span className="font-semibold text-gray-900">{project.sponsor}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Created:</span>
+                    <span className="font-semibold text-gray-900">{new Date(project.createdDate).toLocaleDateString()}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Total Scenarios:</span>
+                    <span className="font-semibold text-gray-900">{project.totalScenarios || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Current Scenarios:</span>
+                    <span className="font-semibold text-gray-900">{project.scenarios?.length || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Active Trials:</span>
+                    <span className="font-semibold text-gray-900">{project.activeTrials || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-gray-600">Completed:</span>
+                    <span className="font-semibold text-gray-900">{project.completedTrials || 0}</span>
+                </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-gray-100 mt-auto">
+                <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">View Scenarios &rarr;</button>
+            </div>
+        </div>
+    );
+}
+
+function ProjectTable({ projects, navigateTo, requestSort, sortConfig }) {
+    if (!projects || projects.length === 0) {
+        return (
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 text-center">
+                <div className="text-gray-500">
+                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+                    <p className="text-gray-500">Try adjusting your search criteria or create a new project.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '1000px' }}>
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 w-80" onClick={() => requestSort('name')}>
+                                <div className="flex items-center gap-2">
+                                    Project Name
+                                    {sortConfig.key === 'name' && (
+                                        <svg className={`w-4 h-4 ${sortConfig.direction === 'ascending' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => requestSort('therapeuticArea')}>
+                                <div className="flex items-center gap-2">
+                                    Therapeutic Area
+                                    {sortConfig.key === 'therapeuticArea' && (
+                                        <svg className={`w-4 h-4 ${sortConfig.direction === 'ascending' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => requestSort('sponsor')}>
+                                <div className="flex items-center gap-2">
+                                    Sponsor
+                                    {sortConfig.key === 'sponsor' && (
+                                        <svg className={`w-4 h-4 ${sortConfig.direction === 'ascending' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => requestSort('status')}>
+                                <div className="flex items-center gap-2">
+                                    Status
+                                    {sortConfig.key === 'status' && (
+                                        <svg className={`w-4 h-4 ${sortConfig.direction === 'ascending' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => requestSort('createdDate')}>
+                                <div className="flex items-center gap-2">
+                                    Created Date
+                                    {sortConfig.key === 'createdDate' && (
+                                        <svg className={`w-4 h-4 ${sortConfig.direction === 'ascending' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    )}
+                                </div>
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Total Scenarios
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Active Trials
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {projects.map(project => (
+                            <tr key={project.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => navigateTo('scenarios', project)}>
+                                <td className="px-6 py-4 text-sm text-gray-900">
+                                    <div>
+                                        <div className="font-medium text-gray-900 mb-1">{project.name}</div>
+                                        <div className="text-sm text-gray-500 leading-relaxed">{project.description}</div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{project.therapeuticArea}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{project.sponsor}</td>
+                                <td className="px-6 py-4">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        project.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                        project.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                        {project.status}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{project.totalScenarios || 0}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{project.activeTrials || 0}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <button className="text-indigo-600 hover:text-indigo-900">View</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject, setCurrentProject }) {
     const [filter, setFilter] = useState('');
     const [showArchived, setShowArchived] = useState(false);
     const [createdByFilter, setCreatedByFilter] = useState('All');
@@ -1171,9 +2249,17 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
     const [displayedItems, setDisplayedItems] = useState(6);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const createdByOptions = useMemo(() => ['All', ...new Set(scenarios.map(s => s.performedBy))], [scenarios]);
+    // Filter options based on current project scenarios only
+    const projectScenarios = useMemo(() => {
+        if (currentProject) {
+            return scenarios.filter(s => s.projectId === currentProject.id);
+        }
+        return scenarios;
+    }, [scenarios, currentProject]);
+
+    const createdByOptions = useMemo(() => ['All', ...new Set(projectScenarios.map(s => s.performedBy))], [projectScenarios]);
     const phaseOptions = useMemo(() => ['All', 'Phase I', 'Phase II', 'Phase III', 'Phase IV'], []);
-    const countryOptions = useMemo(() => ['All', ...new Set(scenarios.map(s => s.country))], [scenarios]);
+    const countryOptions = useMemo(() => ['All', ...new Set(projectScenarios.map(s => s.country))], [projectScenarios]);
 
     const togglePin = (id) => {
         setScenarios(scenarios.map(s => s.id === id ? { ...s, isPinned: !s.isPinned } : s));
@@ -1198,11 +2284,28 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
 
     const handleCompare = () => {
         const scenariosToCompare = scenarios.filter(s => selectedForComparison.includes(s.id));
+        
+        // Check if all scenarios are from the same project
+        if (scenariosToCompare.length > 0) {
+            const firstProjectId = scenariosToCompare[0].projectId;
+            const allSameProject = scenariosToCompare.every(s => s.projectId === firstProjectId);
+            
+            if (!allSameProject) {
+                console.log('Comparison blocked: Scenarios must be from the same project');
+                return;
+            }
+        }
+        
         navigateTo('comparison', scenariosToCompare);
     };
 
     const filteredAndSortedScenarios = useMemo(() => {
         let sortableItems = [...scenarios];
+        
+        // Filter by current project first (one-to-many relationship)
+        if (currentProject) {
+            sortableItems = sortableItems.filter(s => s.projectId === currentProject.id);
+        }
         
         sortableItems = sortableItems
             .filter(s => showArchived || !s.isArchived)
@@ -1305,14 +2408,27 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
     }, [currentPage, itemsPerPage, filteredAndSortedScenarios, view, displayedItems]);
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Scenarios</h1>
-                    <p className="text-gray-500 mt-1">Manage and review your clinical trial scenarios.</p>
+                    <button onClick={() => {
+                        setCurrentProject(null);
+                        navigateTo('projects');
+                    }} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Projects
+                    </button>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        {currentProject ? `${currentProject.name}: Scenarios` : 'Scenarios'}
+                    </h1>
+                    <p className="text-gray-500 mt-1">
+                        {currentProject ? `Manage scenarios for ${currentProject.therapeuticArea} project - ${projectScenarios.length} total scenarios, ${projectScenarios.filter(s => !s.isArchived).length} active trials` : 'Manage and review your clinical trial scenarios.'}
+                    </p>
                 </div>
                 <div className="flex gap-4">
-                    <button onClick={() => navigateTo('create')} className="flex items-center gap-2 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors whitespace-nowrap">
+                    <button onClick={() => navigateTo('create')} className="btn-gradient flex items-center gap-2 px-4 py-2 font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all whitespace-nowrap">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
@@ -1338,16 +2454,15 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                 </div>
                 <div className="flex justify-between items-center mt-4 pt-4 border-t">
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center">
+                        <div className="checkbox-container">
                             <input
                                 id="show-archived"
                                 type="checkbox"
                                 checked={showArchived}
                                 onChange={(e) => setShowArchived(e.target.checked)}
-                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                             />
-                            <label htmlFor="show-archived" className="ml-2 block text-sm text-gray-900">
-                                Show Archived
+                            <label htmlFor="show-archived" className="text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900 transition-colors">
+                                Show Archived Scenarios
                             </label>
                         </div>
                         <button 
@@ -1355,7 +2470,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                             disabled={selectedForComparison.length < 2}
                             className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-colors ${
                                 selectedForComparison.length >= 2 
-                                    ? 'text-white bg-indigo-600 hover:bg-indigo-700' 
+                                    ? 'btn-gradient' 
                                     : 'text-gray-400 bg-gray-200 cursor-not-allowed'
                             }`}
                         >
@@ -1366,13 +2481,13 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                         </button>
                     </div>
                     <div className="inline-flex rounded-md shadow-sm">
-                        <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
+                        <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z" />
                             </svg>
                             Table View
                         </button>
-                        <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
+                        <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'card' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
                             </svg>
@@ -1386,7 +2501,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                 <>
                     {paginatedScenarios.length > 0 ? (
                         <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="responsive-grid">
                                 {paginatedScenarios.map(scenario => (
                                     <ScenarioCard key={scenario.id} scenario={scenario} onPin={togglePin} onArchive={toggleArchive} navigateTo={navigateTo} onSelect={handleSelectForComparison} isSelected={selectedForComparison.includes(scenario.id)} />
                                 ))}
@@ -1400,7 +2515,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo }) {
                                 <div className="text-center mt-6">
                                     <button 
                                         onClick={loadMoreItems}
-                                        className="flex items-center gap-2 px-6 py-3 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                        className="btn-gradient flex items-center gap-2 px-6 py-3 font-medium rounded-lg transition-all"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1463,14 +2578,14 @@ function ScenarioCard({ scenario, onPin, onArchive, navigateTo, onSelect, isSele
                 <p className="text-sm text-gray-500">Country: {country}</p>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                 <div className="flex items-center">
+                 <div className="checkbox-container">
                     <input 
                         type="checkbox" 
                         checked={isSelected}
                         onChange={() => onSelect(id)}
-                        className="site-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        className="site-checkbox"
                     />
-                    <label className="ml-2 text-sm text-gray-600">Compare</label>
+                    <label className="text-sm text-gray-600">Compare</label>
                 </div>
                 <div className="flex items-center gap-2">
                     <Tooltip text={isPinned ? "Unpin Scenario" : "Pin Scenario"}>
@@ -1587,7 +2702,7 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
                                     type="checkbox" 
                                     checked={selectedItems.includes(scenario.id)}
                                     onChange={() => onSelect(scenario.id)}
-                                    className="site-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                    className="site-checkbox"
                                 />
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 hover:underline" onClick={() => navigateTo('results', scenario)}>{scenario.title}</td>
@@ -1765,14 +2880,36 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
         }
     };
 
+    const getTotalCriteriaWeight = () => {
+        return Object.values(formData.criteriaWeights).reduce((sum, weight) => sum + weight, 0);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log('Form submitted with data:', formData);
         console.log('Site ranking data:', siteRankingData);
         
-        // Basic validation
-        if (!formData.title.trim()) {
-            // Validation error handled silently - user can see empty field
+        // Validate only required fields: Phase, Indication, Timeline, and Target Subjects
+        if (!formData.phase) {
+            console.log('Validation failed: Phase not selected');
+            return;
+        }
+        if (!formData.indication.trim()) {
+            console.log('Validation failed: Indication not entered');
+            return;
+        }
+        if (!formData.targetSubjects || formData.targetSubjects <= 0) {
+            console.log('Validation failed: Invalid target subject count');
+            return;
+        }
+        if (!formData.timeline || formData.timeline <= 0) {
+            console.log('Validation failed: Invalid timeline');
+            return;
+        }
+        
+        // Validate criteria weights total 100%
+        if (getTotalCriteriaWeight() !== 100) {
+            console.log('Validation failed: Criteria weights must total 100%. Current total: ' + getTotalCriteriaWeight() + '%');
             return;
         }
         
@@ -1790,7 +2927,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
     };
 
     return (
-        <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
             <header className="mb-8">
                 <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1803,32 +2940,81 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
             </header>
             
             <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="p-6 bg-white rounded-lg border border-gray-200">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-gray-800">Scenario Details</h2>
-                        <div>
-                            <input type="file" accept=".pdf" ref={fileInputRef} onChange={handlePdfUpload} className="hidden" />
-                            <button 
-                                type="button" 
-                                onClick={() => fileInputRef.current.click()} 
-                                disabled={isUploading} 
-                                title="Click to upload a PDF and automatically populate all form fields with realistic clinical trial data"
-                                className="flex items-center gap-2 px-4 py-2 font-semibold text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isUploading ? <LoadingSpinner className="w-5 h-5" /> : <UploadIcon className="w-5 h-5" />}
-                                {isUploading ? 'Processing PDF...' : 'Upload PDF & Auto-fill All Fields'}
-                            </button>
+                {/* PDF Upload Section - Google Reverse Image Search Style */}
+                <div className="form-section p-8">
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Upload Clinical Trial Protocol</h2>
+                        <p className="text-gray-600">Drag and drop your PDF protocol or click to browse. We'll automatically extract and populate all form fields.</p>
+                    </div>
+                    
+                    <div 
+                        className="upload-area p-8 text-center cursor-pointer"
+                        onClick={() => fileInputRef.current.click()}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.add('dragover');
+                        }}
+                        onDragLeave={(e) => {
+                            e.currentTarget.classList.remove('dragover');
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.remove('dragover');
+                            const file = e.dataTransfer.files[0];
+                            if (file && file.type === 'application/pdf') {
+                                const event = { target: { files: [file] } };
+                                handlePdfUpload(event);
+                            }
+                        }}
+                    >
+                        <input type="file" accept=".pdf" ref={fileInputRef} onChange={handlePdfUpload} className="hidden" />
+                        
+                        <div className="space-y-3">
+                            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                                {isUploading ? (
+                                    <LoadingSpinner className="w-8 h-8 text-blue-600" />
+                                ) : (
+                                    <UploadIcon className="w-8 h-8 text-blue-600" />
+                                )}
+                            </div>
+                            
+                            <div>
+                                <h3 className="text-base font-semibold text-gray-800 mb-1">
+                                    {isUploading ? 'Processing PDF...' : 'Drop your PDF here'}
+                                </h3>
+                                <p className="text-sm text-gray-500 mb-3">
+                                    {isUploading 
+                                        ? 'Extracting clinical trial data...' 
+                                        : 'or click to browse files'
+                                    }
+                                </p>
+                                
+                                {!isUploading && (
+                                    <button 
+                                        type="button"
+                                        className="btn-gradient inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all"
+                                    >
+                                        <UploadIcon className="w-4 h-4" />
+                                        Choose PDF File
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Form Fields Section */}
+                <div className="form-section p-8">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-6">Scenario Details</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <InputField label="Title" name="title" value={formData.title} onChange={handleInputChange} />
                         <InputField label="Sponsor" name="sponsor" value={formData.sponsor} onChange={handleInputChange} />
                         <InputField label="Study ID" name="studyId" value={formData.studyId} onChange={handleInputChange} />
-                        <InputField label="Indication" name="indication" value={formData.indication} onChange={handleInputChange} />
+                        <InputField label="Indication *" name="indication" value={formData.indication} onChange={handleInputChange} required />
                         <InputField label="Drug Info" name="drugInfo" value={formData.drugInfo} onChange={handleInputChange} />
-                        <CustomDropdownField label="Phase" options={['Phase I', 'Phase II', 'Phase III', 'Phase IV']} selected={formData.phase} onSelect={(val) => setFormData(p => ({...p, phase: val}))} />
-                        <InputField label="Target Subjects" name="targetSubjects" type="number" value={formData.targetSubjects} onChange={handleInputChange} />
-                        <InputField label="Timeline (Months)" name="timeline" type="number" value={formData.timeline} onChange={handleInputChange} />
+                        <CustomDropdownField label="Phase *" options={['Phase I', 'Phase II', 'Phase III', 'Phase IV']} selected={formData.phase} onSelect={(val) => setFormData(p => ({...p, phase: val}))} required />
+                        <InputField label="Target Subjects *" name="targetSubjects" type="number" value={formData.targetSubjects} onChange={handleInputChange} required />
+                        <InputField label="Timeline (Months) *" name="timeline" type="number" value={formData.timeline} onChange={handleInputChange} required />
                         <div className="col-span-1">
                             <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                             <input
@@ -1847,13 +3033,26 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                             selected={formData.preferredRegions}
                             onSelect={(val) => setFormData(p => ({...p, preferredRegions: val}))}
                         />
-                         <TextAreaField label="Objective" name="objective" value={formData.objective} onChange={handleInputChange} className="md:col-span-2" />
+                        <TextAreaField label="Objective" name="objective" value={formData.objective} onChange={handleInputChange} className="md:col-span-2" />
                         <TextAreaField label="Protocol Details" name="protocolDetails" value={formData.protocolDetails} onChange={handleInputChange} className="md:col-span-2" />
                     </div>
                 </div>
 
-                <div className="p-6 bg-white rounded-lg border border-gray-200">
-                    <h2 className="text-xl font-semibold mb-6 text-gray-800">Key Criteria Weights</h2>
+                <div className="form-section p-8">
+                    <h2 className="text-xl font-semibold mb-6 text-gray-800">Key Criteria Weights *</h2>
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-blue-800 font-medium">Total Criteria Weight:</span>
+                            <span className={`text-lg font-bold ${getTotalCriteriaWeight() === 100 ? 'text-green-600' : 'text-red-600'}`}>
+                                {getTotalCriteriaWeight()}%
+                            </span>
+                        </div>
+                        {getTotalCriteriaWeight() !== 100 && (
+                            <p className="text-sm text-red-600 mt-2">
+                                ⚠️ Total must equal 100%. Current total: {getTotalCriteriaWeight()}%
+                            </p>
+                        )}
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
                         <SliderField label="Patient Availability" name="patientAvailability" value={formData.criteriaWeights.patientAvailability} onChange={handleSliderChange} />
                         <SliderField label="Historical Enrollment Rate" name="enrollmentRate" value={formData.criteriaWeights.enrollmentRate} onChange={handleSliderChange} />
@@ -1870,7 +3069,10 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         </svg>
                         Cancel
                     </button>
-                    <button type="submit" className="flex items-center gap-2 px-6 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                    <button 
+                        type="submit" 
+                        className="btn-gradient flex items-center gap-2 px-6 py-2 font-semibold rounded-md transition-all"
+                    >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -1882,13 +3084,11 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
     );
 }
 
-function ResultsPage({ scenario, navigateTo, onSave }) {
+function ResultsPage({ scenario, navigateTo, onSave, chatMessages, isChatLoading, onSubmitChat }) {
     const [view, setView] = useState('table'); // 'table', 'card'
     const [expandedRows, setExpandedRows] = useState(new Set());
-    const [chatMessages, setChatMessages] = useState([]);
     const [isExportingPdf, setIsExportingPdf] = useState(false);
     const [isExportingExcel, setIsExportingExcel] = useState(false);
-    const [isChatLoading, setIsChatLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [displayedSites, setDisplayedSites] = useState(6);
@@ -2067,11 +3267,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
         }, 100);
     };
 
-    useEffect(() => {
-        if (scenario?.siteRankings?.[0]) {
-            setChatMessages([{ sender: 'bot', text: `The first rank site is ${scenario.siteRankings[0].site}. How can I help you analyze these results?` }]);
-        }
-    }, [scenario]);
+
 
     if (!scenario) {
         return <div className="p-8">Error: No scenario data found. <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline">
@@ -2092,27 +3288,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
         setExpandedRows(newSet);
     };
 
-    const handleChatSubmit = async (query) => {
-        const userMessage = { sender: 'user', text: query };
-        setChatMessages(prev => [...prev, userMessage]);
-        setIsChatLoading(true);
 
-        const scenarioContext = JSON.stringify(scenario, null, 2);
-        const prompt = `You are an expert clinical trial analyst. Based on the following scenario data, answer the user's question.
-        Scenario Data: ${scenarioContext}
-        User Question: ${query}`;
-
-        try {
-            const resultText = await callGemini(prompt);
-            const botMessage = { sender: 'bot', text: resultText };
-            setChatMessages(prev => [...prev, botMessage]);
-        } catch (error) {
-            console.error("Error with Gemini API:", error);
-            const errorMessage = { sender: 'bot', text: "Sorry, I'm having trouble analyzing that right now." };
-            setChatMessages(prev => [...prev, errorMessage]);
-        }
-        setIsChatLoading(false);
-    };
     
     const handleExport = async () => {
         setIsExportingPdf(true);
@@ -2189,18 +3365,18 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                 </div>
                 <div className="flex items-center gap-4">
                     {scenario.isPreview && (
-                        <button onClick={() => onSave(scenario)} className="flex items-center gap-2 px-4 py-2 font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors">
+                        <button onClick={() => onSave(scenario)} className="btn-gradient flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-all">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                             Save Scenario
                         </button>
                     )}
-                    <button onClick={handleExportExcel} disabled={isExportingExcel} className="flex items-center gap-2 px-4 py-2 font-semibold text-green-700 bg-green-100 rounded-md hover:bg-green-200 transition-colors disabled:opacity-50">
+                    <button onClick={handleExportExcel} disabled={isExportingExcel} className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-all disabled:opacity-50 shadow-md hover:shadow-lg">
                         {isExportingExcel ? <LoadingSpinner className="w-5 h-5" /> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>}
                         {isExportingExcel ? 'Exporting...' : 'Export to Excel'}
                     </button>
-                    <button onClick={handleExport} disabled={isExportingPdf} className="flex items-center gap-2 px-4 py-2 font-semibold text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors disabled:opacity-50">
+                    <button onClick={handleExport} disabled={isExportingPdf} className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-all disabled:opacity-50 shadow-md hover:shadow-lg">
                         {isExportingPdf ? <LoadingSpinner className="w-5 h-5" /> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>}
                         {isExportingPdf ? 'Exporting...' : 'Export to PDF'}
                     </button>
@@ -2209,16 +3385,9 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
 
 
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-                {/* Left Panel: Chat */}
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 lg:gap-8">
+                {/* Main Content: Site Ranking */}
                 <div className="lg:col-span-1">
-                    <div className="sticky top-8">
-                        <ChatPanel messages={chatMessages} onSubmit={handleChatSubmit} isLoading={isChatLoading} />
-                    </div>
-                </div>
-
-                {/* Right Panel: Site Ranking */}
-                <div className="lg:col-span-3">
                     <div ref={exportRef} className="bg-white p-4 rounded-lg border border-gray-200">
                         <div className="mb-6 p-4 border-b">
                             <h3 className="text-lg font-semibold text-gray-700 mb-3">Objective</h3>
@@ -2251,7 +3420,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                                     disabled={selectedSites.length < 2}
                                     className={`comparison-button flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-colors ${
                                         selectedSites.length >= 2 
-                                            ? 'text-white bg-indigo-600 hover:bg-indigo-700' 
+                                            ? 'btn-gradient' 
                                             : 'text-gray-400 bg-gray-200 cursor-not-allowed'
                                     }`}
                                 >
@@ -2262,13 +3431,13 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                                 </button>
                              </div>
                             <div className="inline-flex rounded-md shadow-sm">
-                                <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
+                                <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z" />
                                     </svg>
                                     Table View
                                 </button>
-                                <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${view === 'card' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
+                                <button onClick={() => setView('card')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${view === 'card' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-r-lg border border-gray-200`}>
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
                                     </svg>
@@ -2299,7 +3468,7 @@ function ResultsPage({ scenario, navigateTo, onSave }) {
                                     <div className="text-center mt-6">
                                         <button 
                                             onClick={loadMoreSites}
-                                            className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                            className="btn-gradient flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all"
                                         >
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -2485,9 +3654,22 @@ function Tooltip({ children, text }) {
     
     const handleMouseEnter = (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
+        const tooltipWidth = 200; // Approximate tooltip width
+        
+        // Calculate position to center the tooltip above the element
+        // Use the exact center of the triggering element
+        let left = rect.left + (rect.width / 2);
+        
+        // Ensure tooltip doesn't go off-screen
+        if (left - tooltipWidth / 2 < 0) {
+            left = tooltipWidth / 2;
+        } else if (left + tooltipWidth / 2 > window.innerWidth) {
+            left = window.innerWidth - tooltipWidth / 2;
+        }
+        
         setPosition({
-            x: rect.left + rect.width / 2,
-            y: rect.top - 10
+            x: left,
+            y: rect.top - 8
         });
         setShow(true);
     };
@@ -2511,7 +3693,7 @@ function Tooltip({ children, text }) {
                     }}
                 >
                     {text}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" style={{ marginLeft: '-2px' }}></div>
                 </div>
             )}
         </>
@@ -2558,15 +3740,24 @@ function ChatPanel({ messages, onSubmit, isLoading }) {
                 <div ref={messagesEndRef} />
             </div>
             <div className="p-4 border-t border-gray-200">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="relative">
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Ask a question..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full pr-12 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         disabled={isLoading}
                     />
+                    <button
+                        type="submit"
+                        disabled={!input.trim() || isLoading}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-400 hover:text-blue-600 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                    </button>
                 </form>
             </div>
         </div>
@@ -2611,23 +3802,25 @@ function SiteTable({ sites, expandedRows, toggleRow, navigateTo, onSelect, selec
                                         type="checkbox" 
                                         checked={selectedSites.includes(site.siteCode)}
                                         onChange={() => onSelect(site.siteCode)}
-                                        className="site-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                        className="site-checkbox"
                                     />
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{site.rank}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 cursor-pointer hover:text-blue-600 hover:underline" onClick={() => navigateTo('siteDetail', site)}>{site.site}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{site.state}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">
-                                    <Tooltip text={getMatchScoreReasoning(site.matchScore, site.details)}>
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                            site.matchScore >= 90 ? 'bg-green-100 text-green-800' :
-                                            site.matchScore >= 80 ? 'bg-blue-100 text-blue-800' :
-                                            site.matchScore >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
-                                        }`}>
-                                            {site.matchScore}%
-                                        </span>
-                                    </Tooltip>
+                                    <div className="flex justify-center">
+                                        <Tooltip text={getMatchScoreReasoning(site.matchScore, site.details)}>
+                                            <span className={`match-score-badge px-2 py-1 text-xs font-semibold rounded-full ${
+                                                site.matchScore >= 90 ? 'bg-green-100 text-green-800' :
+                                                site.matchScore >= 80 ? 'bg-blue-100 text-blue-800' :
+                                                site.matchScore >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                                {site.matchScore}%
+                                            </span>
+                                        </Tooltip>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{site.compositeScore}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -2666,7 +3859,7 @@ function SiteTable({ sites, expandedRows, toggleRow, navigateTo, onSelect, selec
 
 function SiteCardView({ sites, navigateTo, onSelect, selectedSites }) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="responsive-grid">
             {sites.map(site => (
                 <div key={site.rank} className="bg-white rounded-lg border border-gray-200 p-5">
                     <div className="flex justify-between items-start mb-3">
@@ -2675,7 +3868,7 @@ function SiteCardView({ sites, navigateTo, onSelect, selectedSites }) {
                                 type="checkbox" 
                                 checked={selectedSites.includes(site.siteCode)}
                                 onChange={() => onSelect(site.siteCode)}
-                                className="site-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                className="site-checkbox"
                             />
                             <div>
                                 <p className="text-xs text-gray-500">Rank #{site.rank}</p>
@@ -2689,10 +3882,10 @@ function SiteCardView({ sites, navigateTo, onSelect, selectedSites }) {
                         </div>
                     </div>
                     <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                             <span className="text-gray-600">Match Score:</span>
                             <Tooltip text={getMatchScoreReasoning(site.matchScore, site.details)}>
-                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                <span className={`match-score-badge px-2 py-1 text-xs font-semibold rounded-full ${
                                     site.matchScore >= 90 ? 'bg-green-100 text-green-800' :
                                     site.matchScore >= 80 ? 'bg-blue-100 text-blue-800' :
                                     site.matchScore >= 70 ? 'bg-yellow-100 text-yellow-800' :
@@ -2867,7 +4060,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
                         onClick={() => onPageChange(number)}
                         className={`px-3 py-2 mx-1 rounded-md border transition-colors ${
                             currentPage === number 
-                                ? 'bg-blue-600 text-white border-blue-600' 
+                                ? 'btn-gradient' 
                                 : 'bg-white border-gray-300 hover:bg-gray-50'
                         }`}
                     >
@@ -2956,12 +4149,11 @@ function ComparisonPage({ scenarios, navigateTo }) {
             <div className="overflow-x-auto mb-8">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Parameters Comparison</h3>
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <label className="checkbox-container text-sm text-gray-600">
                         <input 
                             type="checkbox" 
                             checked={hideIdentical}
                             onChange={handleHideIdenticalChange}
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                         />
                         Hide identical information
                     </label>
@@ -3007,7 +4199,7 @@ function ComparisonPage({ scenarios, navigateTo }) {
             {/* Top 3 Sites Comparison */}
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Top 3 Sites Comparison</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="responsive-grid">
                     {scenarios.map(s => (
                         <div key={'summary-'+s.id} className="border border-gray-200 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-4">
@@ -3074,7 +4266,7 @@ function ComparisonPage({ scenarios, navigateTo }) {
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Performance Comparison</h3>
                 
                 {/* Enhanced Performance Metrics */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="responsive-grid mb-8">
                     {scenarios.map(s => {
                         const avgMatchScore = Math.round(s.siteRankings.reduce((sum, site) => sum + site.matchScore, 0) / s.siteRankings.length);
                         const avgCompositeScore = Math.round(s.siteRankings.reduce((sum, site) => sum + site.compositeScore, 0) / s.siteRankings.length);
@@ -3183,7 +4375,7 @@ function ComparisonPage({ scenarios, navigateTo }) {
             {/* Key Insights */}
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Insights</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="responsive-grid">
                     {scenarios.map(s => {
                         const topSite = s.siteRankings[0];
                         const avgScore = Math.round(s.siteRankings.reduce((sum, site) => sum + site.matchScore, 0) / s.siteRankings.length);
@@ -3288,7 +4480,7 @@ function SiteDetailPage({ site, scenario, navigateTo }) {
     const { details } = site;
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
                         <header className="mb-8">
                 <button onClick={() => navigateTo('results', scenario)} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3403,40 +4595,28 @@ function getMatchScoreReasoning(matchScore, siteDetails) {
     return reasoning;
 }
 
-// --- Gemini API Helper ---
+// --- Mock AI Response Helper (Replaces Gemini API) ---
 async function callGemini(prompt, retries = 3, delay = 1000) {
-    const apiKey = ""; // Leave empty, will be handled by the environment
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    const payload = {
-        contents: [{ role: "user", parts: [{ text: prompt }] }]
+    // Mock responses based on prompt content
+    const mockResponses = {
+        'site': 'Based on the site analysis, this location shows strong enrollment capabilities and experienced staff. The historical performance indicates reliable trial execution.',
+        'comparison': 'When comparing these sites, consider factors like enrollment rates, regulatory experience, and therapeutic area expertise. Each site has unique strengths.',
+        'recommendation': 'I recommend focusing on sites with proven track records in your therapeutic area. Consider both performance metrics and operational efficiency.',
+        'default': 'This is a mock AI response. In production, this would connect to a real AI service for clinical trial insights and recommendations.'
     };
-
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                return result.candidates[0].content.parts[0].text;
-            } else {
-                throw new Error("Invalid response structure from Gemini API");
-            }
-        } catch (error) {
-            if (i === retries - 1) throw error;
-            await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
-        }
+    
+    // Determine response based on prompt keywords
+    if (prompt.toLowerCase().includes('site')) {
+        return mockResponses.site;
+    } else if (prompt.toLowerCase().includes('compar') || prompt.toLowerCase().includes('compare')) {
+        return mockResponses.comparison;
+    } else if (prompt.toLowerCase().includes('recommend') || prompt.toLowerCase().includes('suggest')) {
+        return mockResponses.recommendation;
+    } else {
+        return mockResponses.default;
     }
 }
 
@@ -3525,12 +4705,11 @@ function SiteComparisonPage({ navigateTo }) {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
                 <div className="flex justify-between items-center p-4 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900">Detailed Site Comparison</h3>
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <label className="checkbox-container text-sm text-gray-600">
                         <input 
                             type="checkbox" 
                             checked={hideIdentical}
                             onChange={handleHideIdenticalChange}
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                         />
                         Hide identical information
                     </label>
