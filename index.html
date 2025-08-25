@@ -1609,51 +1609,14 @@ function App() {
         return scenarios;
     }
 
-    // Force complete cache clearing and data refresh
+    // Initialize scenarios data (only runs once on mount)
     useEffect(() => {
-        // Clear all localStorage data
-        localStorage.clear();
-        console.log('Completely cleared all cached data');
-        
-        // Force regenerate scenarios with new structure
-        const freshScenarios = generateScenarios(50);
-        console.log('Regenerated scenarios with new structure:');
-        freshScenarios.slice(0, 10).forEach(scenario => {
-            console.log(`Scenario ${scenario.id}: ${scenario.title} -> Project ${scenario.projectId}`);
-        });
-        
-        // Update the scenarios state
-        setScenarios(freshScenarios);
-        
-        // Verify project assignment
-        console.log('=== PROJECT-SCENARIO ASSIGNMENT VERIFICATION ===');
-        const project1Scenarios = freshScenarios.filter(s => s.projectId === 1);
-        const project2Scenarios = freshScenarios.filter(s => s.projectId === 2);
-        const project3Scenarios = freshScenarios.filter(s => s.projectId === 3);
-        const project4Scenarios = freshScenarios.filter(s => s.projectId === 4);
-        const project5Scenarios = freshScenarios.filter(s => s.projectId === 5);
-        const project6Scenarios = freshScenarios.filter(s => s.projectId === 6);
-        const project7Scenarios = freshScenarios.filter(s => s.projectId === 7);
-        const project8Scenarios = freshScenarios.filter(s => s.projectId === 8);
-        const project9Scenarios = freshScenarios.filter(s => s.projectId === 9);
-        const project10Scenarios = freshScenarios.filter(s => s.projectId === 10);
-        const project11Scenarios = freshScenarios.filter(s => s.projectId === 11);
-        const project12Scenarios = freshScenarios.filter(s => s.projectId === 12);
-        
-        console.log(`Project 1 (Neurology): ${project1Scenarios.length} scenarios`);
-        console.log(`Project 2 (Oncology): ${project2Scenarios.length} scenarios`);
-        console.log(`Project 3 (Cardiovascular): ${project3Scenarios.length} scenarios`);
-        console.log(`Project 4 (Rheumatology): ${project4Scenarios.length} scenarios`);
-        console.log(`Project 5 (Respiratory): ${project5Scenarios.length} scenarios`);
-        console.log(`Project 6 (Endocrinology): ${project6Scenarios.length} scenarios`);
-        console.log(`Project 7 (Psychiatry): ${project7Scenarios.length} scenarios`);
-        console.log(`Project 8 (Dermatology): ${project8Scenarios.length} scenarios`);
-        console.log(`Project 9 (Hematology): ${project9Scenarios.length} scenarios`);
-        console.log(`Project 10 (Gastroenterology): ${project10Scenarios.length} scenarios`);
-        console.log(`Project 11 (Nephrology): ${project11Scenarios.length} scenarios`);
-        console.log(`Project 12 (Ophthalmology): ${project12Scenarios.length} scenarios`);
-        console.log('Total scenarios:', freshScenarios.length);
-        console.log('===============================================');
+        // Generate initial scenarios if none exist
+        if (scenarios.length === 0) {
+            const initialScenarios = generateScenarios(50);
+            setScenarios(initialScenarios);
+            console.log('Initialized scenarios:', initialScenarios.length);
+        }
     }, []);
 
 
@@ -1666,19 +1629,39 @@ function App() {
             timestamp: Date.now(),
             expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
         };
+        console.log('Setting session:', {
+            page,
+            data: data ? 'data provided' : 'no data',
+            expiresAt: new Date(sessionData.expiresAt).toLocaleString()
+        });
         localStorage.setItem('session', JSON.stringify(sessionData));
         localStorage.setItem('currentPage', page);
     };
 
     const getSession = () => {
         const sessionStr = localStorage.getItem('session');
-        if (!sessionStr) return null;
+        if (!sessionStr) {
+            console.log('No session found in localStorage');
+            return null;
+        }
         
         try {
             const session = JSON.parse(sessionStr);
             const now = Date.now();
             
+            console.log('Session found:', {
+                page: session.page,
+                expiresAt: new Date(session.expiresAt).toLocaleString(),
+                timeRemaining: Math.round((session.expiresAt - now) / (1000 * 60 * 60)) + ' hours'
+            });
+            
             // Check if session has expired
+            console.log('Session expiration check:', {
+                now: new Date(now).toLocaleString(),
+                expiresAt: new Date(session.expiresAt).toLocaleString(),
+                isExpired: now > session.expiresAt
+            });
+            
             if (now > session.expiresAt) {
                 console.log('Session expired, clearing...');
                 localStorage.removeItem('session');
@@ -1687,15 +1670,17 @@ function App() {
             
             // Extend session if it's close to expiring (within 2 hours)
             if (session.expiresAt - now < (2 * 60 * 60 * 1000)) {
-                console.log('Extending session...');
+                console.log('Session expiring soon, extending...');
                 const extendedSession = {
                     ...session,
                     expiresAt: Date.now() + (24 * 60 * 60 * 1000) // Extend to 24 hours
                 };
                 localStorage.setItem('session', JSON.stringify(extendedSession));
+                console.log('Session extended to:', new Date(extendedSession.expiresAt).toLocaleString());
                 return extendedSession;
             }
             
+            console.log('Session valid, returning...');
             return session;
         } catch (error) {
             console.error('Error parsing session:', error);
@@ -1770,34 +1755,7 @@ function App() {
     };
 
     // --- Effects ---
-    useEffect(() => {
-        // Check for valid session first
-        const session = getSession();
-        if (session && session.page !== 'login') {
-            // Valid session exists, restore the page
-            setCurrentPage(session.page);
-            
-            // If session has data, restore it
-            if (session.data) {
-                // Restore scenario data if available
-                if (session.data.scenario) {
-                    setCurrentScenario(session.data.scenario);
-                }
-                if (session.data.comparisonScenarios) {
-                    setComparisonScenarios(session.data.comparisonScenarios);
-                }
-                if (session.data.site) {
-                    setCurrentSite(session.data.site);
-                }
-            }
-        } else {
-            // No valid session, default to login page
-            setCurrentPage('login');
-        }
-        
-        // Set loading to false after session check
-        setIsLoading(false);
-    }, []);
+    // Session restoration is now handled in the dedicated useEffect below
 
     // Initialize chat messages when scenario changes
     useEffect(() => {
@@ -1854,44 +1812,78 @@ function App() {
 
     // Handle page restoration on refresh
     useEffect(() => {
+        console.log('Session restoration useEffect triggered');
+        console.log('Current localStorage state:', {
+            session: localStorage.getItem('session'),
+            currentPage: localStorage.getItem('currentPage')
+        });
+        
         // Check if we have a valid session
         const session = getSession();
         if (session && session.page !== 'login') {
-            // If we're trying to restore a page that requires data, check if data exists
-            // Only redirect if we're not actively navigating to a new page
-            if ((session.page === 'results' && !currentScenario) ||
-                (session.page === 'comparison' && !comparisonScenarios) ||
-                (session.page === 'siteDetail' && !currentSite)) {
-                // Check if we're in the middle of navigation
-                const isNavigating = localStorage.getItem('isNavigating');
-                if (!isNavigating) {
-                                // Redirect to projects if required data is missing
-            setCurrentPage('projects');
-            setSession('projects');
+            console.log('Restoring session for page:', session.page);
+            
+            // Set the current page from session
+            setCurrentPage(session.page);
+            
+            // If session has data, restore it
+            if (session.data) {
+                console.log('Restoring session data:', session.data);
+                
+                // Restore scenario data if available
+                if (session.data.scenario) {
+                    setCurrentScenario(session.data.scenario);
+                }
+                if (session.data.comparisonScenarios) {
+                    setComparisonScenarios(session.data.comparisonScenarios);
+                }
+                if (session.data.site) {
+                    setCurrentSite(session.data.site);
+                }
+                if (session.data.project) {
+                    setCurrentProject(session.data.project);
                 }
             }
+        } else {
+            console.log('No valid session found, defaulting to login');
+            setCurrentPage('login');
         }
-    }, [currentScenario, comparisonScenarios, currentSite]);
+        
+        // Set loading to false after session check
+        console.log('Setting isLoading to false');
+        setIsLoading(false);
+    }, []); // Only run once on mount
 
     // Session refresh mechanism - extend session on user activity
     useEffect(() => {
         const handleUserActivity = () => {
             const session = getSession();
             if (session && session.page !== 'login') {
-                // Extend session by 1 hour from current activity
-                setSession(session.page, session.data);
+                // Extend session by 24 hours from current activity
+                const extendedSession = {
+                    ...session,
+                    expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+                };
+                localStorage.setItem('session', JSON.stringify(extendedSession));
             }
         };
 
-        // Listen for user activity events
+        // Listen for user activity events (throttled to avoid excessive calls)
+        let timeoutId;
+        const throttledHandler = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(handleUserActivity, 5000); // Only extend every 5 seconds
+        };
+
         const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
         events.forEach(event => {
-            document.addEventListener(event, handleUserActivity, { passive: true });
+            document.addEventListener(event, throttledHandler, { passive: true });
         });
 
         return () => {
+            clearTimeout(timeoutId);
             events.forEach(event => {
-                document.removeEventListener(event, handleUserActivity);
+                document.removeEventListener(event, throttledHandler);
             });
         };
     }, []);
@@ -2550,7 +2542,7 @@ function ProjectsPage({ projects, setProjects, navigateTo }) {
             </header>
 
             <div className="p-4 bg-white rounded-lg border border-gray-200 mb-6">
-                <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     <input
                         type="text"
                         placeholder="Search project name, description, therapeutic area..."
@@ -2558,8 +2550,8 @@ function ProjectsPage({ projects, setProjects, navigateTo }) {
                         onChange={(e) => setFilter(e.target.value)}
                         className="flex-1 min-w-[240px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
-                    <div className="flex flex-wrap items-center gap-3">
-                        <CustomDropdown options={therapeuticAreaOptions} selected={therapeuticAreaFilter} onSelect={setTherapeuticAreaFilter} label="Therapeutic Area:" />
+                    <div className="flex flex-wrap items-center gap-4">
+                        <CustomDropdown options={therapeuticAreaOptions} selected={therapeuticAreaFilter} onSelect={setTherapeuticAreaFilter} label="Area:" />
                         <CustomDropdown options={statusOptions} selected={statusFilter} onSelect={setStatusFilter} label="Status:" />
                     </div>
                 </div>
@@ -2987,7 +2979,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
             </header>
 
             <div className="p-4 bg-white rounded-lg border border-gray-200 mb-6">
-                <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     <input
                         type="text"
                         placeholder="Search title, author, phase, country..."
@@ -2995,8 +2987,8 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                         onChange={(e) => setFilter(e.target.value)}
                         className="flex-1 min-w-[240px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
-                    <div className="flex flex-wrap items-center gap-3">
-                    <CustomDropdown options={createdByOptions} selected={createdByFilter} onSelect={setCreatedByFilter} label="Performed By:" />
+                    <div className="flex flex-wrap items-center gap-4">
+                    <CustomDropdown options={createdByOptions} selected={createdByFilter} onSelect={setCreatedByFilter} label="Author:" />
                     <CustomDropdown options={phaseOptions} selected={phaseFilter} onSelect={setPhaseFilter} label="Phase:" />
                     <CustomDropdown options={countryOptions} selected={countryFilter} onSelect={setCountryFilter} label="Country:" />
                     </div>
@@ -4093,16 +4085,16 @@ function CustomDropdown({ options, selected, onSelect, label }) {
 
     return (
         <div className="flex items-center gap-2" ref={dropdownRef}>
-            <label className="text-sm font-medium text-gray-700">{label}</label>
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">{label}</label>
             <div className="relative">
-                <button type="button" onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-32 px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm">
-                    <span>{selected}</span>
-                    <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+                <button type="button" onClick={() => setIsOpen(!isOpen)} className="flex items-center justify-between w-48 px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm">
+                    <span className="truncate">{selected}</span>
+                    <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'transform rotate-180' : ''}`} />
                 </button>
                 {isOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                    <div className="absolute z-10 w-48 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                         {options.map(option => (
-                            <div key={option} onClick={() => { onSelect(option); setIsOpen(false); }} className="px-3 py-2 cursor-pointer hover:bg-gray-100">
+                            <div key={option} onClick={() => { onSelect(option); setIsOpen(false); }} className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm">
                                 {option}
                             </div>
                         ))}
