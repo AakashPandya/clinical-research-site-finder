@@ -2912,22 +2912,27 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
     };
 
     const handleCompare = () => {
-        const scenariosToCompare = scenarios.filter(s => selectedForComparison.includes(s.id));
+        // Use projectScenarios instead of global scenarios to ensure proper filtering
+        const scenariosToCompare = projectScenarios.filter(s => selectedForComparison.includes(s.id));
         
-        console.log('Comparing scenarios:', scenariosToCompare);
+        console.log('Selected IDs for comparison:', selectedForComparison);
+        console.log('Project scenarios available:', projectScenarios.length);
+        console.log('Scenarios to compare:', scenariosToCompare);
         
         if (scenariosToCompare.length < 2) {
             console.log('Need at least 2 scenarios to compare');
+            alert('Please select at least 2 scenarios to compare.');
             return;
         }
         
-        // Check if all scenarios are from the same project
+        // Check if all scenarios are from the same project (should always be true with projectScenarios)
         if (scenariosToCompare.length > 0) {
             const firstProjectId = scenariosToCompare[0].projectId;
             const allSameProject = scenariosToCompare.every(s => s.projectId === firstProjectId);
             
             if (!allSameProject) {
                 console.log('Comparison blocked: Scenarios must be from the same project');
+                alert('All scenarios must be from the same project.');
                 return;
             }
         }
@@ -2936,7 +2941,14 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
         console.log('Navigating to comparison with:', scenariosToCompare);
         console.log('Scenarios to compare type:', typeof scenariosToCompare, 'Length:', scenariosToCompare.length);
         console.log('First scenario:', scenariosToCompare[0]);
-        navigateTo('comparison', scenariosToCompare);
+        
+        // Ensure we have valid scenario data
+        if (scenariosToCompare.every(s => s && s.id && s.title)) {
+            navigateTo('comparison', scenariosToCompare);
+        } else {
+            console.error('Invalid scenario data detected:', scenariosToCompare);
+            alert('Error: Invalid scenario data. Please try again.');
+        }
     };
 
     const filteredAndSortedScenarios = useMemo(() => {
