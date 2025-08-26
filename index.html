@@ -25,11 +25,6 @@
       window.exports = window.exports || {};
       window.module = window.module || { exports: window.exports };
       // Redirect any deep link like /login to root so SPA works and URL shows domain only
-      const repoName = "clinical-research-site-finder"; // your repo name
-  const basePath = location.hostname.includes("github.io")
-    ? `/${repoName}/`
-    : "/";
- 
     </script>
     <style>
         .identical-row {
@@ -317,8 +312,14 @@
         .responsive-grid {
             display: grid;
             gap: 1.5rem;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             width: 100%;
+        }
+
+        /* Ensure cards handle content overflow properly */
+        .responsive-grid > div {
+            min-width: 0;
+            overflow: hidden;
         }
 
         /* Mobile Responsiveness */
@@ -400,7 +401,7 @@
 
         @media (min-width: 769px) and (max-width: 1024px) {
             .responsive-grid {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
                 gap: 1.5rem;
                 width: 100%;
             }
@@ -679,17 +680,11 @@ const ArchiveIcon = ({ className }) => (
   </svg>
 );
 
-const CalendarIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"/></svg>
-);
 const UploadIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
 );
 const ChevronDownIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-);
-const ArrowDownIcon = ({ className }) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
 );
 const LoadingSpinner = ({ className }) => (
     <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -729,10 +724,10 @@ function ModernDropdown({ options, selected, onSelect, placeholder, className = 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-between w-full px-3 py-2 text-sm bg-white/10 text-white border border-white/20 rounded-md hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
+                className="flex items-center justify-between min-w-[280px] max-w-[400px] px-3 py-2 text-sm bg-white/10 text-white border border-white/20 rounded-md hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
             >
-                <div className="text-left">
-                    <span className={selectedOption ? 'text-white' : 'text-white/70'}>
+                <div className="text-left min-w-0 flex-1">
+                    <span className={`block ${selectedOption ? 'text-white' : 'text-white/70'} truncate`}>
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
                     {selectedOption && selectedOption.subtitle && (
@@ -741,11 +736,11 @@ function ModernDropdown({ options, selected, onSelect, placeholder, className = 
                         </div>
                     )}
                 </div>
-                <ChevronDownIcon className={`w-4 h-4 text-white/70 transition-transform ${isOpen ? 'rotate-180' : ''} ml-2`} />
+                <ChevronDownIcon className={`w-4 h-4 text-white/70 transition-transform ${isOpen ? 'rotate-180' : ''} ml-2 flex-shrink-0`} />
             </button>
             
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200 max-h-60 overflow-auto">
+                <div className="absolute right-0 mt-2 w-[400px] max-w-[90vw] bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200 max-h-60 overflow-auto">
                     {options.map((option) => (
                         <button
                             key={option.value}
@@ -759,9 +754,9 @@ function ModernDropdown({ options, selected, onSelect, placeholder, className = 
                                     : 'text-gray-700'
                             }`}
                         >
-                            <div className="font-medium">{option.label}</div>
+                            <div className="font-medium truncate">{option.label}</div>
                             {option.subtitle && (
-                                <div className="text-xs text-gray-500 mt-1">{option.subtitle}</div>
+                                <div className="text-xs text-gray-500 mt-1 truncate">{option.subtitle}</div>
                             )}
                         </button>
                     ))}
@@ -776,7 +771,7 @@ function ModernDropdown({ options, selected, onSelect, placeholder, className = 
 
 // --- Main App Component ---
 function App() {
-    const [currentPage, setCurrentPage] = useState('login'); // Always start with login, let URL restoration handle the rest
+    const [currentPage, setCurrentPage] = useState('projects'); // Always start with projects for better UX
     const [projects, setProjects] = useState([]);
     const [currentProject, setCurrentProject] = useState(null);
     const [scenarios, setScenarios] = useState([]);
@@ -785,17 +780,13 @@ function App() {
     const [comparisonScenarios, setComparisonScenarios] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [chatMessages, setChatMessages] = useState([]);
-    const [isExportingPdf, setIsExportingPdf] = useState(false);
     const [isExportingExcel, setIsExportingExcel] = useState(false);
     const [isChatLoading, setIsChatLoading] = useState(false);
-    const [expandedRows, setExpandedRows] = useState(new Set());
-    const [itemsPerPage, setItemsPerPage] = useState(6);
     const [selectedForComparison, setSelectedForComparison] = useState([]);
     const [input, setInput] = useState({
         email: '',
         password: ''
     });
-    const [hasError, setHasError] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -819,13 +810,11 @@ function App() {
             competition: 15
         }
     });
-    const [isUploading, setIsUploading] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
 
     // --- Utility Functions ---
-    const isGitHubPages = () => window.location.hostname === 'aakashpandya.github.io';
-    const getBasePath = () => isGitHubPages() ? '/clinical-research-site-finder' : '';
+    const getBasePath = () => window.location.hostname === 'aakashpandya.github.io' ? '/clinical-research-site-finder' : '';
 
     // --- Data ---
     // Initialize mock projects data and link scenarios
@@ -1056,21 +1045,16 @@ function App() {
     // Link scenarios to projects after both are loaded - ensure one-to-many relationship
     useEffect(() => {
         if (projects.length > 0 && scenarios.length > 0) {
+            // Check if projects already have scenarios linked to prevent infinite loop
+            const hasScenariosLinked = projects.some(project => project.scenarios && project.scenarios.length > 0);
+            if (hasScenariosLinked) return;
+            
             // Each scenario belongs to exactly one project (no duplication)
             const updatedProjects = projects.map(project => ({
                 ...project,
                 scenarios: scenarios.filter(scenario => scenario.projectId === project.id)
             }));
             setProjects(updatedProjects);
-            
-            // Log to verify one-to-many relationship
-            console.log('Project-Scenario Distribution (One-to-Many):');
-            updatedProjects.forEach(project => {
-                console.log(`${project.name}: ${project.scenarios.length} scenarios`);
-                project.scenarios.forEach(scenario => {
-                    console.log(`  - ${scenario.title} (ID: ${scenario.id}, ProjectID: ${scenario.projectId})`);
-                });
-            });
             
             // Verify no scenario duplication
             const allScenarioIds = new Set();
@@ -1079,9 +1063,6 @@ function App() {
                     allScenarioIds.add(scenario.id);
                 });
             });
-            
-            console.log(`Total unique scenarios across all projects: ${allScenarioIds.size}`);
-            console.log(`Total scenarios in database: ${scenarios.length}`);
             
             if (allScenarioIds.size !== scenarios.length) {
                 console.warn('Warning: Some scenarios may be duplicated across projects!');
@@ -1279,9 +1260,6 @@ function App() {
     }
 
     // Removed old hardcoded siteRankingData - now generated dynamically for each scenario
-
-    
-    const defaultCriteriaWeights = { patientAvailability: 60, enrollmentRate: 70, startupSpeed: 50, piMatch: 80, competition: 40 };
 
     function generateScenarios(count) {
         const countries = ['USA', 'Canada', 'Germany', 'UK', 'France', 'Spain', 'Italy', 'Netherlands', 'Switzerland', 'Australia', 'Japan', 'South Korea'];
@@ -1680,7 +1658,7 @@ function App() {
         if (scenarios.length === 0) {
             const initialScenarios = generateScenarios(50);
             setScenarios(initialScenarios);
-            console.log('Initialized scenarios:', initialScenarios.length);
+    
         }
     }, []);
 
@@ -1694,11 +1672,7 @@ function App() {
             timestamp: Date.now(),
             expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours from now
         };
-        console.log('Setting session:', {
-            page,
-            data: data ? 'data provided' : 'no data',
-            expiresAt: new Date(sessionData.expiresAt).toLocaleString()
-        });
+
         localStorage.setItem('session', JSON.stringify(sessionData));
         localStorage.setItem('currentPage', page);
     };
@@ -1706,7 +1680,6 @@ function App() {
     const getSession = () => {
         const sessionStr = localStorage.getItem('session');
         if (!sessionStr) {
-            console.log('No session found in localStorage');
             return null;
         }
         
@@ -1714,38 +1687,22 @@ function App() {
             const session = JSON.parse(sessionStr);
             const now = Date.now();
             
-            console.log('Session found:', {
-                page: session.page,
-                expiresAt: new Date(session.expiresAt).toLocaleString(),
-                timeRemaining: Math.round((session.expiresAt - now) / (1000 * 60 * 60)) + ' hours'
-            });
-            
             // Check if session has expired
-            console.log('Session expiration check:', {
-                now: new Date(now).toLocaleString(),
-                expiresAt: new Date(session.expiresAt).toLocaleString(),
-                isExpired: now > session.expiresAt
-            });
-            
             if (now > session.expiresAt) {
-                console.log('Session expired, clearing...');
                 localStorage.removeItem('session');
                 return null;
             }
             
             // Extend session if it's close to expiring (within 2 hours)
             if (session.expiresAt - now < (2 * 60 * 60 * 1000)) {
-                console.log('Session expiring soon, extending...');
                 const extendedSession = {
                     ...session,
                     expiresAt: Date.now() + (24 * 60 * 60 * 1000) // Extend to 24 hours
                 };
                 localStorage.setItem('session', JSON.stringify(extendedSession));
-                console.log('Session extended to:', new Date(extendedSession.expiresAt).toLocaleString());
                 return extendedSession;
             }
             
-            console.log('Session valid, returning...');
             return session;
         } catch (error) {
             console.error('Error parsing session:', error);
@@ -1824,13 +1781,13 @@ function App() {
 
     // Initialize chat messages when scenario changes
     useEffect(() => {
-        if (currentScenario?.siteRankings?.[0]) {
+        if (currentScenario?.siteRankings?.[0] && chatMessages.length === 0) {
             setChatMessages([{ 
                 sender: 'bot', 
                 text: `Welcome! I can see your scenario "${currentScenario.title}" has ${currentScenario.siteRankings.length} sites. The top-ranked site is ${currentScenario.siteRankings[0].site} with a ${currentScenario.siteRankings[0].matchScore}% match score. How can I help you analyze these results?` 
             }]);
         }
-    }, [currentScenario]);
+    }, [currentScenario, chatMessages.length]);
 
     // Handle click outside profile dropdown
     useEffect(() => {
@@ -1877,48 +1834,24 @@ function App() {
 
     // Handle page restoration on refresh
     useEffect(() => {
-        console.log('Session restoration useEffect triggered');
-        console.log('Current localStorage state:', {
-            session: localStorage.getItem('session'),
-            currentPage: localStorage.getItem('currentPage')
-        });
+        // Prevent multiple executions
+        if (!isLoading) return;
         
-        // Check if we have a valid session
-        const session = getSession();
-        if (session && session.page !== 'login') {
-            console.log('Restoring session for page:', session.page);
-            
-            // Set the current page from session
-            setCurrentPage(session.page);
-            
-            // If session has data, restore it
-            if (session.data) {
-                console.log('Restoring session data:', session.data);
-                
-                // Restore scenario data if available
-                if (session.data.scenario) {
-                    setCurrentScenario(session.data.scenario);
-                }
-                if (session.data.comparisonScenarios) {
-                    console.log('Restoring comparison scenarios from session:', session.data.comparisonScenarios);
-                    console.log('Session comparison scenarios type:', typeof session.data.comparisonScenarios);
-                    console.log('Session comparison scenarios length:', session.data.comparisonScenarios ? session.data.comparisonScenarios.length : 'undefined');
-                    setComparisonScenarios(session.data.comparisonScenarios);
-                }
-                if (session.data.site) {
-                    setCurrentSite(session.data.site);
-                }
-                if (session.data.project) {
-                    setCurrentProject(session.data.project);
-                }
-            }
-        } else {
-            console.log('No valid session found, defaulting to login');
-            setCurrentPage('login');
-        }
+        // Always redirect to projects page on reload for better UX
+        setCurrentPage('projects');
         
-        // Set loading to false after session check
-        console.log('Setting isLoading to false');
+        // Clear any previous session data to start fresh
+        setCurrentProject(null);
+        setCurrentScenario(null);
+        setCurrentSite(null);
+        setComparisonScenarios(null);
+        
+        // Clear session data from localStorage
+        localStorage.removeItem('session');
+        localStorage.removeItem('pageData');
+        localStorage.removeItem('currentPage');
+        
+        // Set loading to false after redirect
         setIsLoading(false);
     }, []); // Only run once on mount
 
@@ -1972,9 +1905,7 @@ function App() {
             setCurrentScenario(scenarioWithId);
             // Save data to localStorage for refresh persistence
             localStorage.setItem('pageData', JSON.stringify({ results: [scenarioWithId] }));
-        } else if (page === 'comparison') {
-            console.log('Setting comparison scenarios:', data);
-            console.log('Data type:', typeof data, 'Data length:', data ? data.length : 'undefined');
+                } else if (page === 'comparison') {
             setComparisonScenarios(data);
             localStorage.setItem('pageData', JSON.stringify({ comparison: data }));
         } else if (page === 'siteDetail') {
@@ -1984,13 +1915,13 @@ function App() {
                 currentScenario: currentScenario 
             }));
         } else if (page === 'scenarios') {
-            // For scenarios page, set current project if data is provided
-            if (data) {
-                setCurrentProject(data);
-                localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios', project: data }));
-            } else {
-                localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios' }));
+            // Scenarios page always requires a project - redirect to projects if none provided
+            if (!data) {
+                navigateTo('projects');
+                return;
             }
+            setCurrentProject(data);
+            localStorage.setItem('pageData', JSON.stringify({ page: 'scenarios', project: data }));
         } else if (page === 'create') {
             // For create page, just save the page info
             localStorage.setItem('pageData', JSON.stringify({ page: 'create' }));
@@ -2008,11 +1939,12 @@ function App() {
         // Update URL for proper routing with data
         let url;
         if (page === 'scenarios') {
+            // Scenarios always require a project - use project ID in URL
             if (data && data.id) {
-                // Treat scenarios like project details - use project ID in URL
                 url = `${basePath}/scenarios/${data.id}`;
             } else {
-                url = `${basePath}/scenarios`;
+                // This shouldn't happen now, but fallback to projects
+                url = `${basePath}/projects`;
             }
         } else if (page === 'results' && data) {
             const scenarioId = data.id || Date.now(); // Ensure we always have an ID
@@ -2034,21 +1966,17 @@ function App() {
         const path = window.location.pathname;
         const pathParts = path.split('/').filter(Boolean);
         
-        // Detect if we're on GitHub Pages or local development
-        const isOnGitHubPages = isGitHubPages();
-        
-        // For GitHub Pages, check if we're on the root or index.html
+        // Always redirect to projects on reload for better UX
         if (pathParts.length === 0 || pathParts[pathParts.length - 1] === 'index.html') {
-            // Root path or index.html - show login page
-            console.log('Root path or index.html, setting to login');
-            setCurrentPage('login');
+            // Root path or index.html - redirect to projects
+            setCurrentPage('projects');
             return;
         }
         
                     // Handle routing based on environment
             let page, scenarioId, siteCode, projectId;
             
-            if (isOnGitHubPages) {
+            if (window.location.hostname === 'aakashpandya.github.io') {
                 // GitHub Pages structure: /clinical-research-site-finder/page
                 if (pathParts[0] === 'clinical-research-site-finder') {
                     if (pathParts.length === 1) {
@@ -2065,7 +1993,6 @@ function App() {
                     } else if (page === 'scenarios' && pathParts.length > 2) {
                         // Handle project-specific scenario URLs: /scenarios/1 (treat like project details)
                         projectId = parseInt(pathParts[2]);
-                        console.log('Project ID from GitHub Pages URL:', projectId);
                     }
                 }
             } else {
@@ -2078,11 +2005,10 @@ function App() {
                 } else if (page === 'scenarios' && pathParts.length > 1) {
                     // Handle project-specific scenario URLs: /scenarios/1 (treat like project details)
                     projectId = parseInt(pathParts[1]);
-                    console.log('Project ID from local URL:', projectId);
                 }
             }
         
-        console.log('Page from URL:', page, 'Scenario ID:', scenarioId, 'Site Code:', siteCode);
+
         
         if (!page) {
             setCurrentPage('login');
@@ -2095,44 +2021,42 @@ function App() {
         try {
             if (savedData) {
                 parsedData = JSON.parse(savedData);
-                console.log('Parsed saved data:', parsedData);
             }
         } catch (e) {
             console.error('Failed to parse saved data:', e);
         }
 
         if (page === 'scenarios') {
-            console.log('Setting page to scenarios');
-            setCurrentPage('scenarios');
-            localStorage.setItem('currentPage', 'scenarios');
-            
-            // Check if we have a project ID in the URL (treat like project details)
+            // Scenarios page requires a project - check if we have a project ID in the URL
             if (projectId) {
-                console.log('Project ID from URL:', projectId);
-                
-                // Find the project and set it as current
                 const project = projects.find(p => p.id === projectId);
                 if (project) {
                     setCurrentProject(project);
-                    console.log('Set current project from URL:', project.name);
+                    setCurrentPage('scenarios');
+                    localStorage.setItem('currentPage', 'scenarios');
+                } else {
+                    // Project not found, redirect to projects
+                    setCurrentPage('projects');
+                    localStorage.setItem('currentPage', 'projects');
                 }
+            } else {
+                // No project ID in URL, redirect to projects
+                setCurrentPage('projects');
+                localStorage.setItem('currentPage', 'projects');
             }
             return;
         }
         
         if (page === 'create') {
-            console.log('Setting page to create');
             setCurrentPage('create');
             localStorage.setItem('currentPage', 'create');
             return;
         }
         
         if (page === 'results' && scenarioId) {
-            console.log('Looking for scenario with ID:', scenarioId);
             if (parsedData?.results) {
                 const scenario = parsedData.results.find(s => s.id === scenarioId);
                 if (scenario) {
-                    console.log('Found scenario, setting to results page');
                     setCurrentScenario(scenario);
                     setCurrentPage('results');
                     localStorage.setItem('currentPage', 'results');
@@ -2142,11 +2066,9 @@ function App() {
         }
         
         if (page === 'site' && siteCode) {
-            console.log('Looking for site with code:', siteCode);
             if (parsedData?.siteDetail) {
                 const site = parsedData.siteDetail.find(s => s.siteCode === siteCode);
                 if (site) {
-                    console.log('Found site, setting to siteDetail page');
                     setCurrentSite(site);
                     if (parsedData.currentScenario) {
                         setCurrentScenario(parsedData.currentScenario);
@@ -2173,7 +2095,6 @@ function App() {
         }
         
         // If no data found or invalid route, show login page instead of redirecting
-        console.log('Unknown page or data not found, showing login page');
         setCurrentPage('login');
         localStorage.setItem('currentPage', 'login');
         
@@ -2185,8 +2106,6 @@ function App() {
     
     // --- Page Components ---
     const renderPage = () => {
-        console.log('renderPage called, currentPage:', currentPage, 'currentScenario:', currentScenario);
-        
         if (isLoading) {
             return <div className="flex items-center justify-center h-screen"><LoadingSpinner className="w-12 h-12 text-blue-600" /></div>;
         }
@@ -2201,14 +2120,11 @@ function App() {
             case 'create':
                 return <CreateScenarioPage navigateTo={navigateTo} onSave={handleSaveScenario} siteRankingData={generateSites(25, Date.now())} />;
             case 'results':
-                return currentScenario ? <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} chatMessages={chatMessages} isChatLoading={isChatLoading} onSubmitChat={handleChatSubmit} /> : null;
+                return currentScenario ? <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} chatMessages={chatMessages} isChatLoading={isChatLoading} onSubmitChat={handleChatSubmit} currentProject={currentProject} /> : null;
             case 'comparison':
-                console.log('Rendering comparison page with scenarios:', comparisonScenarios);
-                console.log('Comparison scenarios state:', comparisonScenarios);
-                console.log('Comparison scenarios type:', typeof comparisonScenarios);
-                return <ComparisonPage scenarios={comparisonScenarios || []} navigateTo={navigateTo} projects={projects} />;
+                return <ComparisonPage scenarios={comparisonScenarios || []} navigateTo={navigateTo} projects={projects} currentProject={currentProject} />;
             case 'siteDetail':
-                return currentSite ? <SiteDetailPage site={currentSite} scenario={currentScenario} navigateTo={navigateTo} /> : null;
+                return currentSite ? <SiteDetailPage site={currentSite} scenario={currentScenario} navigateTo={navigateTo} currentProject={currentProject} /> : null;
             case 'siteComparison':
                 return <SiteComparisonPage navigateTo={navigateTo} />;
             default:
@@ -2216,10 +2132,7 @@ function App() {
         }
     };
 
-    // --- Error Boundary ---
-    if (hasError) {
-        return <div>Error: {hasError}</div>;
-    }
+
 
     return (
         <div className={`min-h-screen ${currentPage === 'login' ? 'bg-gray-100' : 'bg-gray-50'}`}>
@@ -2283,35 +2196,37 @@ function App() {
                         <div className="flex items-center gap-3">
                             {/* Project Dropdown */}
                             {currentPage !== 'projects' && projects.length > 0 && (
-                                <ModernDropdown
-                                    options={[
-                                        { value: '', label: 'Select Project' },
-                                        ...projects.map(project => ({
-                                            value: project.id,
-                                            label: `${project.name} (${project.therapeuticArea})`,
-                                            subtitle: `${project.sponsor} • ${project.status}`
-                                        }))
-                                    ]}
-                                    selected={currentProject?.id || ''}
-                                    onSelect={(projectId) => {
-                                        if (projectId) {
-                                            const selectedProject = projects.find(p => p.id === projectId);
-                                            if (selectedProject) {
-                                                setCurrentProject(selectedProject);
-                                                // Clear any existing comparison selection when switching projects
+                                <div className="hidden md:block">
+                                    <ModernDropdown
+                                        options={[
+                                            { value: '', label: 'Select Project' },
+                                            ...projects.map(project => ({
+                                                value: project.id,
+                                                label: `${project.name} (${project.therapeuticArea})`,
+                                                subtitle: `${project.sponsor} • ${project.status}`
+                                            }))
+                                        ]}
+                                        selected={currentProject?.id || ''}
+                                        onSelect={(projectId) => {
+                                            if (projectId) {
+                                                const selectedProject = projects.find(p => p.id === projectId);
+                                                if (selectedProject) {
+                                                    setCurrentProject(selectedProject);
+                                                    // Clear any existing comparison selection when switching projects
+                                                    setComparisonScenarios(null);
+                                                    // Navigate to scenarios with the new project
+                                                    navigateTo('scenarios', selectedProject);
+                                                }
+                                            } else {
+                                                // If no project selected, clear current project and go to projects page
+                                                setCurrentProject(null);
                                                 setComparisonScenarios(null);
-                                                // Navigate to scenarios with the new project
-                                                navigateTo('scenarios', selectedProject);
+                                                navigateTo('projects');
                                             }
-                                        } else {
-                                            // If no project selected, clear current project and go to projects page
-                                            setCurrentProject(null);
-                                            setComparisonScenarios(null);
-                                            navigateTo('projects');
-                                        }
-                                    }}
-                                    placeholder="Select Project"
-                                />
+                                        }}
+                                        placeholder="Select Project"
+                                    />
+                                </div>
                             )}
                             
                             <div className="relative profile-dropdown">
@@ -2822,9 +2737,7 @@ function ProjectTable({ projects, navigateTo, requestSort, sortConfig }) {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Active Trials
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
+
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -2849,9 +2762,7 @@ function ProjectTable({ projects, navigateTo, requestSort, sortConfig }) {
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-900">{project.totalScenarios || 0}</td>
                                 <td className="px-6 py-4 text-sm text-gray-900">{project.activeTrials || 0}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <button className="text-indigo-600 hover:text-indigo-900">View</button>
-                                </td>
+
                             </tr>
                         ))}
                     </tbody>
@@ -2862,6 +2773,32 @@ function ProjectTable({ projects, navigateTo, requestSort, sortConfig }) {
 }
 
 function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject, setCurrentProject }) {
+    // Guard: scenarios page always requires a project - redirect to projects if none
+    useEffect(() => {
+        if (!currentProject) {
+            navigateTo('projects');
+        }
+    }, [currentProject, navigateTo]);
+
+    // Don't render anything while redirecting
+    if (!currentProject) {
+        return null;
+    }
+
+    // Breadcrumb component
+    const Breadcrumbs = () => (
+        <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+            <button 
+                onClick={() => navigateTo('projects')} 
+                className="hover:text-blue-600 transition-colors"
+            >
+                Projects
+            </button>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-900 font-medium">{currentProject.name}</span>
+        </nav>
+    );
+
     const [filter, setFilter] = useState('');
     const [showArchived, setShowArchived] = useState(false);
     const [createdByFilter, setCreatedByFilter] = useState('All');
@@ -2903,10 +2840,8 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
     };
 
     const handleSelectForComparison = (id) => {
-        console.log('Selecting scenario for comparison:', id);
         setSelectedForComparison(prev => {
             const newSelection = prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id];
-            console.log('New selection:', newSelection);
             return newSelection;
         });
     };
@@ -2915,38 +2850,15 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
         // Use projectScenarios instead of global scenarios to ensure proper filtering
         const scenariosToCompare = projectScenarios.filter(s => selectedForComparison.includes(s.id));
         
-        console.log('Selected IDs for comparison:', selectedForComparison);
-        console.log('Project scenarios available:', projectScenarios.length);
-        console.log('Scenarios to compare:', scenariosToCompare);
-        
         if (scenariosToCompare.length < 2) {
-            console.log('Need at least 2 scenarios to compare');
             alert('Please select at least 2 scenarios to compare.');
             return;
         }
-        
-        // Check if all scenarios are from the same project (should always be true with projectScenarios)
-        if (scenariosToCompare.length > 0) {
-            const firstProjectId = scenariosToCompare[0].projectId;
-            const allSameProject = scenariosToCompare.every(s => s.projectId === firstProjectId);
-            
-            if (!allSameProject) {
-                console.log('Comparison blocked: Scenarios must be from the same project');
-                alert('All scenarios must be from the same project.');
-                return;
-            }
-        }
-        
-        // Navigate to comparison page with the selected scenarios
-        console.log('Navigating to comparison with:', scenariosToCompare);
-        console.log('Scenarios to compare type:', typeof scenariosToCompare, 'Length:', scenariosToCompare.length);
-        console.log('First scenario:', scenariosToCompare[0]);
         
         // Ensure we have valid scenario data
         if (scenariosToCompare.every(s => s && s.id && s.title)) {
             navigateTo('comparison', scenariosToCompare);
         } else {
-            console.error('Invalid scenario data detected:', scenariosToCompare);
             alert('Error: Invalid scenario data. Please try again.');
         }
     };
@@ -3008,10 +2920,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
         setCurrentPage(1);
         setSortConfig({ key: 'createdDate', direction: 'descending' });
         
-        // Show project change notification
-        if (currentProject) {
-            console.log(`Switched to project: ${currentProject.name} (${currentProject.therapeuticArea})`);
-        }
+
     }, [currentProject]);
 
     // Adjust displayed items based on content height
@@ -3080,23 +2989,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
-                    <div className="flex items-center gap-2 mb-2 text-sm text-gray-600">
-                        <button onClick={() => navigateTo('projects')} className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">
-                            Projects
-                        </button>
-                        {currentProject && (
-                            <>
-                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                                <span className="text-gray-500">{currentProject.name}</span>
-                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                                <span className="text-gray-500">Scenarios</span>
-                            </>
-                        )}
-                    </div>
+                    <Breadcrumbs />
                     <button onClick={() => {
                         setCurrentProject(null);
                         navigateTo('projects');
@@ -3122,7 +3015,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                         )}
                     </div>
                     <p className="text-gray-500 mt-1">
-                        {currentProject ? `Manage scenarios for ${currentProject.therapeuticArea} project - ${projectScenarios.length} total scenarios, ${projectScenarios.filter(s => !s.isArchived).length} active trials` : 'Manage and review your clinical trial scenarios.'}
+                        Manage and review your clinical trial scenarios.
                     </p>
                     {currentProject && (
                         <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
@@ -3211,10 +3104,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                             </label>
                         </div>
                         <button 
-                            onClick={() => {
-                                console.log('Compare button clicked, selectedForComparison:', selectedForComparison);
-                                handleCompare();
-                            }} 
+                            onClick={handleCompare}
                             disabled={selectedForComparison.length < 2}
                             className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-colors ${
                                 selectedForComparison.length >= 2 
@@ -3264,36 +3154,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                 )}
             </div>
 
-            {/* Project Summary Section */}
-            {currentProject && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
-                    <h3 className="text-lg font-semibold text-indigo-800 mb-3">Project Overview</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
-                            <div className="text-2xl font-bold text-indigo-600">{projectScenarios.length}</div>
-                            <div className="text-sm text-indigo-700">Total Scenarios</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
-                            <div className="text-2xl font-bold text-green-600">
-                                {projectScenarios.filter(s => !s.isArchived).length}
-                            </div>
-                            <div className="text-sm text-green-700">Active Trials</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
-                            <div className="text-2xl font-bold text-blue-600">
-                                {currentProject.targetEnrollment?.toLocaleString() || 'N/A'}
-                            </div>
-                            <div className="text-sm text-blue-700">Target Enrollment</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
-                            <div className="text-2xl font-bold text-purple-600">
-                                {currentProject.estimatedCompletion || 'N/A'}
-                            </div>
-                            <div className="text-sm text-purple-700">Est. Completion</div>
-                        </div>
-                    </div>
-                </div>
-            )}
+
 
             {view === 'card' ? (
                 <>
@@ -3671,30 +3532,23 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Form submitted with data:', formData);
-        console.log('Site ranking data:', siteRankingData);
         
         // Validate only required fields: Phase, Indication, Timeline, and Target Subjects
         if (!formData.phase) {
-            console.log('Validation failed: Phase not selected');
             return;
         }
         if (!formData.indication.trim()) {
-            console.log('Validation failed: Indication not entered');
             return;
         }
         if (!formData.targetSubjects || formData.targetSubjects <= 0) {
-            console.log('Validation failed: Invalid target subject count');
             return;
         }
         if (!formData.timeline || formData.timeline <= 0) {
-            console.log('Validation failed: Invalid timeline');
             return;
         }
         
         // Validate criteria weights total 100%
         if (getTotalCriteriaWeight() !== 100) {
-            console.log('Validation failed: Criteria weights must total 100%. Current total: ' + getTotalCriteriaWeight() + '%');
             return;
         }
         
@@ -3705,20 +3559,17 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
             siteRankings: siteRankingData || [], // siteRankingData is already an array
         };
         
-        console.log('Preview scenario created:', previewScenario);
-        console.log('Navigating to results...');
-        
         navigateTo('results', previewScenario);
     };
 
     return (
         <div className="max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
             <header className="mb-8">
-                <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
+                <button onClick={() => navigateTo('projects')} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Scenarios
+                    Back to Projects
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900">Create New Scenario</h1>
                 <p className="text-gray-500 mt-1">Define the parameters for your clinical trial simulation.</p>
@@ -3848,7 +3699,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                 </div>
 
                 <div className="flex justify-end items-center pt-4 gap-4">
-                    <button type="button" onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 px-6 py-2 font-semibold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                    <button type="button" onClick={() => navigateTo('projects')} className="flex items-center gap-2 px-6 py-2 font-semibold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -3869,7 +3720,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
     );
 }
 
-function ResultsPage({ scenario, navigateTo, onSave, chatMessages, isChatLoading, onSubmitChat }) {
+function ResultsPage({ scenario, navigateTo, onSave, chatMessages, isChatLoading, onSubmitChat, currentProject }) {
     const [view, setView] = useState('table'); // 'table', 'card'
     const [expandedRows, setExpandedRows] = useState(new Set());
     const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -4055,7 +3906,7 @@ function ResultsPage({ scenario, navigateTo, onSave, chatMessages, isChatLoading
 
 
     if (!scenario) {
-        return <div className="p-8">Error: No scenario data found. <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline">
+        return <div className="p-8">Error: No scenario data found. <button onClick={() => navigateTo('projects')} className="flex items-center gap-2 text-blue-600 hover:underline">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -4139,12 +3990,28 @@ function ResultsPage({ scenario, navigateTo, onSave, chatMessages, isChatLoading
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="mb-6 flex items-center justify-between">
                 <div>
-                    <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Scenarios
-                    </button>
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+                        <button 
+                            onClick={() => navigateTo('projects')} 
+                            className="hover:text-blue-600 transition-colors"
+                        >
+                            Projects
+                        </button>
+                        <span className="text-gray-400">/</span>
+                        {currentProject && (
+                            <>
+                                <button 
+                                    onClick={() => navigateTo('scenarios', currentProject)} 
+                                    className="hover:text-blue-600 transition-colors"
+                                >
+                                    {currentProject.name}
+                                </button>
+                                <span className="text-gray-400">/</span>
+                            </>
+                        )}
+                        <span className="text-gray-900 font-medium">{scenario.title}</span>
+                    </nav>
                     <h1 className="text-3xl font-bold text-gray-900">{scenario.title}</h1>
                     <p className="text-gray-500 mt-1">Results and site ranking based on your criteria.</p>
                 </div>
@@ -4895,12 +4762,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     );
 }
 
-function ComparisonPage({ scenarios, navigateTo, projects }) {
+function ComparisonPage({ scenarios, navigateTo, projects, currentProject }) {
     const [hideIdentical, setHideIdentical] = useState(false);
 
-    console.log('ComparisonPage rendered with scenarios:', scenarios);
-    console.log('Scenarios type:', typeof scenarios, 'Length:', scenarios ? scenarios.length : 'undefined');
-    console.log('Scenarios data:', JSON.stringify(scenarios, null, 2));
+
 
     if (!scenarios || scenarios.length < 2) {
         return (
@@ -4968,24 +4833,28 @@ function ComparisonPage({ scenarios, navigateTo, projects }) {
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="mb-6 flex items-center justify-between">
                 <div>
-                    <button onClick={() => {
-                        // Navigate back to scenarios with the project context
-                        if (scenarios.length > 0 && scenarios[0].projectId) {
-                            const project = projects.find(p => p.id === scenarios[0].projectId);
-                            if (project) {
-                                navigateTo('scenarios', project);
-                            } else {
-                                navigateTo('projects');
-                            }
-                        } else {
-                            navigateTo('projects');
-                        }
-                    }} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:underline mb-2 transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Scenarios
-                    </button>
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+                        <button 
+                            onClick={() => navigateTo('projects')} 
+                            className="hover:text-blue-600 transition-colors"
+                        >
+                            Projects
+                        </button>
+                        <span className="text-gray-400">/</span>
+                        {currentProject && (
+                            <>
+                                <button 
+                                    onClick={() => navigateTo('scenarios', currentProject)} 
+                                    className="hover:text-blue-600 transition-colors"
+                                >
+                                    {currentProject.name}
+                                </button>
+                                <span className="text-gray-400">/</span>
+                            </>
+                        )}
+                        <span className="text-gray-900 font-medium">Scenario Comparison ({scenarios.length})</span>
+                    </nav>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Scenario Comparison ({scenarios.length})</h1>
                     <p className="text-gray-500">Review key attributes side-by-side and deep-dive into full site results for each scenario.</p>
                 </div>
@@ -5050,23 +4919,23 @@ function ComparisonPage({ scenarios, navigateTo, projects }) {
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">Top 3 Sites Comparison</h3>
                 <div className="responsive-grid">
                     {scenarios.map(s => (
-                        <div key={'summary-'+s.id} className="border border-gray-200 rounded-lg p-4">
+                        <div key={'summary-'+s.id} className="border border-gray-200 rounded-lg p-5 min-w-0">
                             <div className="flex items-center justify-between mb-4">
-                                <h4 className="text-md font-semibold text-gray-900 truncate">{s.title}</h4>
-                                <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">{s.phase}</span>
+                                <h4 className="text-md font-semibold text-gray-900 truncate flex-1 mr-3">{s.title}</h4>
+                                <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 flex-shrink-0">{s.phase}</span>
                             </div>
                             
                             {/* Top 3 Sites Summary */}
                             <div className="space-y-3">
                                 {s.siteRankings.slice(0, 3).map((site, index) => (
-                                    <div key={site.rank} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-6 h-6 bg-blue-100 text-blue-800 text-xs font-bold rounded-full flex items-center justify-center">
+                                    <div key={site.rank} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg min-w-0">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <span className="w-6 h-6 bg-blue-100 text-blue-800 text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
                                                 {site.rank}
                                             </span>
-                                            <span className="text-sm font-medium text-gray-800 truncate">{site.site}</span>
+                                            <span className="text-sm font-medium text-gray-800 truncate flex-1">{site.site}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 flex-shrink-0">
                                             <span className="text-xs text-gray-600">{site.state}</span>
                                             <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                                                 {site.matchScore}%
@@ -5077,7 +4946,7 @@ function ComparisonPage({ scenarios, navigateTo, projects }) {
                             </div>
                             
                             {/* Performance Metrics */}
-                            <div className="grid grid-cols-2 gap-4 pt-4 mt-4 border-t border-gray-100">
+                            <div className="grid grid-cols-2 gap-6 pt-4 mt-4 border-t border-gray-100">
                                 <div className="text-center">
                                     <div className="text-xl font-bold text-blue-600">
                                         {s.siteRankings.length}
@@ -5315,13 +5184,13 @@ const ScenarioDetailColumn = ({ scenario }) => (
     </div>
 );
 
-function SiteDetailPage({ site, scenario, navigateTo }) {
+function SiteDetailPage({ site, scenario, navigateTo, currentProject }) {
     if (!site) {
         return (
             <div className="p-8 text-center">
                 <h1 className="text-2xl font-bold mb-4">Site Not Found</h1>
-                <button onClick={() => navigateTo('scenarios')} className="mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                    Back to Scenarios
+                <button onClick={() => navigateTo('projects')} className="mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    Back to Projects
                 </button>
             </div>
         );
@@ -5331,12 +5200,39 @@ function SiteDetailPage({ site, scenario, navigateTo }) {
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
                         <header className="mb-8">
-                <button onClick={() => navigateTo('results', scenario)} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Back to Results
-                </button>
+                {/* Breadcrumbs */}
+                <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+                    <button 
+                        onClick={() => navigateTo('projects')} 
+                        className="hover:text-blue-600 transition-colors"
+                    >
+                        Projects
+                    </button>
+                    <span className="text-gray-400">/</span>
+                    {currentProject && (
+                        <>
+                            <button 
+                                onClick={() => navigateTo('scenarios', currentProject)} 
+                                className="hover:text-blue-600 transition-colors"
+                            >
+                                {currentProject.name}
+                            </button>
+                            <span className="text-gray-400">/</span>
+                        </>
+                    )}
+                    {scenario && (
+                        <>
+                            <button 
+                                onClick={() => navigateTo('results', scenario)} 
+                                className="hover:text-blue-600 transition-colors"
+                            >
+                                {scenario.title}
+                            </button>
+                            <span className="text-gray-400">/</span>
+                        </>
+                    )}
+                    <span className="text-gray-900 font-medium">{site.site}</span>
+                </nav>
                 <h1 className="text-3xl font-bold text-gray-900">{site.site}</h1>
                 <p className="text-gray-500 mt-1">{details.siteInfo?.address || 'N/A'}</p>
             </header>
@@ -5527,11 +5423,11 @@ function SiteComparisonPage({ navigateTo }) {
             <div className="p-8 text-center">
                 <h1 className="text-2xl font-bold mb-4">Site Comparison</h1>
                 <p>Please select at least 2 sites to compare.</p>
-                <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onClick={() => navigateTo('projects')} className="flex items-center gap-2 mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    <svg className="w-5 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Scenarios
+                    Back to Projects
                 </button>
             </div>
         );
@@ -5540,11 +5436,11 @@ function SiteComparisonPage({ navigateTo }) {
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="mb-6">
-                <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
+                <button onClick={() => navigateTo('projects')} className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Scenarios
+                    Back to Projects
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900">Site Comparison ({sites.length} sites)</h1>
                 <p className="text-gray-500">Comparing sites for scenario: <span className="font-semibold text-gray-700">{scenario?.title || 'Unknown Scenario'}</span></p>
@@ -5717,12 +5613,12 @@ function SiteComparisonPage({ navigateTo }) {
             {/* Action Buttons */}
             <div className="flex gap-4">
                 <button 
-                    onClick={() => navigateTo('scenarios')}
+                    onClick={() => navigateTo('projects')}
                     className="flex items-center gap-2 mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Scenarios
+                    Back to Projects
                 </button>
                 <button 
                     onClick={() => navigateTo('results', scenario)}
