@@ -706,6 +706,71 @@ const SparklesIcon = ({ className }) => (
     </svg>
 );
 
+// --- Modern Dropdown Component ---
+function ModernDropdown({ options, selected, onSelect, placeholder, className = "" }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(option => option.value === selected);
+
+    return (
+        <div className={`relative ${className}`} ref={dropdownRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center justify-between w-full px-3 py-2 text-sm bg-white/10 text-white border border-white/20 rounded-md hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
+            >
+                <div className="text-left">
+                    <span className={selectedOption ? 'text-white' : 'text-white/70'}>
+                        {selectedOption ? selectedOption.label : placeholder}
+                    </span>
+                    {selectedOption && selectedOption.subtitle && (
+                        <div className="text-xs text-white/70 truncate">
+                            {selectedOption.subtitle}
+                        </div>
+                    )}
+                </div>
+                <ChevronDownIcon className={`w-4 h-4 text-white/70 transition-transform ${isOpen ? 'rotate-180' : ''} ml-2`} />
+            </button>
+            
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200 max-h-60 overflow-auto">
+                    {options.map((option) => (
+                        <button
+                            key={option.value}
+                            onClick={() => {
+                                onSelect(option.value);
+                                setIsOpen(false);
+                            }}
+                            className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                                option.value === selected 
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 font-medium' 
+                                    : 'text-gray-700'
+                            }`}
+                        >
+                            <div className="font-medium">{option.label}</div>
+                            {option.subtitle && (
+                                <div className="text-xs text-gray-500 mt-1">{option.subtitle}</div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 
 
 
@@ -1835,6 +1900,9 @@ function App() {
                     setCurrentScenario(session.data.scenario);
                 }
                 if (session.data.comparisonScenarios) {
+                    console.log('Restoring comparison scenarios from session:', session.data.comparisonScenarios);
+                    console.log('Session comparison scenarios type:', typeof session.data.comparisonScenarios);
+                    console.log('Session comparison scenarios length:', session.data.comparisonScenarios ? session.data.comparisonScenarios.length : 'undefined');
                     setComparisonScenarios(session.data.comparisonScenarios);
                 }
                 if (session.data.site) {
@@ -1905,6 +1973,8 @@ function App() {
             // Save data to localStorage for refresh persistence
             localStorage.setItem('pageData', JSON.stringify({ results: [scenarioWithId] }));
         } else if (page === 'comparison') {
+            console.log('Setting comparison scenarios:', data);
+            console.log('Data type:', typeof data, 'Data length:', data ? data.length : 'undefined');
             setComparisonScenarios(data);
             localStorage.setItem('pageData', JSON.stringify({ comparison: data }));
         } else if (page === 'siteDetail') {
@@ -1939,7 +2009,8 @@ function App() {
         let url;
         if (page === 'scenarios') {
             if (data && data.id) {
-                url = `${basePath}/scenarios/project/${data.id}`;
+                // Treat scenarios like project details - use project ID in URL
+                url = `${basePath}/scenarios/${data.id}`;
             } else {
                 url = `${basePath}/scenarios`;
             }
@@ -1974,42 +2045,42 @@ function App() {
             return;
         }
         
-        // Handle routing based on environment
-        let page, scenarioId, siteCode;
-        
-        if (isOnGitHubPages) {
-            // GitHub Pages structure: /clinical-research-site-finder/page
-            if (pathParts[0] === 'clinical-research-site-finder') {
-                if (pathParts.length === 1) {
-                    // Just /clinical-research-site-finder/ - show login
-                    setCurrentPage('login');
-                    return;
+                    // Handle routing based on environment
+            let page, scenarioId, siteCode, projectId;
+            
+            if (isOnGitHubPages) {
+                // GitHub Pages structure: /clinical-research-site-finder/page
+                if (pathParts[0] === 'clinical-research-site-finder') {
+                    if (pathParts.length === 1) {
+                        // Just /clinical-research-site-finder/ - show login
+                        setCurrentPage('login');
+                        return;
+                    }
+                    // Extract the actual page from the second part
+                    page = pathParts[1];
+                    if (page === 'results' && pathParts.length > 2) {
+                        scenarioId = parseInt(pathParts[2]); // Third part
+                    } else if (page === 'site' && pathParts.length > 2) {
+                        siteCode = pathParts[2]; // Third part
+                    } else if (page === 'scenarios' && pathParts.length > 2) {
+                        // Handle project-specific scenario URLs: /scenarios/1 (treat like project details)
+                        projectId = parseInt(pathParts[2]);
+                        console.log('Project ID from GitHub Pages URL:', projectId);
+                    }
                 }
-                // Extract the actual page from the second part
-                page = pathParts[1];
-                if (page === 'results' && pathParts.length > 2) {
-                    scenarioId = parseInt(pathParts[2]); // Third part
-                } else if (page === 'site' && pathParts.length > 2) {
-                    siteCode = pathParts[2]; // Third part
-                } else if (page === 'scenarios' && pathParts.length > 3 && pathParts[2] === 'project') {
-                    // Handle project-specific scenario URLs: /scenarios/project/1
-                    const projectId = parseInt(pathParts[3]);
-                    console.log('Project ID from GitHub Pages URL:', projectId);
+            } else {
+                // Local development structure: /page
+                page = pathParts[0];
+                if (page === 'results' && pathParts.length > 1) {
+                    scenarioId = parseInt(pathParts[1]); // Second part
+                } else if (page === 'site' && pathParts.length > 1) {
+                    siteCode = pathParts[1]; // Second part
+                } else if (page === 'scenarios' && pathParts.length > 1) {
+                    // Handle project-specific scenario URLs: /scenarios/1 (treat like project details)
+                    projectId = parseInt(pathParts[1]);
+                    console.log('Project ID from local URL:', projectId);
                 }
             }
-        } else {
-            // Local development structure: /page
-            page = pathParts[0];
-            if (page === 'results' && pathParts.length > 1) {
-                scenarioId = parseInt(pathParts[1]); // Second part
-            } else if (page === 'site' && pathParts.length > 1) {
-                siteCode = pathParts[1]; // Second part
-            } else if (page === 'scenarios' && pathParts.length > 2 && pathParts[1] === 'project') {
-                // Handle project-specific scenario URLs: /scenarios/project/1
-                const projectId = parseInt(pathParts[2]);
-                console.log('Project ID from local URL:', projectId);
-            }
-        }
         
         console.log('Page from URL:', page, 'Scenario ID:', scenarioId, 'Site Code:', siteCode);
         
@@ -2035,9 +2106,8 @@ function App() {
             setCurrentPage('scenarios');
             localStorage.setItem('currentPage', 'scenarios');
             
-            // Check if we have a project ID in the URL
-            if (pathParts.length > 2 && pathParts[2] === 'project' && pathParts[3]) {
-                const projectId = parseInt(pathParts[3]);
+            // Check if we have a project ID in the URL (treat like project details)
+            if (projectId) {
                 console.log('Project ID from URL:', projectId);
                 
                 // Find the project and set it as current
@@ -2089,10 +2159,16 @@ function App() {
         }
         
         if (page === 'comparison' && parsedData?.comparison) {
-            console.log('Setting page to comparison');
+            console.log('Setting page to comparison with data:', parsedData.comparison);
+            console.log('Parsed comparison data type:', typeof parsedData.comparison);
+            console.log('Parsed comparison data length:', parsedData.comparison ? parsedData.comparison.length : 'undefined');
+            console.log('Parsed comparison data keys:', Object.keys(parsedData.comparison[0] || {}));
+            console.log('Parsed comparison data first item:', parsedData.comparison[0]);
+            console.log('Setting comparison scenarios state to:', parsedData.comparison);
             setComparisonScenarios(parsedData.comparison);
             setCurrentPage('comparison');
             localStorage.setItem('currentPage', 'comparison');
+            console.log('Comparison page navigation completed');
             return;
         }
         
@@ -2127,7 +2203,10 @@ function App() {
             case 'results':
                 return currentScenario ? <ResultsPage scenario={currentScenario} navigateTo={navigateTo} onSave={handleSaveScenario} chatMessages={chatMessages} isChatLoading={isChatLoading} onSubmitChat={handleChatSubmit} /> : null;
             case 'comparison':
-                return comparisonScenarios ? <ComparisonPage scenarios={comparisonScenarios} navigateTo={navigateTo} /> : null;
+                console.log('Rendering comparison page with scenarios:', comparisonScenarios);
+                console.log('Comparison scenarios state:', comparisonScenarios);
+                console.log('Comparison scenarios type:', typeof comparisonScenarios);
+                return <ComparisonPage scenarios={comparisonScenarios || []} navigateTo={navigateTo} projects={projects} />;
             case 'siteDetail':
                 return currentSite ? <SiteDetailPage site={currentSite} scenario={currentScenario} navigateTo={navigateTo} /> : null;
             case 'siteComparison':
@@ -2183,19 +2262,7 @@ function App() {
                                         Projects
                                     </div>
                                 </button>
-                                <button
-                                    onClick={() => navigateTo('scenarios')}
-                                    className={`nav-item px-4 py-2 text-sm font-medium text-white transition-all ${
-                                        currentPage === 'scenarios' ? 'active' : ''
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Scenarios
-                                    </div>
-                                </button>
+
                                 <button
                                     onClick={() => navigateTo('create')}
                                     className={`nav-item px-4 py-2 text-sm font-medium text-white transition-all ${
@@ -2212,8 +2279,41 @@ function App() {
                             </nav>
                         </div>
                         
-                        {/* Right side - Profile icon and name */}
+                        {/* Right side - Project dropdown and Profile */}
                         <div className="flex items-center gap-3">
+                            {/* Project Dropdown */}
+                            {currentPage !== 'projects' && projects.length > 0 && (
+                                <ModernDropdown
+                                    options={[
+                                        { value: '', label: 'Select Project' },
+                                        ...projects.map(project => ({
+                                            value: project.id,
+                                            label: `${project.name} (${project.therapeuticArea})`,
+                                            subtitle: `${project.sponsor} • ${project.status}`
+                                        }))
+                                    ]}
+                                    selected={currentProject?.id || ''}
+                                    onSelect={(projectId) => {
+                                        if (projectId) {
+                                            const selectedProject = projects.find(p => p.id === projectId);
+                                            if (selectedProject) {
+                                                setCurrentProject(selectedProject);
+                                                // Clear any existing comparison selection when switching projects
+                                                setComparisonScenarios(null);
+                                                // Navigate to scenarios with the new project
+                                                navigateTo('scenarios', selectedProject);
+                                            }
+                                        } else {
+                                            // If no project selected, clear current project and go to projects page
+                                            setCurrentProject(null);
+                                            setComparisonScenarios(null);
+                                            navigateTo('projects');
+                                        }
+                                    }}
+                                    placeholder="Select Project"
+                                />
+                            )}
+                            
                             <div className="relative profile-dropdown">
                                 <button 
                                     onClick={() => setIsOpen(!isOpen)}
@@ -2293,22 +2393,7 @@ function App() {
                                 </svg>
                                 Projects
                             </button>
-                            <button
-                                onClick={() => {
-                                    navigateTo('scenarios');
-                                    setSidebarOpen(false);
-                                }}
-                                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                                    currentPage === 'scenarios'
-                                        ? 'btn-gradient' 
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                }`}
-                            >
-                                <svg className="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Scenarios
-                            </button>
+
                             <button
                                 onClick={() => {
                                     navigateTo('create');
@@ -2679,7 +2764,7 @@ function ProjectTable({ projects, navigateTo, requestSort, sortConfig }) {
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '1000px' }}>
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 w-80" onClick={() => requestSort('name')}>
                                 <div className="flex items-center gap-2">
@@ -2781,7 +2866,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
     const [showArchived, setShowArchived] = useState(false);
     const [createdByFilter, setCreatedByFilter] = useState('All');
     const [phaseFilter, setPhaseFilter] = useState('All');
-    const [countryFilter, setCountryFilter] = useState('All');
+
     const [view, setView] = useState('table'); // 'card', 'table'
     const [sortConfig, setSortConfig] = useState({ key: 'createdDate', direction: 'descending' });
     const [currentPage, setCurrentPage] = useState(1);
@@ -2800,7 +2885,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
 
     const createdByOptions = useMemo(() => ['All', ...new Set(projectScenarios.map(s => s.performedBy))], [projectScenarios]);
     const phaseOptions = useMemo(() => ['All', 'Phase I', 'Phase II', 'Phase III', 'Phase IV'], []);
-    const countryOptions = useMemo(() => ['All', ...new Set(projectScenarios.map(s => s.country))], [projectScenarios]);
+
 
     const togglePin = (id) => {
         setScenarios(scenarios.map(s => s.id === id ? { ...s, isPinned: !s.isPinned } : s));
@@ -2818,13 +2903,23 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
     };
 
     const handleSelectForComparison = (id) => {
-        setSelectedForComparison(prev => (
-            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-        ));
+        console.log('Selecting scenario for comparison:', id);
+        setSelectedForComparison(prev => {
+            const newSelection = prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id];
+            console.log('New selection:', newSelection);
+            return newSelection;
+        });
     };
 
     const handleCompare = () => {
         const scenariosToCompare = scenarios.filter(s => selectedForComparison.includes(s.id));
+        
+        console.log('Comparing scenarios:', scenariosToCompare);
+        
+        if (scenariosToCompare.length < 2) {
+            console.log('Need at least 2 scenarios to compare');
+            return;
+        }
         
         // Check if all scenarios are from the same project
         if (scenariosToCompare.length > 0) {
@@ -2837,6 +2932,10 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
             }
         }
         
+        // Navigate to comparison page with the selected scenarios
+        console.log('Navigating to comparison with:', scenariosToCompare);
+        console.log('Scenarios to compare type:', typeof scenariosToCompare, 'Length:', scenariosToCompare.length);
+        console.log('First scenario:', scenariosToCompare[0]);
         navigateTo('comparison', scenariosToCompare);
     };
 
@@ -2862,7 +2961,7 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
             })
             .filter(s => createdByFilter === 'All' || s.performedBy === createdByFilter)
             .filter(s => phaseFilter === 'All' || s.phase === phaseFilter)
-            .filter(s => countryFilter === 'All' || s.country === countryFilter);
+            
 
         sortableItems.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
@@ -2878,13 +2977,30 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
         });
 
         return sortableItems;
-    }, [scenarios, filter, showArchived, createdByFilter, phaseFilter, countryFilter, sortConfig]);
+    }, [scenarios, filter, showArchived, createdByFilter, phaseFilter, sortConfig]);
 
     // Reset displayed items when filters change
     useEffect(() => {
         setDisplayedItems(6);
         setCurrentPage(1);
-    }, [filter, showArchived, createdByFilter, phaseFilter, countryFilter, sortConfig]);
+    }, [filter, showArchived, createdByFilter, phaseFilter, sortConfig]);
+
+    // Reset filters and pagination when project changes
+    useEffect(() => {
+        setFilter('');
+        setShowArchived(false);
+        setCreatedByFilter('All');
+        setPhaseFilter('All');
+        setSelectedForComparison([]);
+        setDisplayedItems(6);
+        setCurrentPage(1);
+        setSortConfig({ key: 'createdDate', direction: 'descending' });
+        
+        // Show project change notification
+        if (currentProject) {
+            console.log(`Switched to project: ${currentProject.name} (${currentProject.therapeuticArea})`);
+        }
+    }, [currentProject]);
 
     // Adjust displayed items based on content height
     useEffect(() => {
@@ -2952,21 +3068,98 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
+                    <div className="flex items-center gap-2 mb-2 text-sm text-gray-600">
+                        <button onClick={() => navigateTo('projects')} className="text-blue-600 hover:text-blue-700 hover:underline transition-colors">
+                            Projects
+                        </button>
+                        {currentProject && (
+                            <>
+                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                                <span className="text-gray-500">{currentProject.name}</span>
+                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                                <span className="text-gray-500">Scenarios</span>
+                            </>
+                        )}
+                    </div>
                     <button onClick={() => {
                         setCurrentProject(null);
                         navigateTo('projects');
-                    }} className="flex items-center gap-2 text-blue-600 hover:underline mb-2 h-6">
+                    }} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:underline mb-2 h-6 transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Back to Projects
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        {currentProject ? `${currentProject.name}: Scenarios` : 'Scenarios'}
-                    </h1>
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            {currentProject ? `${currentProject.name}: Scenarios` : 'Scenarios'}
+                        </h1>
+                        {currentProject && (
+                            <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 text-sm font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 rounded-full border border-blue-200">
+                                    {projectScenarios.length} Scenarios
+                                </span>
+                                <span className="px-3 py-1 text-sm font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 rounded-full border border-green-200">
+                                    {projectScenarios.filter(s => !s.isArchived).length} Active
+                                </span>
+                            </div>
+                        )}
+                    </div>
                     <p className="text-gray-500 mt-1">
                         {currentProject ? `Manage scenarios for ${currentProject.therapeuticArea} project - ${projectScenarios.length} total scenarios, ${projectScenarios.filter(s => !s.isArchived).length} active trials` : 'Manage and review your clinical trial scenarios.'}
                     </p>
+                    {currentProject && (
+                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <span className="font-semibold text-blue-800">Sponsor:</span>
+                                    <span className="ml-2 text-blue-700">{currentProject.sponsor}</span>
+                                </div>
+                                <div>
+                                    <span className="font-semibold text-blue-800">Status:</span>
+                                    <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                                        currentProject.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                        currentProject.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                        {currentProject.status}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="font-semibold text-blue-800">Created:</span>
+                                    <span className="ml-2 text-blue-700">{new Date(currentProject.createdDate).toLocaleDateString()}</span>
+                                </div>
+                                <div>
+                                    <span className="font-semibold text-blue-800">Therapeutic Area:</span>
+                                    <span className="ml-2 text-blue-700">{currentProject.therapeuticArea}</span>
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-blue-200">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                    <div>
+                                        <span className="font-semibold text-blue-800">Total Scenarios:</span>
+                                        <span className="ml-2 text-blue-700">{projectScenarios.length}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold text-blue-800">Active Trials:</span>
+                                        <span className="ml-2 text-blue-700">{projectScenarios.filter(s => !s.isArchived).length}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold text-blue-800">Target Enrollment:</span>
+                                        <span className="ml-2 text-blue-700">{currentProject.targetEnrollment?.toLocaleString() || 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold text-blue-800">Estimated Completion:</span>
+                                        <span className="ml-2 text-blue-700">{currentProject.estimatedCompletion || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="flex gap-4">
                     <button onClick={() => navigateTo('create')} className="btn-gradient flex items-center gap-2 px-4 py-2 font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all whitespace-nowrap">
@@ -2978,22 +3171,21 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                 </div>
             </header>
 
-            <div className="p-4 bg-white rounded-lg border border-gray-200 mb-6">
+            <div className="p-4 bg-gradient-to-r from-white to-blue-50 rounded-lg border border-gray-200 mb-6">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     <input
                         type="text"
-                        placeholder="Search title, author, phase, country..."
+                        placeholder={currentProject ? `Search ${currentProject.name} scenarios...` : "Search title, author, phase, country..."}
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
-                        className="flex-1 min-w-[240px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 min-w-[240px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                     />
                     <div className="flex flex-wrap items-center gap-4">
-                    <CustomDropdown options={createdByOptions} selected={createdByFilter} onSelect={setCreatedByFilter} label="Author:" />
-                    <CustomDropdown options={phaseOptions} selected={phaseFilter} onSelect={setPhaseFilter} label="Phase:" />
-                    <CustomDropdown options={countryOptions} selected={countryFilter} onSelect={setCountryFilter} label="Country:" />
+                        <CustomDropdown options={createdByOptions} selected={createdByFilter} onSelect={setCreatedByFilter} label="Author:" />
+                        <CustomDropdown options={phaseOptions} selected={phaseFilter} onSelect={setPhaseFilter} label="Phase:" />
                     </div>
                 </div>
-                <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
                     <div className="flex items-center gap-4">
                         <div className="checkbox-container">
                             <input
@@ -3007,7 +3199,10 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                             </label>
                         </div>
                         <button 
-                            onClick={handleCompare} 
+                            onClick={() => {
+                                console.log('Compare button clicked, selectedForComparison:', selectedForComparison);
+                                handleCompare();
+                            }} 
                             disabled={selectedForComparison.length < 2}
                             className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-md transition-colors ${
                                 selectedForComparison.length >= 2 
@@ -3020,6 +3215,9 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                             </svg>
                             Compare ({selectedForComparison.length})
                         </button>
+                        <div className="text-xs text-gray-500 mt-1">
+                            {selectedForComparison.length < 2 ? 'Select 2+ scenarios to compare' : 'Ready to compare'}
+                        </div>
                     </div>
                     <div className="inline-flex rounded-md shadow-sm">
                         <button onClick={() => setView('table')} className={`flex items-center gap-2 px-4 py-2 font-medium ${view === 'table' ? 'btn-gradient' : 'bg-white text-gray-700 hover:bg-gray-50'} rounded-l-lg border border-gray-200`}>
@@ -3036,7 +3234,54 @@ function ScenariosListPage({ scenarios, setScenarios, navigateTo, currentProject
                         </button>
                     </div>
                 </div>
+                {currentProject && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="font-medium">Project Filters:</span>
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                {currentProject.therapeuticArea}
+                            </span>
+                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                {currentProject.sponsor}
+                            </span>
+                            <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                {currentProject.regulatoryPhase || 'N/A'}
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Project Summary Section */}
+            {currentProject && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+                    <h3 className="text-lg font-semibold text-indigo-800 mb-3">Project Overview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
+                            <div className="text-2xl font-bold text-indigo-600">{projectScenarios.length}</div>
+                            <div className="text-sm text-indigo-700">Total Scenarios</div>
+                        </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
+                            <div className="text-2xl font-bold text-green-600">
+                                {projectScenarios.filter(s => !s.isArchived).length}
+                            </div>
+                            <div className="text-sm text-green-700">Active Trials</div>
+                        </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
+                            <div className="text-2xl font-bold text-blue-600">
+                                {currentProject.targetEnrollment?.toLocaleString() || 'N/A'}
+                            </div>
+                            <div className="text-sm text-blue-700">Target Enrollment</div>
+                        </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-indigo-200">
+                            <div className="text-2xl font-bold text-purple-600">
+                                {currentProject.estimatedCompletion || 'N/A'}
+                            </div>
+                            <div className="text-sm text-purple-700">Est. Completion</div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {view === 'card' ? (
                 <>
@@ -3164,7 +3409,7 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
     return (
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
                         <th className="px-6 py-3"></th>
                         <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'title' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('title')}>
@@ -3193,19 +3438,7 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
                                 </div>
                             </div>
                         </th>
-                        <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'country' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('country')}>
-                            <div className="flex items-center justify-between">
-                                <span>Country</span>
-                                <div className="flex flex-col items-center ml-2">
-                                    <svg className={`w-3 h-3 ${sortConfig.key === 'country' && sortConfig.direction === 'ascending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                    </svg>
-                                    <svg className={`w-3 h-3 ${sortConfig.key === 'country' && sortConfig.direction === 'descending' ? 'text-blue-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </th>
+
                         <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${sortConfig.key === 'createdDate' ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => requestSort('createdDate')}>
                             <div className="flex items-center justify-between">
                                 <span>Created Date</span>
@@ -3248,7 +3481,6 @@ function ScenarioTable({ scenarios, onPin, onArchive, navigateTo, requestSort, s
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 hover:underline" onClick={() => navigateTo('results', scenario)}>{scenario.title}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.performedBy}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.country}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(scenario.createdDate).toLocaleDateString()}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{scenario.phase}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e)=>e.stopPropagation()}>
@@ -4323,7 +4555,7 @@ function SiteTable({ sites, expandedRows, toggleRow, navigateTo, onSelect, selec
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
                         <th className="px-6 py-3"></th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
@@ -4651,15 +4883,37 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     );
 }
 
-function ComparisonPage({ scenarios, navigateTo }) {
+function ComparisonPage({ scenarios, navigateTo, projects }) {
     const [hideIdentical, setHideIdentical] = useState(false);
 
-    if (scenarios.length < 2) {
+    console.log('ComparisonPage rendered with scenarios:', scenarios);
+    console.log('Scenarios type:', typeof scenarios, 'Length:', scenarios ? scenarios.length : 'undefined');
+    console.log('Scenarios data:', JSON.stringify(scenarios, null, 2));
+
+    if (!scenarios || scenarios.length < 2) {
         return (
             <div className="p-8 text-center">
                 <h1 className="text-2xl font-bold mb-4">Comparison</h1>
                 <p>Select two or more scenarios to compare.</p>
-                <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                <p className="text-sm text-gray-500 mt-2">
+                    Received {scenarios ? scenarios.length : 0} scenarios
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                    {!scenarios ? 'No scenarios data provided' : scenarios.length === 0 ? 'Empty scenarios array' : 'Insufficient scenarios for comparison'}
+                </p>
+                <button onClick={() => {
+                    // Navigate back to scenarios with the project context
+                    if (scenarios && scenarios.length > 0 && scenarios[0].projectId) {
+                        const project = projects.find(p => p.id === scenarios[0].projectId);
+                        if (project) {
+                            navigateTo('scenarios', project);
+                        } else {
+                            navigateTo('projects');
+                        }
+                    } else {
+                        navigateTo('projects');
+                    }
+                }} className="flex items-center gap-2 mt-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -4690,7 +4944,7 @@ function ComparisonPage({ scenarios, navigateTo }) {
         
         return (
             <tr key={label} className={isIdentical ? 'identical-row' : ''}>
-                <td className="px-6 py-4 text-sm font-medium text-gray-700">{label}</td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-30 bg-white border-r border-gray-200">{label}</td>
                 {scenarios.map(s => (
                     <td key={s.id+String(label)} className="px-6 py-4 text-sm text-gray-800">{getValue(s) || '-'}</td>
                 ))}
@@ -4702,19 +4956,31 @@ function ComparisonPage({ scenarios, navigateTo }) {
         <div className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
             <header className="mb-6 flex items-center justify-between">
                 <div>
-                    <button onClick={() => navigateTo('scenarios')} className="flex items-center gap-2 text-blue-600 hover:underline mb-2">
+                    <button onClick={() => {
+                        // Navigate back to scenarios with the project context
+                        if (scenarios.length > 0 && scenarios[0].projectId) {
+                            const project = projects.find(p => p.id === scenarios[0].projectId);
+                            if (project) {
+                                navigateTo('scenarios', project);
+                            } else {
+                                navigateTo('projects');
+                            }
+                        } else {
+                            navigateTo('projects');
+                        }
+                    }} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:underline mb-2 transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Back to Scenarios
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900">Scenario Comparison ({scenarios.length})</h1>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Scenario Comparison ({scenarios.length})</h1>
                     <p className="text-gray-500">Review key attributes side-by-side and deep-dive into full site results for each scenario.</p>
                 </div>
             </header>
 
             {/* Overview matrix header */}
-            <div className="overflow-x-auto mb-8">
+            <div className="mb-8">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Parameters Comparison</h3>
                     <label className="checkbox-container text-sm text-gray-600">
@@ -4726,42 +4992,45 @@ function ComparisonPage({ scenarios, navigateTo }) {
                         Hide identical information
                     </label>
                 </div>
-                <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 rounded-xl shadow-sm">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Field</th>
-                            {scenarios.map(s => (
-                                <th key={s.id} className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase whitespace-nowrap">{s.title}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {[
-                            ['Indication', (s)=>s.indication],
-                            ['Phase', (s)=>s.phase],
-                            ['Drug', (s)=>s.drugInfo],
-                            ['Start Date', (s)=>s.startDate],
-                            ['Country', (s)=>s.country],
-                            ['Objective', (s)=>s.objective],
-                        ].map(([label, getter]) => renderTableRow(label, getter))}
-                        {/* Criteria weights row */}
-                        <tr className="criteria-weights-row">
-                            <td className="px-4 py-3 text-sm font-medium text-gray-700">Criteria Weights</td>
-                            {scenarios.map(s => (
-                                <td key={s.id+':weights'} className="px-4 py-3 text-sm">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {Object.entries(s.criteriaWeights || {}).map(([k,v]) => (
-                                            <div key={k} className="flex justify-between items-center text-xs bg-gray-50 border rounded px-2 py-1">
-                                                <span className="capitalize">{String(k).replace(/([A-Z])/g,' $1')}</span>
-                                                <span className="font-semibold text-blue-600">{v}%</span>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto relative">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 z-30 bg-gradient-to-r from-gray-50 to-blue-50 border-r border-gray-200">Field</th>
+                                    {scenarios.map(s => (
+                                        <th key={s.id} className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase whitespace-nowrap sticky top-0 z-20 bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">{s.title}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {[
+                                    ['Indication', (s)=>s.indication],
+                                    ['Phase', (s)=>s.phase],
+                                    ['Drug', (s)=>s.drugInfo],
+                                    ['Start Date', (s)=>s.startDate],
+                                    ['Objective', (s)=>s.objective],
+                                ].map(([label, getter]) => renderTableRow(label, getter))}
+                                {/* Criteria weights row */}
+                                <tr className="criteria-weights-row">
+                                    <td className="px-4 py-3 text-sm font-medium text-gray-700 sticky left-0 z-30 bg-white border-r border-gray-200">Criteria Weights</td>
+                                    {scenarios.map(s => (
+                                        <td key={s.id+':weights'} className="px-4 py-3 text-sm">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {Object.entries(s.criteriaWeights || {}).map(([k,v]) => (
+                                                    <div key={k} className="flex justify-between items-center text-xs bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded px-2 py-1">
+                                                        <span className="capitalize">{String(k).replace(/([A-Z])/g,' $1')}</span>
+                                                        <span className="font-semibold text-blue-600">{v}%</span>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
-                                </td>
-                            ))}
-                        </tr>
-                    </tbody>
-                </table>
+                                        </td>
+                                    ))}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             {/* Top 3 Sites Comparison */}
@@ -5231,7 +5500,7 @@ function SiteComparisonPage({ navigateTo }) {
         
         return (
             <tr key={label} className={isIdentical ? 'identical-row' : ''}>
-                <td className="px-6 py-4 text-sm font-medium text-gray-700">{label}</td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">{label}</td>
                 {sites.map(site => (
                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">
                         {getValue(site)}
@@ -5282,22 +5551,23 @@ function SiteComparisonPage({ navigateTo }) {
                         Hide identical information
                     </label>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Attribute</th>
-                                {sites.map(site => (
-                                    <th key={site.siteCode} className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase whitespace-nowrap">
-                                        {site.site}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 z-20 bg-gray-50">Attribute</th>
+                                    {sites.map(site => (
+                                        <th key={site.siteCode} className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase whitespace-nowrap sticky top-0 z-10 bg-gray-50">
+                                            {site.site}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
                         <tbody className="divide-y divide-gray-200">
                             {/* Basic Site Info */}
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50">Basic Information</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50 sticky left-0 z-20">Basic Information</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900"></td>
                                 ))}
@@ -5313,31 +5583,31 @@ function SiteComparisonPage({ navigateTo }) {
                             
                             {/* Site Details */}
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50">Site Details</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50 sticky left-0 z-20">Site Details</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900"></td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Principal Investigator</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Principal Investigator</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.siteInfo?.pi || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Site Type</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Site Type</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.siteInfo?.siteType || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">IRB Status</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">IRB Status</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.siteInfo?.irbStatus || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Regulatory Status</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Regulatory Status</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.siteInfo?.regulatoryStatus || 'N/A'}</td>
                                 ))}
@@ -5345,31 +5615,31 @@ function SiteComparisonPage({ navigateTo }) {
                             
                             {/* Operational Performance */}
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50">Operational Performance</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50 sticky left-0 z-20">Operational Performance</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900"></td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Enrollment Rate</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Enrollment Rate</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.operationalPerformance?.enrollmentRate || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Activation Time</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Activation Time</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.operationalPerformance?.timeToActivate || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Past Trials</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Past Trials</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.operationalPerformance?.pastTrials || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Success Rate</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Success Rate</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.operationalPerformance?.successRate || 'N/A'}</td>
                                 ))}
@@ -5377,25 +5647,25 @@ function SiteComparisonPage({ navigateTo }) {
                             
                             {/* Patient Population */}
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50">Patient Population</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50 sticky left-0 z-20">Patient Population</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900"></td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Available Patients</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Available Patients</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.patientPopulation?.availablePatients || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Demographics</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Demographics</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.patientPopulation?.demographics || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Disease Prevalence</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Disease Prevalence</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.patientPopulation?.diseasePrevalence || 'N/A'}</td>
                                 ))}
@@ -5403,25 +5673,25 @@ function SiteComparisonPage({ navigateTo }) {
                             
                             {/* Infrastructure */}
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50">Infrastructure</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 bg-gray-50 sticky left-0 z-20">Infrastructure</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900"></td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Facilities</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Facilities</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.infrastructure?.facilities || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Equipment</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Equipment</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.infrastructure?.equipment || 'N/A'}</td>
                                 ))}
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-700">Staffing</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700 sticky left-0 z-20 bg-white">Staffing</td>
                                 {sites.map(site => (
                                     <td key={site.siteCode} className="px-6 py-4 text-sm text-gray-900">{site.details?.infrastructure?.staffing || 'N/A'}</td>
                                 ))}
@@ -5430,6 +5700,7 @@ function SiteComparisonPage({ navigateTo }) {
                     </table>
                 </div>
             </div>
+        </div>
 
             {/* Action Buttons */}
             <div className="flex gap-4">
