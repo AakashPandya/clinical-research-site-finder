@@ -5282,10 +5282,10 @@ function ComparisonPage({ scenarios, navigateTo, projects, currentProject }) {
 
                     {/* Comparison Table */}
                     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
+                        <table className="min-w-full divide-y divide-gray-200 table-fixed">
                             <thead className="bg-gray-50 sticky top-0 z-10">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-48">
                                         Parameter
                                     </th>
                                     {scenarios.map((scenario, index) => (
@@ -5298,7 +5298,7 @@ function ComparisonPage({ scenarios, navigateTo, projects, currentProject }) {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {/* Basic Information */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Basic Information
                                     </td>
                                     {scenarios.map(scenario => (
@@ -5315,7 +5315,7 @@ function ComparisonPage({ scenarios, navigateTo, projects, currentProject }) {
 
                                 {/* Site Rankings */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Site Rankings
                                     </td>
                                     {scenarios.map(scenario => (
@@ -5358,7 +5358,7 @@ function ComparisonPage({ scenarios, navigateTo, projects, currentProject }) {
 
                                 {/* Actions */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Actions
                                     </td>
                                     {scenarios.map(scenario => (
@@ -5743,10 +5743,10 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                     {/* Comparison Table */}
                     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
+                        <table className="min-w-full divide-y divide-gray-200 table-fixed">
                             <thead className="bg-gray-50 sticky top-0 z-10">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-48">
                                         Parameter
                                     </th>
                                     {sites.map((site, index) => (
@@ -5759,7 +5759,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {/* Quick Overview */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Quick Overview
                                     </td>
                                     {sites.map(site => (
@@ -5772,7 +5772,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                                 {/* Basic Site Information */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Basic Site Information
                                     </td>
                                     {sites.map(site => (
@@ -5790,7 +5790,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                                 {/* Infrastructure & Facilities */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Infrastructure & Facilities
                                     </td>
                                     {sites.map(site => (
@@ -5808,7 +5808,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                                 {/* Clinical Capabilities */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Clinical Capabilities
                                     </td>
                                     {sites.map(site => (
@@ -5824,7 +5824,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                                 {/* Operational Performance */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Operational Performance
                                     </td>
                                     {sites.map(site => (
@@ -5841,7 +5841,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                                 {/* Quality & Compliance */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Quality & Compliance
                                     </td>
                                     {sites.map(site => (
@@ -5854,7 +5854,7 @@ function SiteComparisonPage({ navigateTo, currentProject }) {
 
                                 {/* Actions */}
                                 <tr className="bg-gray-50">
-                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200">
+                                    <td className="px-6 py-4 text-sm font-semibold text-gray-800 border-r border-gray-200 w-48">
                                         Actions
                                     </td>
                                     {sites.map(site => (
