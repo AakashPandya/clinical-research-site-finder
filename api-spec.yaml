@@ -1,0 +1,415 @@
+openapi: 3.0.3
+info:
+  title: Clinical Research Site Finder API
+  description: API for uploading and processing clinical research protocol PDFs
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@crsfinder.com
+
+servers:
+  - url: https://api.crsfinder.com/v1
+    description: Production server
+  - url: https://staging-api.crsfinder.com/v1
+    description: Staging server
+  - url: http://localhost:8000/v1
+    description: Local development server
+
+paths:
+  /protocols/upload:
+    post:
+      summary: Upload Clinical Research Protocol PDF
+      description: |
+        Upload a clinical research protocol PDF and extract structured data.
+        The system will analyze the PDF content and populate relevant fields
+        for clinical trial site matching and analysis.
+      
+      tags:
+        - Protocol Management
+      
+      security:
+        - BearerAuth: []
+      
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - protocol_file
+              properties:
+                protocol_file:
+                  type: string
+                  format: binary
+                  description: |
+                    Clinical research protocol PDF file.
+                    Must be a valid PDF document.
+                    Maximum file size: 50MB
+                    Supported formats: PDF only
+                    The system will automatically extract all relevant data from this PDF.
+      
+      responses:
+        '200':
+          description: Protocol successfully uploaded and processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSuccessResponse'
+
+        '400':
+          description: Bad request - invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: Unauthorized - authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: PDF processing service not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '415':
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '422':
+          description: PDF processing failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for API authentication
+
+  schemas:
+    BaseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Protocol uploaded successfully"
+
+    UploadSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UploadData'
+
+    UploadData:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "NEURO-001: Alzheimer's Disease Treatment Program"
+          description: Study title extracted from PDF
+        sponsor:
+          type: string
+          example: "NeuroGen Therapeutics Inc."
+          description: Study sponsor extracted from PDF
+        studyId:
+          type: string
+          example: "NEURO-001"
+          description: Study identifier extracted from PDF
+        indication:
+          type: string
+          example: "Alzheimer's Disease and Neurodegenerative Disorders"
+          description: Medical indication extracted from PDF
+        drugInfo:
+          type: string
+          example: "Novel Amyloid Beta and Tau Protein Modulators"
+          description: Drug information extracted from PDF
+        phase:
+          type: string
+          enum: ["Phase I", "Phase II", "Phase III", "Phase IV"]
+          example: "Phase II"
+          description: Clinical trial phase extracted from PDF
+        targetSubjects:
+          type: integer
+          example: 2400
+          description: Target number of subjects extracted from PDF
+        timelineInMonths:
+          type: integer
+          example: 36
+          description: Study timeline in months extracted from PDF
+        startDate:
+          type: string
+          format: date
+          example: "2024-06-01"
+          description: Study start date extracted from PDF
+        preferredRegions:
+          type: array
+          items:
+            type: string
+          example: ["North America", "Europe"]
+          description: Preferred geographic regions extracted from PDF
+        objective:
+          type: string
+          example: "Evaluate safety and efficacy of novel neurological compounds in early-stage Alzheimer's disease patients"
+          description: Study objective extracted from PDF
+        protocolDetails:
+          type: string
+          example: "Comprehensive clinical trial protocol including patient recruitment, treatment administration, safety monitoring, and efficacy assessment."
+          description: Protocol details extracted from PDF
+        criteriaWeights:
+          $ref: '#/components/schemas/CriteriaWeights'
+        inclusionCriteria:
+          type: array
+          items:
+            type: string
+          example:
+            - "Age 50-85 years"
+            - "Diagnosis of probable Alzheimer's disease"
+            - "MMSE score 20-26"
+          description: Patient inclusion criteria extracted from PDF
+        exclusionCriteria:
+          type: array
+          items:
+            type: string
+          example:
+            - "Severe psychiatric disorders"
+            - "Uncontrolled medical conditions"
+            - "Previous participation in similar trials"
+          description: Patient exclusion criteria extracted from PDF
+        processing_status:
+          type: string
+          enum: ["completed", "processing", "failed"]
+          example: "completed"
+          description: Status of the PDF processing
+
+    CriteriaWeights:
+      type: object
+      properties:
+        patientAvailability:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 25
+          description: Weight for patient availability criteria
+        enrollmentRate:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 20
+          description: Weight for historical enrollment rate
+        startupSpeed:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 20
+          description: Weight for site startup speed
+        piMatch:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 20
+          description: Weight for PI/specialty match
+        competition:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 15
+          description: Weight for competition load
+      required:
+        - patientAvailability
+        - enrollmentRate
+        - startupSpeed
+        - piMatch
+        - competition
+
+    ErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            success:
+              type: boolean
+              example: false
+            error:
+              $ref: '#/components/schemas/ErrorDetails'
+
+    ErrorDetails:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Invalid file format. Only PDF files are supported."
+        details:
+          type: object
+          additionalProperties: true
+          example:
+            field: "protocol_file"
+            value: "document.docx"
+            constraint: "PDF format required"
+
+    FileSizeError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "FILE_TOO_LARGE"
+                message:
+                  type: string
+                  example: "File size exceeds maximum limit of 50MB"
+                details:
+                  type: object
+                  properties:
+                    maxSize:
+                      type: integer
+                      example: 52428800
+                    actualSize:
+                      type: integer
+                      example: 67108864
+
+    MediaTypeError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "UNSUPPORTED_MEDIA_TYPE"
+                message:
+                  type: string
+                  example: "Only PDF files are supported"
+                details:
+                  type: object
+                  properties:
+                    supportedTypes:
+                      type: array
+                      items:
+                        type: string
+                      example: ["application/pdf"]
+
+    PDFProcessingError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "PDF_PROCESSING_FAILED"
+                message:
+                  type: string
+                  example: "Failed to extract data from PDF"
+                details:
+                  type: object
+                  properties:
+                    reason:
+                      type: string
+                      example: "PDF is password protected or corrupted"
+
+    RateLimitError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "RATE_LIMIT_EXCEEDED"
+                message:
+                  type: string
+                  example: "Too many requests. Please try again later."
+                details:
+                  type: object
+                  properties:
+                    retryAfter:
+                      type: integer
+                      example: 60
+                      description: Seconds to wait before retrying
+
+    ServiceUnavailableError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "SERVICE_UNAVAILABLE"
+                message:
+                  type: string
+                  example: "PDF processing service is temporarily unavailable"
+                details:
+                  type: object
+                  properties:
+                    estimatedRecovery:
+                      type: string
+                      example: "2024-01-15T10:30:00Z"

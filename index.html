@@ -6,25 +6,26 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>CRSFinder</title>
+    <title>Clinical Research Site Finder</title>
+    
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>" />
-    <!-- Tailwind CSS -->
+    
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React Libraries -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Babel to transpile JSX in the browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Export libraries -->
+    
+    <!-- Export Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Define CommonJS globals for libraries that expect them -->
+    
+    <!-- Global Configuration -->
     <script>
-      window.exports = window.exports || {};
-      window.module = window.module || { exports: window.exports };
-      // Redirect any deep link like /login to root so SPA works and URL shows domain only
+        window.exports = window.exports || {};
+        window.module = window.module || { exports: window.exports };
     </script>
     <style>
         .identical-row {
@@ -748,71 +749,82 @@
     <div id="root"></div>
 
     <script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo, useRef } = React;
+        // ===== REACT IMPORTS =====
+        const { useState, useEffect, useMemo, useRef } = React;
 
-// --- SVG Icon Components ---
-const PinIcon = ({ className, isPinned }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    viewBox="0 0 24 24"
-    strokeWidth="2"
-    stroke="currentColor"
-    fill={isPinned ? 'currentColor' : 'none'}
-  >
-    {/* Pin head (circle) */}
-    <circle cx="12" cy="6" r="3" />
-    {/* Pin shaft (line) */}
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v12"
-    />
-    {/* Pin point (small triangle) */}
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10 21l2 2 2-2"
-    />
-  </svg>
-);
+        // ===== SVG ICON COMPONENTS =====
+        const PinIcon = ({ className, isPinned }) => (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={className}
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill={isPinned ? 'currentColor' : 'none'}
+            >
+                {/* Pin head (circle) */}
+                <circle cx="12" cy="6" r="3" />
+                {/* Pin shaft (line) */}
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v12"
+                />
+                {/* Pin point (small triangle) */}
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10 21l2 2 2-2"
+                />
+            </svg>
+        );
 
-const ArchiveIcon = ({ className }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2"
-  >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" 
-    />
-  </svg>
-);
+        const ArchiveIcon = ({ className }) => (
+            <svg 
+                className={className} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+            >
+                <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" 
+                />
+            </svg>
+        );
 
-const UploadIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg>
-);
-const ChevronDownIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
-);
-const LoadingSpinner = ({ className }) => (
-    <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-);
-const CheckIcon = ({ className }) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-);
-const SparklesIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.455-2.456L12.5 18l1.178-.398a3.375 3.375 0 002.455-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456L20.25 18l-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
-    </svg>
-);
+        const UploadIcon = ({ className }) => (
+            <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+            </svg>
+        );
+
+        const ChevronDownIcon = ({ className }) => (
+            <svg className={className} viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+            </svg>
+        );
+
+        const LoadingSpinner = ({ className }) => (
+            <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        );
+
+        const CheckIcon = ({ className }) => (
+            <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+        );
+
+        const SparklesIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.455-2.456L12.5 18l1.178-.398a3.375 3.375 0 002.455-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456L20.25 18l-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
+            </svg>
+        );
 
 // --- Modern Dropdown Component ---
 function ModernDropdown({ options, selected, onSelect, placeholder, className = "" }) {
@@ -914,6 +926,8 @@ function App() {
         preferredRegions: ['North America', 'Europe'],
         objective: '',
         protocolDetails: '',
+                    inclusionCriteria: [],
+            exclusionCriteria: [],
         criteriaWeights: {
             patientAvailability: 20,
             enrollmentRate: 20,
@@ -1800,6 +1814,16 @@ function App() {
                      studyId: `PRO${String(scenarioId-1).padStart(4,'0')}`,
                      preferredRegions: ['North America', 'Europe', 'Asia'].slice(0, 1 + (i % 3)),
                      protocolDetails: `Comprehensive clinical trial protocol for ${title} including patient recruitment, treatment administration, safety monitoring, and efficacy assessment.`,
+                                inclusionCriteria: [
+               `Age ${18 + (i % 50)}-${65 + (i % 30)} years`,
+               `Diagnosis of ${indication.toLowerCase()}`,
+               `Willing and able to provide informed consent`
+           ],
+           exclusionCriteria: [
+               `Severe psychiatric disorders`,
+               `Uncontrolled medical conditions`,
+               `Previous participation in similar trials`
+           ],
                      criteriaWeights: {
                          patientAvailability: 60 + (i % 20),
                          enrollmentRate: 70 + (i % 20),
@@ -4001,6 +4025,94 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
 
                         <TextAreaField label="Objective" name="objective" value={formData.objective} onChange={handleInputChange} className="md:col-span-2" />
                         <TextAreaField label="Protocol Details" name="protocolDetails" value={formData.protocolDetails} onChange={handleInputChange} className="md:col-span-2" />
+                        
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Inclusion Criteria</label>
+                            
+                            {/* Predefined Inclusion Criteria */}
+                            <div className="mb-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        "Age 18-65 years",
+                                        "Diagnosis confirmed by physician",
+                                        "Willing and able to provide informed consent",
+                                        "Stable medical condition",
+                                        "No significant psychiatric disorders",
+                                        "Adequate organ function",
+                                        "Negative pregnancy test (females)",
+                                        "BMI 18-35 kg/m²",
+                                        "ECG within normal limits",
+                                        "Normal laboratory values"
+                                    ].map((criterion, index) => {
+                                        const isSelected = (formData.inclusionCriteria || []).includes(criterion);
+                                        return (
+                                            <button
+                                                key={index}
+                                                type="button"
+                                                onClick={() => {
+                                                    const currentCriteria = formData.inclusionCriteria || [];
+                                                    const newCriteria = isSelected
+                                                        ? currentCriteria.filter(c => c !== criterion)
+                                                        : [...currentCriteria, criterion];
+                                                    setFormData(p => ({...p, inclusionCriteria: newCriteria}));
+                                                }}
+                                                className={`px-3 py-1 text-xs rounded-full transition-colors border ${
+                                                    isSelected 
+                                                        ? 'bg-blue-600 text-white border-blue-600' 
+                                                        : 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
+                                                }`}
+                                            >
+                                                {criterion}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Exclusion Criteria</label>
+                            
+                            {/* Predefined Exclusion Criteria */}
+                            <div className="mb-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        "Severe psychiatric disorders",
+                                        "Uncontrolled medical conditions",
+                                        "Previous participation in similar trials",
+                                        "Pregnancy or breastfeeding",
+                                        "Known drug allergies",
+                                        "Active malignancy",
+                                        "Severe hepatic impairment",
+                                        "Severe renal impairment",
+                                        "Recent major surgery",
+                                        "Substance abuse history"
+                                    ].map((criterion, index) => {
+                                        const isSelected = (formData.exclusionCriteria || []).includes(criterion);
+                                        return (
+                                            <button
+                                                key={index}
+                                                type="button"
+                                                onClick={() => {
+                                                    const currentCriteria = formData.exclusionCriteria || [];
+                                                    const newCriteria = isSelected
+                                                        ? currentCriteria.filter(c => c !== criterion)
+                                                        : [...currentCriteria, criterion];
+                                                    setFormData(p => ({...p, exclusionCriteria: newCriteria}));
+                                                }}
+                                                className={`px-3 py-1 text-xs rounded-full transition-colors border ${
+                                                    isSelected 
+                                                        ? 'bg-red-600 text-white border-red-600' 
+                                                        : 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
+                                                }`}
+                                            >
+                                                {criterion}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
