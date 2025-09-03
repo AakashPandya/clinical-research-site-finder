@@ -1814,16 +1814,8 @@ function App() {
                      studyId: `PRO${String(scenarioId-1).padStart(4,'0')}`,
                      preferredRegions: ['North America', 'Europe'], // Always North America and Europe
                      protocolDetails: `Comprehensive clinical trial protocol for ${title} including patient recruitment, treatment administration, safety monitoring, and efficacy assessment.`,
-                                inclusionCriteria: [
-               `Age ${18 + (i % 50)}-${65 + (i % 30)} years`,
-               `Diagnosis of ${indication.toLowerCase()}`,
-               `Willing and able to provide informed consent`
-           ],
-           exclusionCriteria: [
-               `Severe psychiatric disorders`,
-               `Uncontrolled medical conditions`,
-               `Previous participation in similar trials`
-           ],
+                     inclusionCriteria: `• Age ${18 + (i % 50)}-${65 + (i % 30)} years\n• Diagnosis of ${indication.toLowerCase()}\n• Willing and able to provide informed consent\n• ECOG performance status 0-1\n• Adequate organ function\n• Measurable disease per RECIST v1.1\n• Life expectancy ≥3 months\n• Negative pregnancy test for women of childbearing potential\n• Stable medical condition\n• No significant psychiatric disorders`,
+                     exclusionCriteria: `• Severe psychiatric disorders\n• Uncontrolled medical conditions\n• Previous participation in similar trials\n• Pregnancy or breastfeeding\n• Known drug allergies\n• Active malignancy\n• Severe hepatic impairment\n• Severe renal impairment\n• Recent major surgery\n• Substance abuse history`,
                      criteriaWeights: {
                          patientAvailability: 60 + (i % 20),
                          enrollmentRate: 70 + (i % 20),
@@ -3812,6 +3804,8 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         drugInfo: 'Pembrolizumab (Keytruda)',
                         objective: 'To evaluate the efficacy and safety of Pembrolizumab in combination with chemotherapy for the first-line treatment of metastatic non-small cell lung cancer.',
                         protocolDetails: 'A Phase III, randomized, double-blind study to evaluate the efficacy and safety of Pembrolizumab in combination with chemotherapy.',
+                        inclusionCriteria: '• Age ≥18 years\n• Histologically or cytologically confirmed metastatic NSCLC\n• No prior systemic therapy for metastatic disease\n• ECOG performance status 0-1\n• Adequate organ function\n• Measurable disease per RECIST v1.1\n• Life expectancy ≥3 months\n• Willing and able to provide informed consent\n• Negative pregnancy test for women of childbearing potential',
+                        exclusionCriteria: '• Active autoimmune disease requiring systemic treatment\n• History of severe hypersensitivity to pembrolizumab or its excipients\n• Active infection requiring systemic therapy\n• Known active central nervous system metastases\n• Pregnancy or breastfeeding\n• Prior anti-PD-1/PD-L1 therapy\n• Known additional malignancy within 3 years\n• Severe hepatic impairment (Child-Pugh Class C)\n• Uncontrolled intercurrent illness',
                         targetSubjects: 500,
                         timeline: 24,
                         phase: 'Phase III',
@@ -3826,6 +3820,8 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         drugInfo: 'Atezolizumab (Tecentriq)',
                         objective: 'To assess the efficacy and safety of Atezolizumab in combination with chemotherapy for the treatment of early-stage triple-negative breast cancer.',
                         protocolDetails: 'A Phase III, multicenter, randomized study evaluating Atezolizumab plus chemotherapy versus chemotherapy alone in patients with early-stage TNBC.',
+                        inclusionCriteria: '• Age ≥18 years\n• Histologically confirmed TNBC\n• No prior neoadjuvant or adjuvant therapy\n• ECOG performance status 0-1\n• Adequate bone marrow function\n• Adequate renal and hepatic function\n• No distant metastases\n• Willing to undergo tumor biopsy\n• Negative pregnancy test for women of childbearing potential\n• Ability to comply with study procedures',
+                        exclusionCriteria: '• Prior immunotherapy for any malignancy\n• Active autoimmune disease\n• History of severe allergic reactions to monoclonal antibodies\n• Active infection requiring systemic antibiotics\n• Known HIV, HBV, or HCV infection\n• Pregnancy or breastfeeding\n• Psychiatric illness limiting compliance\n• Concurrent malignancy within 5 years\n• Major surgery within 4 weeks\n• Uncontrolled diabetes or hypertension',
                         targetSubjects: 1200,
                         timeline: 36,
                         phase: 'Phase III',
@@ -3840,6 +3836,8 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         drugInfo: 'Nivolumab (Opdivo)',
                         objective: 'To evaluate the long-term survival and safety of Nivolumab in patients with advanced melanoma who have progressed on or after prior therapy.',
                         protocolDetails: 'A Phase III, open-label, single-arm study to assess the long-term safety and efficacy of Nivolumab in patients with advanced melanoma.',
+                        inclusionCriteria: '• Age ≥18 years\n• Histologically confirmed advanced melanoma\n• Progression on or after prior therapy\n• ECOG performance status 0-2\n• Measurable disease per RECIST v1.1\n• Adequate organ function\n• Life expectancy ≥3 months\n• Willing and able to provide informed consent\n• Negative pregnancy test for women of childbearing potential\n• No active brain metastases',
+                        exclusionCriteria: '• Prior anti-PD-1/PD-L1 therapy\n• Active autoimmune disease\n• History of severe hypersensitivity to nivolumab\n• Active infection requiring systemic therapy\n• Known additional malignancy within 2 years\n• Severe hepatic or renal impairment\n• Pregnancy or breastfeeding\n• Uncontrolled intercurrent illness\n• Psychiatric illness limiting compliance\n• Concurrent systemic immunosuppressive therapy',
                         targetSubjects: 300,
                         timeline: 18,
                         phase: 'Phase III',
@@ -3854,6 +3852,8 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         drugInfo: 'Tisagenlecleucel (Kymriah)',
                         objective: 'To evaluate the safety and efficacy of Tisagenlecleucel in pediatric and young adult patients with relapsed or refractory B-ALL.',
                         protocolDetails: 'A Phase II, single-arm, multicenter study to assess the safety and efficacy of Tisagenlecleucel in patients with relapsed or refractory B-ALL.',
+                        inclusionCriteria: '• Age 3-25 years\n• Relapsed or refractory B-ALL\n• ≥25% blasts in bone marrow\n• ECOG performance status 0-2\n• Adequate organ function\n• No active graft-versus-host disease\n• No active infection\n• Willing and able to provide informed consent\n• Negative pregnancy test for women of childbearing potential\n• Available CAR-T cell product',
+                        exclusionCriteria: '• Prior CAR-T cell therapy\n• Active central nervous system leukemia\n• Active graft-versus-host disease\n• Uncontrolled infection\n• Severe hepatic or renal impairment\n• Pregnancy or breastfeeding\n• Known HIV, HBV, or HCV infection\n• Psychiatric illness limiting compliance\n• Concurrent malignancy\n• Uncontrolled intercurrent illness',
                         targetSubjects: 150,
                         timeline: 12,
                         phase: 'Phase II',
@@ -3868,6 +3868,8 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         drugInfo: 'Valoctocogene Roxaparvovec (Roctavian)',
                         objective: 'To assess the long-term safety and efficacy of Valoctocogene Roxaparvovec in adult patients with severe hemophilia A.',
                         protocolDetails: 'A Phase III, open-label, single-dose study to evaluate the safety and efficacy of Valoctocogene Roxaparvovec in patients with severe hemophilia A.',
+                        inclusionCriteria: '• Age ≥18 years\n• Severe hemophilia A (FVIII <1%)\n• ≥150 exposure days to FVIII\n• No history of FVIII inhibitors\n• Adequate organ function\n• Willing and able to provide informed consent\n• Negative pregnancy test for women of childbearing potential\n• No active infection\n• Stable medical condition\n• Ability to comply with study procedures',
+                        exclusionCriteria: '• History of FVIII inhibitors\n• Active infection requiring systemic therapy\n• Known HIV, HBV, or HCV infection\n• Severe hepatic impairment\n• Pregnancy or breastfeeding\n• Active malignancy\n• Uncontrolled intercurrent illness\n• Psychiatric illness limiting compliance\n• Concurrent immunosuppressive therapy\n• Known hypersensitivity to vector components',
                         targetSubjects: 200,
                         timeline: 48,
                         phase: 'Phase III',
@@ -4094,93 +4096,23 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         <TextAreaField label="Objective" name="objective" value={formData.objective} onChange={handleInputChange} className="md:col-span-2" />
                         <TextAreaField label="Protocol Details" name="protocolDetails" value={formData.protocolDetails} onChange={handleInputChange} className="md:col-span-2" />
                         
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Inclusion Criteria</label>
-                            
-                            {/* Predefined Inclusion Criteria */}
-                            <div className="mb-4">
-                                <div className="flex flex-wrap gap-2">
-                                    {[
-                                        "Age 18-65 years",
-                                        "Diagnosis confirmed by physician",
-                                        "Willing and able to provide informed consent",
-                                        "Stable medical condition",
-                                        "No significant psychiatric disorders",
-                                        "Adequate organ function",
-                                        "Negative pregnancy test (females)",
-                                        "BMI 18-35 kg/m²",
-                                        "ECG within normal limits",
-                                        "Normal laboratory values"
-                                    ].map((criterion, index) => {
-                                        const isSelected = (formData.inclusionCriteria || []).includes(criterion);
-                                        return (
-                                            <button
-                                                key={index}
-                                                type="button"
-                                                onClick={() => {
-                                                    const currentCriteria = formData.inclusionCriteria || [];
-                                                    const newCriteria = isSelected
-                                                        ? currentCriteria.filter(c => c !== criterion)
-                                                        : [...currentCriteria, criterion];
-                                                    setFormData(p => ({...p, inclusionCriteria: newCriteria}));
-                                                }}
-                                                className={`px-3 py-1 text-xs rounded-full transition-colors border ${
-                                                    isSelected 
-                                                        ? 'bg-blue-600 text-white border-blue-600' 
-                                                        : 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
-                                                }`}
-                                            >
-                                                {criterion}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Exclusion Criteria</label>
-                            
-                            {/* Predefined Exclusion Criteria */}
-                            <div className="mb-4">
-                                <div className="flex flex-wrap gap-2">
-                                    {[
-                                        "Severe psychiatric disorders",
-                                        "Uncontrolled medical conditions",
-                                        "Previous participation in similar trials",
-                                        "Pregnancy or breastfeeding",
-                                        "Known drug allergies",
-                                        "Active malignancy",
-                                        "Severe hepatic impairment",
-                                        "Severe renal impairment",
-                                        "Recent major surgery",
-                                        "Substance abuse history"
-                                    ].map((criterion, index) => {
-                                        const isSelected = (formData.exclusionCriteria || []).includes(criterion);
-                                        return (
-                                            <button
-                                                key={index}
-                                                type="button"
-                                                onClick={() => {
-                                                    const currentCriteria = formData.exclusionCriteria || [];
-                                                    const newCriteria = isSelected
-                                                        ? currentCriteria.filter(c => c !== criterion)
-                                                        : [...currentCriteria, criterion];
-                                                    setFormData(p => ({...p, exclusionCriteria: newCriteria}));
-                                                }}
-                                                className={`px-3 py-1 text-xs rounded-full transition-colors border ${
-                                                    isSelected 
-                                                        ? 'bg-red-600 text-white border-red-600' 
-                                                        : 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
-                                                }`}
-                                            >
-                                                {criterion}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
+                        <TextAreaField 
+                            label="Inclusion Criteria" 
+                            name="inclusionCriteria" 
+                            value={formData.inclusionCriteria || ''} 
+                            onChange={handleInputChange} 
+                            className="md:col-span-2"
+                            placeholder="Enter inclusion criteria for the study..."
+                        />
+                        
+                        <TextAreaField 
+                            label="Exclusion Criteria" 
+                            name="exclusionCriteria" 
+                            value={formData.exclusionCriteria || ''} 
+                            onChange={handleInputChange} 
+                            className="md:col-span-2"
+                            placeholder="Enter exclusion criteria for the study..."
+                        />
                     </div>
                 </div>
 
