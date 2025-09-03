@@ -3635,7 +3635,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
         criteriaWeights: { patientAvailability: 20, enrollmentRate: 20, startupSpeed: 20, piMatch: 20, competition: 20 }
     });
     const [isUploading, setIsUploading] = useState(false);
-    const [activeSlider, setActiveSlider] = useState(null);
+    const [userTouchedSliders, setUserTouchedSliders] = useState(new Set());
     const fileInputRef = useRef(null);
 
     // Ensure required regions are always selected
@@ -3652,6 +3652,16 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
         }
     }, [formData.preferredRegions]);
 
+    // Ensure slider visual positions match their values
+    useEffect(() => {
+        Object.keys(formData.criteriaWeights).forEach(key => {
+            const slider = document.querySelector(`input[name="${key}"]`);
+            if (slider) {
+                slider.style.setProperty('--value-percent', `${formData.criteriaWeights[key]}%`);
+            }
+        });
+    }, [formData.criteriaWeights]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -3660,86 +3670,131 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
     const handleSliderChange = (e) => {
         const { name, value } = e.target;
         const newValue = parseInt(value);
-        const slider = e.target;
-        slider.style.setProperty('--value-percent', `${value}%`);
         
-        // Track which slider is being actively adjusted
-        setActiveSlider(name);
+        // Mark this slider as user-touched
+        setUserTouchedSliders(prev => new Set([...prev, name]));
         
-        setFormData(prev => {
-            const currentWeights = { ...prev.criteriaWeights };
-            const oldValue = currentWeights[name];
-            const difference = newValue - oldValue;
+        // Update the changed slider
+        const newWeights = { ...formData.criteriaWeights, [name]: newValue };
+        
+        // Calculate total of other sliders
+        const otherSliders = Object.keys(formData.criteriaWeights).filter(key => key !== name);
+        const totalOther = otherSliders.reduce((sum, key) => sum + newWeights[key], 0);
+        const total = newValue + totalOther;
+        
+        // If total is not 100%, adjust other sliders
+        if (total !== 100) {
+            const adjustmentNeeded = 100 - total;
             
-            if (difference === 0) return prev;
+            // Create priority order: non-touched first, then past touched, then fresh touched
+            const nonTouched = otherSliders.filter(key => !userTouchedSliders.has(key));
+            const pastTouched = otherSliders.filter(key => userTouchedSliders.has(key) && key !== name);
+            const priorityOrder = [...nonTouched, ...pastTouched];
             
-            // Get all other criteria names
-            const otherCriteria = Object.keys(currentWeights).filter(key => key !== name);
+            // Try to adjust single sliders in priority order
+            let adjustmentMade = false;
             
-            // Prevent individual values from going below 0 or above 100
-            if (newValue < 0 || newValue > 100) {
-                return prev; // Don't allow invalid values
-            }
-            
-            // Calculate how much we need to adjust other criteria
-            const totalOtherCriteria = otherCriteria.reduce((sum, key) => sum + currentWeights[key], 0);
-            const newTotalOtherCriteria = totalOtherCriteria - difference;
-            
-            // If we can't decrease enough, don't allow the change
-            if (newTotalOtherCriteria < 0) {
-                return prev;
-            }
-            
-            const newWeights = { ...currentWeights };
-            newWeights[name] = newValue;
-            
-            // Handle the case where other criteria are all 0 (when current slider was 100%)
-            if (totalOtherCriteria === 0) {
-                // Distribute the remaining weight equally among other criteria
-                const remainingWeight = 100 - newValue;
-                const equalShare = Math.floor(remainingWeight / otherCriteria.length);
-                const remainder = remainingWeight % otherCriteria.length;
-                
-                otherCriteria.forEach((key, index) => {
-                    newWeights[key] = equalShare + (index < remainder ? 1 : 0);
-                });
-            } else {
-                // Normal proportional distribution
-                const adjustmentRatio = newTotalOtherCriteria / totalOtherCriteria;
-                
-                otherCriteria.forEach(key => {
-                    newWeights[key] = Math.max(0, Math.round(currentWeights[key] * adjustmentRatio));
-                });
-                
-                // Ensure total equals exactly 100% by adjusting the last criteria if needed
-                const total = Object.values(newWeights).reduce((sum, val) => sum + val, 0);
-                if (total !== 100) {
-                    const lastKey = otherCriteria[otherCriteria.length - 1];
-                    const adjustment = 100 - total;
-                    newWeights[lastKey] = Math.max(0, newWeights[lastKey] + adjustment);
-                    
-                    // Double-check and ensure we don't go below 0
-                    if (newWeights[lastKey] < 0) {
-                        // If we can't adjust enough, revert the change
-                        return prev;
+            // First try: adjust a single non-touched slider
+            for (const key of nonTouched) {
+                if (newWeights[key] > 0 && newWeights[key] < 100) {
+                    const canAdjust = adjustmentNeeded > 0 ? (100 - newWeights[key]) : newWeights[key];
+                    if (canAdjust >= Math.abs(adjustmentNeeded)) {
+                        newWeights[key] = Math.max(0, Math.min(100, newWeights[key] + adjustmentNeeded));
+                        adjustmentMade = true;
+                        break;
                     }
                 }
             }
             
-            // Final validation - ensure total is exactly 100%
-            const finalTotal = Object.values(newWeights).reduce((sum, val) => sum + val, 0);
-            if (finalTotal !== 100) {
-                // If still not 100%, revert the change
-                return prev;
+            // Second try: if no single non-touched slider can handle it, try past touched
+            if (!adjustmentMade) {
+                for (const key of pastTouched) {
+                    if (newWeights[key] > 0 && newWeights[key] < 100) {
+                        const canAdjust = adjustmentNeeded > 0 ? (100 - newWeights[key]) : newWeights[key];
+                        if (canAdjust >= Math.abs(adjustmentNeeded)) {
+                            newWeights[key] = Math.max(0, Math.min(100, newWeights[key] + adjustmentNeeded));
+                            adjustmentMade = true;
+                            break;
+                        }
+                    }
+                }
             }
             
-            return { ...prev, criteriaWeights: newWeights };
-        });
+            // Third try: if still need adjustment, distribute proportionally among non-touched
+            if (!adjustmentMade && nonTouched.length > 0) {
+                const nonTouchedTotal = nonTouched.reduce((sum, key) => sum + newWeights[key], 0);
+                if (nonTouchedTotal > 0) {
+                    nonTouched.forEach(key => {
+                        const proportion = newWeights[key] / nonTouchedTotal;
+                        const adjustment = Math.round(proportion * adjustmentNeeded);
+                        newWeights[key] = Math.max(0, Math.min(100, newWeights[key] + adjustment));
+                    });
+                } else {
+                    // If all non-touched are 0, distribute equally
+                    const equalShare = Math.floor(adjustmentNeeded / nonTouched.length);
+                    const remainder = adjustmentNeeded % nonTouched.length;
+                    nonTouched.forEach((key, index) => {
+                        newWeights[key] = equalShare + (index < remainder ? 1 : 0);
+                    });
+                }
+            }
+            
+            // Fourth try: if still need adjustment, distribute among past touched
+            const currentTotal = Object.values(newWeights).reduce((sum, val) => sum + val, 0);
+            if (currentTotal !== 100 && pastTouched.length > 0) {
+                const finalAdjustment = 100 - currentTotal;
+                const availablePastTouched = pastTouched.filter(key => 
+                    newWeights[key] > 0 && newWeights[key] < 100
+                );
+                
+                if (availablePastTouched.length > 0) {
+                    const equalShare = Math.floor(finalAdjustment / availablePastTouched.length);
+                    const remainder = finalAdjustment % availablePastTouched.length;
+                    
+                    availablePastTouched.forEach((key, index) => {
+                        const adjustment = equalShare + (index < remainder ? 1 : 0);
+                        newWeights[key] = Math.max(0, Math.min(100, newWeights[key] + adjustment));
+                    });
+                }
+            }
+            
+            // Final pass: ensure total is exactly 100%
+            const finalTotal = Object.values(newWeights).reduce((sum, val) => sum + val, 0);
+            if (finalTotal !== 100) {
+                const finalAdjustment = 100 - finalTotal;
+                
+                // Find any slider that can be adjusted (prefer lower priority)
+                let targetSlider = null;
+                
+                // Try to find a slider that can be adjusted
+                for (let i = priorityOrder.length - 1; i >= 0; i--) {
+                    const key = priorityOrder[i];
+                    if (finalAdjustment > 0 && newWeights[key] < 100) {
+                        targetSlider = key;
+                        break;
+                    } else if (finalAdjustment < 0 && newWeights[key] > 0) {
+                        targetSlider = key;
+                        break;
+                    }
+                }
+                
+                // If no suitable slider found, force adjustment to the changed slider
+                if (!targetSlider) {
+                    targetSlider = name;
+                }
+                
+                newWeights[targetSlider] = Math.max(0, Math.min(100, newWeights[targetSlider] + finalAdjustment));
+            }
+        }
         
-        // Clear active slider indicator after a longer delay to reduce flickering
-        setTimeout(() => {
-            setActiveSlider(null);
-        }, 2000);
+        // Update form data
+        setFormData(prev => ({
+            ...prev,
+            criteriaWeights: newWeights
+        }));
+        
+        // Update slider visual position
+        e.target.style.setProperty('--value-percent', `${newValue}%`);
     };
 
     const handlePdfUpload = (e) => {
@@ -4143,10 +4198,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span>
-                                {activeSlider && formData.criteriaWeights[activeSlider] === 100 
-                                    ? 'When reducing from 100%, other criteria will be distributed equally'
-                                    : 'Smart sliders automatically adjust other criteria to maintain 100% total'
-                                }
+                                Smart sliders automatically adjust other criteria to maintain 100% total
                             </span>
                         </div>
 
@@ -4158,23 +4210,23 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                     </div>
                     <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                            <div className={`p-2 rounded ${activeSlider === 'patientAvailability' ? 'bg-blue-100 border border-blue-300' : 'bg-white border border-gray-200'}`}>
+                            <div className="p-2 rounded bg-white border border-gray-200">
                                 <div className="text-xs text-gray-600 mb-1">Patient Availability</div>
                                 <div className="text-lg font-bold text-blue-600">{formData.criteriaWeights.patientAvailability}%</div>
                             </div>
-                            <div className={`p-2 rounded ${activeSlider === 'enrollmentRate' ? 'bg-blue-100 border border-blue-300' : 'bg-white border border-gray-200'}`}>
+                            <div className="p-2 rounded bg-white border border-gray-200">
                                 <div className="text-xs text-gray-600 mb-1">Enrollment Rate</div>
                                 <div className="text-lg font-bold text-green-600">{formData.criteriaWeights.enrollmentRate}%</div>
                             </div>
-                            <div className={`p-2 rounded ${activeSlider === 'startupSpeed' ? 'bg-blue-100 border border-blue-300' : 'bg-white border border-gray-200'}`}>
+                            <div className="p-2 rounded bg-white border border-gray-200">
                                 <div className="text-xs text-gray-600 mb-1">Start-up Speed</div>
                                 <div className="text-lg font-bold text-purple-600">{formData.criteriaWeights.startupSpeed}%</div>
                             </div>
-                            <div className={`p-2 rounded ${activeSlider === 'piMatch' ? 'bg-blue-100 border border-blue-300' : 'bg-white border border-gray-200'}`}>
+                            <div className="p-2 rounded bg-white border border-gray-200">
                                 <div className="text-xs text-gray-600 mb-1">PI Match</div>
                                 <div className="text-lg font-bold text-orange-600">{formData.criteriaWeights.piMatch}%</div>
                             </div>
-                            <div className={`p-2 rounded ${activeSlider === 'competition' ? 'bg-blue-100 border border-blue-300' : 'bg-white border border-gray-200'}`}>
+                            <div className="p-2 rounded bg-white border border-gray-200">
                                 <div className="text-xs text-gray-600 mb-1">Competition</div>
                                 <div className="text-lg font-bold text-red-600">{formData.criteriaWeights.competition}%</div>
                             </div>
