@@ -3676,41 +3676,53 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
             // Get all other criteria names
             const otherCriteria = Object.keys(currentWeights).filter(key => key !== name);
             
-            // Calculate how much we need to adjust other criteria
-            const totalOtherCriteria = otherCriteria.reduce((sum, key) => sum + currentWeights[key], 0);
-            const newTotalOtherCriteria = totalOtherCriteria - difference;
-            
             // Prevent individual values from going below 0 or above 100
             if (newValue < 0 || newValue > 100) {
                 return prev; // Don't allow invalid values
             }
             
+            // Calculate how much we need to adjust other criteria
+            const totalOtherCriteria = otherCriteria.reduce((sum, key) => sum + currentWeights[key], 0);
+            const newTotalOtherCriteria = totalOtherCriteria - difference;
+            
+            // If we can't decrease enough, don't allow the change
             if (newTotalOtherCriteria < 0) {
-                // If we can't decrease enough, don't allow the change
                 return prev;
             }
-            
-            // Distribute the adjustment proportionally among other criteria
-            const adjustmentRatio = newTotalOtherCriteria / totalOtherCriteria;
             
             const newWeights = { ...currentWeights };
             newWeights[name] = newValue;
             
-            otherCriteria.forEach(key => {
-                newWeights[key] = Math.max(0, Math.round(currentWeights[key] * adjustmentRatio));
-            });
-            
-            // Ensure total equals exactly 100% by adjusting the last criteria if needed
-            const total = Object.values(newWeights).reduce((sum, val) => sum + val, 0);
-            if (total !== 100) {
-                const lastKey = otherCriteria[otherCriteria.length - 1];
-                const adjustment = 100 - total;
-                newWeights[lastKey] = Math.max(0, newWeights[lastKey] + adjustment);
+            // Handle the case where other criteria are all 0 (when current slider was 100%)
+            if (totalOtherCriteria === 0) {
+                // Distribute the remaining weight equally among other criteria
+                const remainingWeight = 100 - newValue;
+                const equalShare = Math.floor(remainingWeight / otherCriteria.length);
+                const remainder = remainingWeight % otherCriteria.length;
                 
-                // Double-check and ensure we don't go below 0
-                if (newWeights[lastKey] < 0) {
-                    // If we can't adjust enough, revert the change
-                    return prev;
+                otherCriteria.forEach((key, index) => {
+                    newWeights[key] = equalShare + (index < remainder ? 1 : 0);
+                });
+            } else {
+                // Normal proportional distribution
+                const adjustmentRatio = newTotalOtherCriteria / totalOtherCriteria;
+                
+                otherCriteria.forEach(key => {
+                    newWeights[key] = Math.max(0, Math.round(currentWeights[key] * adjustmentRatio));
+                });
+                
+                // Ensure total equals exactly 100% by adjusting the last criteria if needed
+                const total = Object.values(newWeights).reduce((sum, val) => sum + val, 0);
+                if (total !== 100) {
+                    const lastKey = otherCriteria[otherCriteria.length - 1];
+                    const adjustment = 100 - total;
+                    newWeights[lastKey] = Math.max(0, newWeights[lastKey] + adjustment);
+                    
+                    // Double-check and ensure we don't go below 0
+                    if (newWeights[lastKey] < 0) {
+                        // If we can't adjust enough, revert the change
+                        return prev;
+                    }
                 }
             }
             
@@ -4130,7 +4142,12 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>Smart sliders automatically adjust other criteria to maintain 100% total</span>
+                            <span>
+                                {activeSlider && formData.criteriaWeights[activeSlider] === 100 
+                                    ? 'When reducing from 100%, other criteria will be distributed equally'
+                                    : 'Smart sliders automatically adjust other criteria to maintain 100% total'
+                                }
+                            </span>
                         </div>
 
                         {getTotalCriteriaWeight() !== 100 && (
