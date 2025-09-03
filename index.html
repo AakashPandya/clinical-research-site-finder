@@ -1812,7 +1812,7 @@ function App() {
                      objective: objective,
                      sponsor: sponsor,
                      studyId: `PRO${String(scenarioId-1).padStart(4,'0')}`,
-                     preferredRegions: ['North America', 'Europe', 'Asia'].slice(0, 1 + (i % 3)),
+                     preferredRegions: ['North America', 'Europe'], // Always North America and Europe
                      protocolDetails: `Comprehensive clinical trial protocol for ${title} including patient recruitment, treatment administration, safety monitoring, and efficacy assessment.`,
                                 inclusionCriteria: [
                `Age ${18 + (i % 50)}-${65 + (i % 30)} years`,
@@ -3763,7 +3763,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         timeline: 36,
                         phase: 'Phase III',
                         startDate: '2024-10-15',
-                        preferredRegions: ['North America', 'Europe', 'Asia']
+                        preferredRegions: ['North America', 'Europe']
                     },
                     {
                         title: 'Nivolumab Melanoma Study',
@@ -3805,7 +3805,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         timeline: 48,
                         phase: 'Phase III',
                         startDate: '2025-01-15',
-                        preferredRegions: ['North America', 'Europe', 'Australia']
+                        preferredRegions: ['North America', 'Europe']
                     }
                 ];
                 
@@ -3823,6 +3823,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                 
                 setFormData({
                     ...selectedStudy,
+                    preferredRegions: ['North America', 'Europe'], // Always preserve North America and Europe
                     criteriaWeights: newWeights
                 });
                 
@@ -4010,7 +4011,7 @@ function CreateScenarioPage({ navigateTo, onSave, siteRankingData }) {
                         </div>
 
                         <MultiSelectDropdownField 
-                            label="Preferred Regions"
+                            label="Preferred Regions (North America & Europe Always Required)"
                             options={['North America', 'South America', 'Europe', 'Asia', 'Africa', 'Australia']}
                             selected={formData.preferredRegions}
                             onSelect={(val) => {
